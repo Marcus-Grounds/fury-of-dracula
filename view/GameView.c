@@ -18,12 +18,20 @@
 #include "GameView.h"
 #include "Map.h"
 #include "Places.h"
+
+#define TOTAL_PLAYERS 5
+#define TOTAL_PLACES 71
 // add your own #includes here
 
-// TODO: ADD YOUR OWN STRUCTS HERE
+typedef struct travel {
+	int rail;
+	bool road;
+	bool sea;
+} Travel;
 
 struct gameView {
-	// TODO: ADD FIELDS HERE
+	Travel **edges;
+	int turn;
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -52,14 +60,12 @@ void GvFree(GameView gv)
 
 Round GvGetRound(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return ((gv->turn++) / TOTAL_PLAYERS);
 }
 
 Player GvGetPlayer(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return PLAYER_LORD_GODALMING;
+	return ((gv->turn++) % TOTAL_PLAYERS);
 }
 
 int GvGetScore(GameView gv)
@@ -137,18 +143,43 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 
 PlaceId *GvGetReachable(GameView gv, Player player, Round round,
                         PlaceId from, int *numReturnedLocs)
-{
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+{	
 	*numReturnedLocs = 0;
-	return NULL;
+	PlaceId *reachableLocations = NULL;
+	for (int i = 0; i < TOTAL_PLAYERS; i++){
+		if (i == ST_JOSEPH_AND_ST_MARY && player == PLAYER_DRACULA) continue;
+		if (gv->edges[from][i].road 
+			|| gv->edges[from][i].sea 
+			|| (player != PLAYER_DRACULA 
+				&& gv->edges[from][i].rail 
+				&& gv->edges[from][i].rail <= round % 4)) {
+				(*numReturnedLocs)++;
+				reachableLocations = realloc(reachableLocations, sizeof(PlaceId));
+				reachableLocations[(*numReturnedLocs) - 1] = i;
+		}
+	}
+	return reachableLocations;
 }
 
 PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
                               PlaceId from, bool road, bool rail,
                               bool boat, int *numReturnedLocs)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
+	*numReturnedLocs = 0;*numReturnedLocs = 0;
+	PlaceId *reachableLocations = NULL;
+	for (int i = 0; i < TOTAL_PLAYERS; i++){
+		if (i == ST_JOSEPH_AND_ST_MARY && player == PLAYER_DRACULA) continue;
+		if ((road && gv->edges[from][i].road)
+			|| (sea && gv->edges[from][i].road)
+			|| (player != PLAYER_DRACULA 
+				&& rail 
+				&& gv->edges[from][i].rail 
+				&& gv->edges[from][i].rail <= round % 4)) {
+				(*numReturnedLocs)++;
+				reachableLocations = realloc(reachableLocations, sizeof(PlaceId));
+				reachableLocations[(*numReturnedLocs) - 1] = i;
+		}
+	}
 	return NULL;
 }
 
