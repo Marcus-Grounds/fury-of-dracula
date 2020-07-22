@@ -21,12 +21,14 @@
 #include "Places.h"
 // add your own #includes here
 
-// Helper Function Declarations:
+// Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initialisePlayers(GameView gv);
 PlaceId *newMoveHistory(void);
 void storePastPlays(GameView gv, char *pastPlays);
 void storeMoveHistory(GameView gv, char *play, Player player);
-Player initialToId(char initial);
+Player initialToPlayer(char initial);
+PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
+PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 
 // TODO: ADD YOUR OWN STRUCTS HERE
 
@@ -54,8 +56,9 @@ GameView GvNew(char *pastPlays, Message messages[])
 		fprintf(stderr, "Couldn't allocate GameView!\n");
 		exit(EXIT_FAILURE);
 	}
+	
 	initialisePlayers(new);
-
+	storePastPlays(new, pastPlays);
 
 	return new;
 }
@@ -118,54 +121,86 @@ PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-
-	*canFree = false;
 	*numReturnedMoves = (gv->players[player]).historyCount;
+	*canFree = false;
 	return (gv->players[player]).history;
 }
 
 PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
                         int *numReturnedMoves, bool *canFree)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	//*numReturnedMoves = 0;
-	// *canFree = false;
-	// return NULL;
 	if (numMoves >= (gv->players[player]).historyCount) {
 		return GvGetMoveHistory(gv, player, numReturnedMoves, canFree);
 	}
-	// else: // TODO
+
+	PlaceId *moveHistory = (gv->players[player]).history;
+	PlaceId *lastMoves = malloc(sizeof(PlaceId) * numMoves);
+	assert (lastMoves != NULL);
+
+
+	// Copy the last 'numMoves' moves of moveHistory into 'lastMoves'
+	int startIndex = (gv->players[player]).historyCount - numMoves;
+	for (int i = 0; i < numMoves; i++) {
+		lastMoves[i] = moveHistory[startIndex + i];
+	}
+
+	*numReturnedMoves = numMoves;
 	*canFree = true;
-	return NULL;
+	return lastMoves;
 }
 
 PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	/* *numReturnedLocs = 0;
-	*canFree = false;
-	return NULL; */
 	if (player != PLAYER_DRACULA) {
+		// TODO: dont have to care abt teleporting to hospital?
 		return GvGetMoveHistory(gv, player, numReturnedLocs, canFree);
 	}
-	// Else: player is dracula // TODO
-	// need to traverse through moveHistory array again 
-	// after already doing it in storePastPlays
-	// - not time efficient? test to see
 
+	PlaceId *moveHistory = (gv->players[player]).history;
+	int moveCount = (gv->players[player]).historyCount;
+
+	PlaceId *locHistory = malloc(sizeof(PlaceId) * moveCount);
+	assert (locHistory != NULL);
+
+	for (int i = 0; i < moveCount; i++) {
+		PlaceId currMove = moveHistory[i];
+
+		if (currMove == TELEPORT) {
+			locHistory[i] = CASTLE_DRACULA;
+		} else if (currMove == HIDE) {
+			locHistory[i] = locationOfHide(moveHistory, i, currMove);
+		} else if ((currMove >= DOUBLE_BACK_1) && (currMove <= DOUBLE_BACK_5)) {
+			locHistory[i] = locationOfDoubleBack(moveHistory, i, currMove);
+		} else {
+			locHistory[i] = currMove;
+		}
+	}
+	*numReturnedLocs = moveCount;
 	*canFree = true;
-	return NULL;
+	return locHistory;
 }
 
 PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
                             int *numReturnedLocs, bool *canFree)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	*canFree = false;
-	return 0;
+	PlaceId *locHistory = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
+	if (numLocs >= (*numReturnedLocs)) {
+		return locHistory;
+	}
+
+	PlaceId *lastLocs = malloc(sizeof(PlaceId) * numLocs);
+	assert (lastLocs != NULL);
+
+	// Copy the last 'numLocs' locations of locHistory into 'lastLocs'
+	int startIndex = (*numReturnedLocs) - numLocs;
+	for (int i = 0; i < numLocs; i++) {
+		lastLocs[i] = locHistory[startIndex + i];
+	}
+
+	*numReturnedLocs = numLocs;
+	*canFree = true;
+	return lastLocs;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -193,76 +228,72 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 
 // TODO
 
-// TODO: need comment that describes functions
+// Initialises the players[] field of the GameView data structure
 void initialisePlayers(GameView gv) {
 	for (Player curr = PLAYER_LORD_GODALMING; curr <= PLAYER_DRACULA; curr++) {
 		(gv->players[curr]).historyCount = 0;
 		(gv->players[curr]).history = newMoveHistory(); 
-		(gv->players[curr]).health = 0;
+		(gv->players[curr]).health = 9; 
 	}
+	(gv->players[PLAYER_DRACULA]).health = 40;
 	return;
 }
 
-// creates new empty History 
+// Creates new empty array to store player move history
 PlaceId *newMoveHistory(void) {
-	PlaceId *new = malloc(sizeof(*new)); //todo: sizeof PlaceId or *new?
+	PlaceId *new = malloc(sizeof(*new)); 
+
 	if (new == NULL) {
-		fprintf(stderr, "Couldn't allocate move history array!\n"); //TODO check msg
+		fprintf(stderr, "Couldn't allocate move history array\n");
 		exit(EXIT_FAILURE);
 	}
 	return new;
 }
 
-// TODO: need function to free move history?
+// TODO: need to free move history (function?)
 
 
-// store move history of players into gameview struct
+// Stores data from pastPlays into the GameView data structure
 void storePastPlays(GameView gv, char *pastPlays) {
-	// store move history:
-	
-	/* int count = 0;
-	PlaceId *moveHistory = NULL;*/
+	if (strcmp(pastPlays, "") == 0) return;
 
-	// tokenise pastPlays string with strsep
+	// Extracting each play from pastPlays string with strsep
 	char *freeTmp = strdup(pastPlays);
 	char *tmp = freeTmp;
 
-	Player currPlayer;
 	char *play;
+	Player currPlayer;
 	while ((play = strsep(&tmp, " ")) != NULL) {
-		// extract information from current play & store into gv
-		// play is a string (7 chars long)
+		currPlayer = initialToPlayer(play[0]);
 
-		/* is it time efficient to check which player is moving for every move?
-			^(using initialToId)
-			since if they take turns moving -> currPlayer is enough?
-			so only need one: dont need initialToId or dont need currPlayer
-			useful for debug for now to check that currPlayer is giving right player? */
-		assert(initialToId(play[0]) == currPlayer);
-
+		// Extracting information from current play & storing into GameView data structure:
 		storeMoveHistory(gv, play, currPlayer);
+
 		// TODO: add in health info, traps, encounters etc
-		currPlayer++;
 	}
 	free(freeTmp);
 }
 
+// Stores a player move into the move history of player (in GameView data structure)
 void storeMoveHistory(GameView gv, char *play, Player player) {
-	// TODO
-	assert ((gv->players[player]).history != NULL);
+	PlaceId *moveHistory = (gv->players[player]).history;
+	assert (moveHistory != NULL);
 
-	char placeAbbrev[3]; //TODO: abbrev len 2? or 3 for null terminator? is that included
-	strncpy(placeAbbrev, play + 1, 2); // check: need to define numbers for readability?
-	placeAbbrev[2] = '\0'; //TODO: is this necessary? 
-	// printf("DEBUG: placeAbbrev is %s\n", placeAbbrev);
-	// PlaceId place = placeAbbrevToId(placeAbbrev);
-	// TODO: Incomplete
-	
+	char placeAbbrev[3] = {play[1], play[2], '\0'};
+	PlaceId place = placeAbbrevToId(placeAbbrev);
 
+	// Add new place into the player's move history
+	int count = (gv->players[player]).historyCount;
+	count++;
+	moveHistory = realloc(moveHistory, (sizeof(PlaceId) * count));
+	assert (moveHistory != NULL);
+
+	moveHistory[count - 1] = place;
+	(gv->players[player]).historyCount = count;
 }
 
-// Test function for storePastPlays() //TODO
-Player initialToId(char initial) {
+// Returns a player given their initial
+Player initialToPlayer(char initial) {
 	switch(initial) {
 		case 'G':
 			return PLAYER_LORD_GODALMING;
@@ -275,7 +306,36 @@ Player initialToId(char initial) {
 		case 'D':
 			return PLAYER_DRACULA;
 		default:
-			fprintf(stderr, "Initial is not a valid player!\n"); //TODO check msg
+			fprintf(stderr, "Initial is not a valid player\n"); 
 			exit(EXIT_FAILURE);
+	}
+}
+
+// Resolves location of Dracula's HIDE move to a city or sea
+PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove) {
+
+	if (currMove != HIDE) return currMove;
+	// Check if the resolved location of hide is a doubleback move
+	return locationOfDoubleBack(moveHistory, index - 1, moveHistory[index - 1]);
+}
+
+// Resolves location of Dracula's DOUBLE_BACK_n move to a city or sea
+PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) {
+
+	// Doubling back and checking if the resolved location is a hide move
+	switch(currMove) {
+		case DOUBLE_BACK_1:
+			return locationOfHide(moveHistory, index - 1, moveHistory[index - 1]);
+		case DOUBLE_BACK_2:
+			return locationOfHide(moveHistory, index - 2, moveHistory[index - 2]);
+		case DOUBLE_BACK_3:
+			return locationOfHide(moveHistory, index - 3, moveHistory[index - 3]);
+		case DOUBLE_BACK_4:
+			return locationOfHide(moveHistory, index - 4, moveHistory[index - 4]);
+		case DOUBLE_BACK_5:
+			return locationOfHide(moveHistory, index - 5, moveHistory[index - 5]);
+		default: 
+			// Move given is not a double back move
+			return currMove;
 	}
 }
