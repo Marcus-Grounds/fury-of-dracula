@@ -34,7 +34,6 @@ int main(void)
 		GameView gv = GvNew(trail, messages);
 		assert(GvGetRound(gv) == 0);
 		assert(GvGetPlayer(gv) == PLAYER_LORD_GODALMING);
-		printf("LHS:%u   RHS:%u\n",GvGetPlayer(gv), PLAYER_LORD_GODALMING );
 		assert(GvGetScore(gv) == GAME_START_SCORE);
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
 		assert(GvGetHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
@@ -61,7 +60,6 @@ int main(void)
 
 
 		assert(GvGetRound(gv) == 0);
-		printf("\nLHS:%u   RHS:%u\n",GvGetPlayer(gv), PLAYER_DR_SEWARD );
 		assert(GvGetPlayer(gv) == PLAYER_DR_SEWARD);
 		assert(GvGetScore(gv) == GAME_START_SCORE);
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == STRASBOURG);
