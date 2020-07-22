@@ -205,7 +205,8 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 	for (int i = 0; i < numLocs; i++) {
 		lastLocs[i] = locHistory[startIndex + i];
 	}
-
+	free(locHistory);
+	
 	*numReturnedLocs = numLocs;
 	*canFree = true;
 	return lastLocs;
@@ -341,6 +342,7 @@ void storePastPlays(GameView gv, char *pastPlays) {
 		storeMoveHistory(gv, play, currPlayer);
 
 		// TODO: add in health info, traps, encounters etc
+		
 	}
 	free(freeTmp);
 }
