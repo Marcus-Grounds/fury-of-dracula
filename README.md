@@ -7,6 +7,8 @@ username: jlin2002<br />
 real name: Joanna Lin<br /> 
 zID: z5311239<br /> 
 tutorial code:<br /> 
+
+```
   // I am simulating an issue with pulling.<br /> 
   #include <stdio.h><br /> 
   int main(void) {<br /> 
@@ -14,3 +16,4 @@ tutorial code:<br />
       return 0;<br /> 
   }<br /> 
   // Simulating a problem with pulling.<br /> 
+```
