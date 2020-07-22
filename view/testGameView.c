@@ -25,16 +25,16 @@
 
 int main(void)
 {
-	{///////////////////////////////////////////////////////////////////
 	
+	{///////////////////////////////////////////////////////////////////
 		printf("Basic initialisation\n");
 
 		char *trail = "";
 		Message messages[] = {};
 		GameView gv = GvNew(trail, messages);
-
 		assert(GvGetRound(gv) == 0);
 		assert(GvGetPlayer(gv) == PLAYER_LORD_GODALMING);
+		printf("LHS:%u   RHS:%u\n",GvGetPlayer(gv), PLAYER_LORD_GODALMING );
 		assert(GvGetScore(gv) == GAME_START_SCORE);
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
 		assert(GvGetHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
@@ -55,7 +55,13 @@ int main(void)
 		Message messages[1] = {};
 		GameView gv = GvNew(trail, messages);
 
+		//manual testing::
+
+		GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING); 
+
+
 		assert(GvGetRound(gv) == 0);
+		printf("\nLHS:%u   RHS:%u\n",GvGetPlayer(gv), PLAYER_DR_SEWARD );
 		assert(GvGetPlayer(gv) == PLAYER_DR_SEWARD);
 		assert(GvGetScore(gv) == GAME_START_SCORE);
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == STRASBOURG);
@@ -75,6 +81,8 @@ int main(void)
 		Message messages[4] = {};
 		GameView gv = GvNew(trail, messages);
 
+		//printf("CURR LOC: %u\n",GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING));
+
 		assert(GvGetRound(gv) == 0);
 		assert(GvGetPlayer(gv) == PLAYER_DRACULA);
 		assert(GvGetScore(gv) == GAME_START_SCORE);
@@ -87,7 +95,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("After Dracula's turn\n");
@@ -102,6 +110,7 @@ int main(void)
 		GameView gv = GvNew(trail, messages);
 
 		assert(GvGetRound(gv) == 1);
+		GvGetHealth(gv, PLAYER_LORD_GODALMING);
 		assert(GvGetPlayer(gv) == PLAYER_LORD_GODALMING);
 		assert(GvGetScore(gv) == GAME_START_SCORE - SCORE_LOSS_DRACULA_TURN);
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
@@ -493,6 +502,6 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-
+	
 	return EXIT_SUCCESS;
 }

@@ -23,6 +23,8 @@
 #define TOTAL_PLAYERS 5
 #define TOTAL_PLACES 71
 #define MIN_BRANCHING_DISTANCE 2
+#define HUNTER 0
+#define DRACULA 1
 // add your own #includes here
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
@@ -33,20 +35,39 @@ void storeMoveHistory(GameView gv, char *play, Player player);
 Player initialToPlayer(char initial);
 PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
+void init_score_round(GameView gv);
+void player_init_location(GameView gv, char *pastPlays);
+PlaceId get_current_location(GameView gv, Player player);
 
 // TODO: ADD YOUR OWN STRUCTS HERE
 
+typedef struct travel {
+	int rail;
+	bool road;
+	bool sea;
+} Travel;
+
+
 typedef struct playerData {
+
 	int historyCount;
 	PlaceId *history; // Move history of player
 	int health;
+	PlaceId location;
+	int role;
+	bool if_drac_isrev;
 } PlayerData;
+
 
 struct gameView {
 	// TODO: ADD FIELDS HERE
-	int nTurns;
-	int score;
 	PlayerData players[NUM_PLAYERS];
+	Map places;
+	char *plays;
+	int turn;
+	int score;
+	int round;
+	bool made_turn;
 };
 
 
@@ -64,6 +85,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 	
 	initialisePlayers(new);
 	storePastPlays(new, pastPlays);
+	init_score_round(new);
 
 	return new;
 }
@@ -79,12 +101,13 @@ void GvFree(GameView gv)
 
 Round GvGetRound(GameView gv)
 {
-	return ((gv->turn++) / TOTAL_PLAYERS);
+	return ((gv->turn) / TOTAL_PLAYERS);
 }
 
 Player GvGetPlayer(GameView gv)
 {
-	return ((gv->turn++) % TOTAL_PLAYERS);
+	printf("DEBUG GETPLAYER: turn is %d\n", gv->turn);
+	return ((gv->turn) % TOTAL_PLAYERS);
 }
 
 int GvGetScore(GameView gv)
@@ -97,17 +120,51 @@ int GvGetScore(GameView gv)
 int GvGetHealth(GameView gv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return gv->player[players].health;
+	return gv->players[player].health;
 }
 
 PlaceId GvGetPlayerLocation(GameView gv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	//PlaceId location;
+	//PlaceId last_move = gv->players[player].location;
+	if (player % 4 == 0 && player != 0) {
+		gv->players[player].role = DRACULA;
+	} else {
+		gv->players[player].role = HUNTER;
+	}
+
+	PlaceId location = get_current_location(gv, player);
+
+	//TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	//If a turn has not been made, return NOWHERE
+	
+	if (gv->made_turn == false) return NOWHERE;
+
+	//If the player is a hunter
+	if (gv->players[player].role  == HUNTER) {
+		return location;
+	
+		//If the player is the Dracula
+	} else if (gv->players[player].role == DRACULA) {
+
+		//If the dracula has been revealed
+		if (gv->players[player].if_drac_isrev == true) {
+			return gv->players[player].location;
+		}
+		/*
+		//If Dracula's last move was a TELEPORT
+		if ( gv->players[player].history[last_move - 1] == TELEPORT) {
+			return CASTLE_DRACULA;
+	}	*/
+	}
+	
 	return NOWHERE;
 }
 
 PlaceId GvGetVampireLocation(GameView gv)
 {
+
+
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return NOWHERE;
 }
@@ -224,6 +281,7 @@ PlaceId *getConnectionsByRail(GameView gv, PlaceId from, PlaceId intermediate,
 							  int distance, int *numReturnedLocs) {
 
 	if (maxRailDistance < distance) return reachableLocations;
+
 	ConnList intermediateConns = MapGetConnections(gv->places, intermediate);
 	for (ConnList curr = intermediateConns; curr != NULL; curr = curr->next) {
 		if (curr->p == from) continue;
@@ -300,9 +358,10 @@ void initialisePlayers(GameView gv) {
 	for (Player curr = PLAYER_LORD_GODALMING; curr <= PLAYER_DRACULA; curr++) {
 		(gv->players[curr]).historyCount = 0;
 		(gv->players[curr]).history = newMoveHistory(); 
-		(gv->players[curr]).health = 9; 
+		(gv->players[curr]).health = GAME_START_HUNTER_LIFE_POINTS; 
 	}
-	(gv->players[PLAYER_DRACULA]).health = 40;
+	(gv->players[PLAYER_DRACULA]).health = GAME_START_BLOOD_POINTS;
+	gv->players[PLAYER_DRACULA].if_drac_isrev = false;
 	return;
 }
 
@@ -319,7 +378,6 @@ PlaceId *newMoveHistory(void) {
 
 // TODO: need to free move history (function?)
 
-
 // Stores data from pastPlays into the GameView data structure
 void storePastPlays(GameView gv, char *pastPlays) {
 	if (strcmp(pastPlays, "") == 0) return;
@@ -327,12 +385,13 @@ void storePastPlays(GameView gv, char *pastPlays) {
 	// Extracting each play from pastPlays string with strsep
 	char *freeTmp = strdup(pastPlays);
 	char *tmp = freeTmp;
-
 	char *play;
 	Player currPlayer;
 	while ((play = strsep(&tmp, " ")) != NULL) {
 		currPlayer = initialToPlayer(play[0]);
 
+		gv->turn++;
+		printf("DEBUG PASTPLAYS: turn is %d\n", gv->turn);
 		// Extracting information from current play & storing into GameView data structure:
 		storeMoveHistory(gv, play, currPlayer);
 
@@ -356,6 +415,7 @@ void storeMoveHistory(GameView gv, char *play, Player player) {
 	assert (moveHistory != NULL);
 
 	moveHistory[count - 1] = place;
+
 	(gv->players[player]).historyCount = count;
 }
 
@@ -407,9 +467,23 @@ PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) 
 	}
 }
 
-
+//Initializing score and round
 void init_score_round(GameView gv) {
-	gv->score = 366;
-	gv_round = 0;
-	gv->turn = PLAYER_LORD_GODALMING;
+	gv->score = GAME_START_SCORE;
+	gv->round = 0;
+	gv->turn = 0;
+	gv->made_turn = true;
+}	
+
+PlaceId get_current_location(GameView gv, Player player) {
+
+	int last = gv->players[player].historyCount;
+	if (last == 0) return NOWHERE;
+	gv->players[player].location = gv->players[player].history[last - 1];
+	return gv->players[player].location;
+}
+
+bool is_drac_revealed(GameView gv, Player player) {
+	//TODO
+	return false;
 }
