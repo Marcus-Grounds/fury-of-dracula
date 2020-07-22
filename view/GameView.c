@@ -146,7 +146,6 @@ PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
 	PlaceId *lastMoves = malloc(sizeof(PlaceId) * numMoves);
 	assert (lastMoves != NULL);
 
-
 	// Copy the last 'numMoves' moves of moveHistory into 'lastMoves'
 	int startIndex = (gv->players[player]).historyCount - numMoves;
 	for (int i = 0; i < numMoves; i++) {
@@ -300,7 +299,7 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 
 // TODO
 
-// Initialises the players[] field of the GameView data structure
+// Initialises the players field of the GameView data structure
 void initialisePlayers(GameView gv) {
 	for (Player curr = PLAYER_LORD_GODALMING; curr <= PLAYER_DRACULA; curr++) {
 		(gv->players[curr]).historyCount = 0;
