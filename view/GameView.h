@@ -107,10 +107,12 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player);
  * This function should return:
  * - NOWHERE  if the immature vampire does not exist (i.e., if it hasn't
  *   been spawned, or if it has already matured or been vanquished).
+ * 
  * - A  PlaceId corresponding to a real location, if the location of the
  *   immature vampire has been revealed in the play string.  This  means
  *   Dracula's  location during the round in which he placed an immature
  *   vampire was revealed.
+ * 
  * - Otherwise,  CITY_UNKNOWN.  Note that this function can never return
  *   SEA_UNKNOWN, since Dracula never places encounters at sea.
  */
