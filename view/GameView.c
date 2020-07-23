@@ -22,6 +22,7 @@
 
 #define TOTAL_PLAYERS 5
 #define TOTAL_PLACES 71
+#define MAX_MOVE_SIZE 7
 #define MIN_BRANCHING_DISTANCE 2
 #define INITIAL_GAME_SCORE 366
 // add your own #includes here
@@ -32,6 +33,7 @@ PlaceId *newMoveHistory(void);
 void storePastPlays(GameView gv, char *pastPlays);
 void storeMoveHistory(GameView gv, char *play, Player player);
 void updateGameScore(GameView gv, char *play, Player player);
+void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
 Player initialToPlayer(char initial);
 PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
@@ -50,8 +52,6 @@ struct gameView {
 	int score;
 	int turn;
 };
-
-
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -93,12 +93,12 @@ void GvFree(GameView gv)
 
 Round GvGetRound(GameView gv)
 {
-	return ((gv->turn++) / TOTAL_PLAYERS);
+	return ((gv->turn) / TOTAL_PLAYERS);
 }
 
 Player GvGetPlayer(GameView gv)
 {
-	return ((gv->turn++) % TOTAL_PLAYERS);
+	return ((gv->turn) % TOTAL_PLAYERS);
 }
 
 int GvGetScore(GameView gv)
@@ -108,8 +108,7 @@ int GvGetScore(GameView gv)
 
 int GvGetHealth(GameView gv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return (gv->players[player]).health;
 }
 
 PlaceId GvGetPlayerLocation(GameView gv, Player player)
@@ -329,9 +328,6 @@ PlaceId *newMoveHistory(void) {
 	return new;
 }
 
-// TODO: need to free move history (function?)
-
-
 // Stores data from pastPlays into the GameView data structure
 void storePastPlays(GameView gv, char *pastPlays) {
 	if (strcmp(pastPlays, "") == 0) return;
@@ -345,12 +341,11 @@ void storePastPlays(GameView gv, char *pastPlays) {
 	while ((play = strsep(&tmp, " ")) != NULL) {
 		currPlayer = initialToPlayer(play[0]);
 
+		gv->turn ++;
 		// Extracting information from current play & storing into GameView data structure:
 		storeMoveHistory(gv, play, currPlayer);
-		updateGameScore (gv, play, currPlayer);
-
-		// TODO: add in health info, traps, encounters etc
-		
+		updatePlayerHealth (gv, pastPlays ,play, currPlayer);
+		updateGameScore (gv, play, currPlayer);			
 	}
 	free(freeTmp);
 }
@@ -433,4 +428,69 @@ void updateGameScore(GameView gv, char *play, Player player) {
 		}
 	}
 }
+
+void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player) {
+	
+	int health = (gv->players[player]).health;
+	int histCount = (gv->players[player]).historyCount;
+	PlaceId *playerHistory = (gv->players[player]).history;
+	
+	if (player != PLAYER_DRACULA) {
+	
+		for (int i = 3; i < MAX_MOVE_SIZE; i++) {
+			if (play[i] == 'T') {
+				health = health - 2;
+			}
+			if (play[i] == 'D') {
+				health = health - 4;	
+			}
+		}
+		for (int i = 0; i < histCount - 1; i ++) {
+			if (playerHistory[i] == playerHistory[i + 1]) {
+				
+				health = health + 3;
+				
+				if (health > 9) {
+					health = 9;
+				}
+			}
+		}
+
+	} else {
+		
+		//COUNTER FOR DRACULA ENCOUNTER AND DRACULA AT CASTLE
+		char *freeTmp = strdup(pastPlays);
+		char *tmp = freeTmp;
+
+		int encounter = 0; 
+		char *play;
+		
+		while ((play = strsep(&tmp, " ")) != NULL) {
+			if (play[0] != 'D') {
+				for (int i = 3; i < MAX_MOVE_SIZE; i++) {
+					if (play[i] == 'D') {
+						encounter ++;
+					}
+				}		
+			}
+		}
+		free (freeTmp);
+
+		health = health - (10*encounter);
+
+		//HEALTH LOSS AT SEA/ HEALTH GAIN AT CASTLE
+		for (int i = 0; i < histCount; i ++) {
+			if (placeIdToType(playerHistory[i]) == SEA) {
+				health = health - 2;
+			}
+			if (playerHistory[i] == CASTLE_DRACULA) {
+				health = health + 10;
+			}
+		}
+	}	
+	
+	(gv->players[player]).health = health;
+}
+
+
 	
