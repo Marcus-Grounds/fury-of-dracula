@@ -24,17 +24,12 @@
 #define MIN_BRANCHING_DISTANCE 2
 // add your own #includes here
 
-typedef struct travel {
-	int rail;
-	bool road;
-	bool sea;
-} Travel;
-
 struct gameView {
 	Map places;
 	int turn;
 };
 
+int turn = 0;
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -46,7 +41,6 @@ GameView GvNew(char *pastPlays, Message messages[])
 		fprintf(stderr, "Couldn't allocate GameView!\n");
 		exit(EXIT_FAILURE);
 	}
-
 	return new;
 }
 
@@ -61,12 +55,12 @@ void GvFree(GameView gv)
 
 Round GvGetRound(GameView gv)
 {
-	return ((gv->turn++) / TOTAL_PLAYERS);
+	return (turn++ / TOTAL_PLAYERS);
 }
 
 Player GvGetPlayer(GameView gv)
 {
-	return ((gv->turn++) % TOTAL_PLAYERS);
+	return (turn++ % TOTAL_PLAYERS);
 }
 
 int GvGetScore(GameView gv)
@@ -141,6 +135,12 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
+bool isRepeat(PlaceId *reachableLocations, PlaceId newLocation, int *numReturnedLocs) {
+	for (int i = 0; i < (*numReturnedLocs); i++) {
+		if (reachableLocations[i] == newLocation) return true;
+	}
+	return false;
+}
 
 PlaceId *addPlaceId(PlaceId new, PlaceId *reachableLocations,
 					int *numReturnedLocs) {
@@ -158,8 +158,7 @@ PlaceId *getConnectionsByRail(GameView gv, PlaceId from, PlaceId intermediate,
 	if (maxRailDistance < distance) return reachableLocations;
 	ConnList intermediateConns = MapGetConnections(gv->places, intermediate);
 	for (ConnList curr = intermediateConns; curr != NULL; curr = curr->next) {
-		if (curr->p == from) continue;
-		if (curr->type == RAIL) {
+		if (curr->type == RAIL && !isRepeat(reachableLocations, curr->p, numReturnedLocs)) {
 			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 			reachableLocations = getConnectionsByRail(gv, from, curr->p, 
 								 		        	  reachableLocations,
@@ -180,18 +179,17 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 	int maxRailDistance = (player + round) % 4;
 	for (ConnList curr = allConnections; curr != NULL; curr = curr->next){
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
-		if (curr->type == ROAD || curr->type == BOAT) {
-			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
-		}
-		if (player == PLAYER_DRACULA || maxRailDistance == 0) continue;
-		if (curr->type == RAIL) {
-			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
+		if (player != PLAYER_DRACULA && curr->type == RAIL && maxRailDistance > 0) {
+			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 			reachableLocations = getConnectionsByRail(gv, from, curr->p, 
 												      reachableLocations, 
 													  maxRailDistance, 
 													  MIN_BRANCHING_DISTANCE, 
 													  numReturnedLocs);
+			continue;
 		}
+		if (curr->type == ROAD || curr->type == BOAT)
+			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 	}
 	return reachableLocations;
 }
@@ -204,19 +202,19 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 	PlaceId *reachableLocations = NULL;
 	ConnList allConnections = MapGetConnections(gv->places, from);
 	int maxRailDistance = (player + round) % 4;
-	for (ConnList curr = allConnections; curr != NULL; curr = curr->next){
+	for (ConnList curr = allConnections; curr != NULL; curr = curr->next) {
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
-		if ((road && curr->type == ROAD) || (boat && curr->type == BOAT)) {
-			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
-		}
-		if (player == PLAYER_DRACULA || maxRailDistance == 0) continue;
-		if (rail && curr->type == RAIL) {
+		if (player != PLAYER_DRACULA && rail && curr->type == RAIL && maxRailDistance > 0) {
 			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 			reachableLocations = getConnectionsByRail(gv, from, curr->p, 
 												      reachableLocations, 
 													  maxRailDistance, 
 													  MIN_BRANCHING_DISTANCE, 
 													  numReturnedLocs);
+			continue;
+		}
+		if ((road && curr->type == ROAD) || (boat && curr->type == BOAT)) {
+			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 		}
 	}
 	return reachableLocations;
