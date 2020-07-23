@@ -22,9 +22,8 @@
 
 #define TOTAL_PLAYERS 5
 #define TOTAL_PLACES 71
-#define MAX_MOVE_SIZE 7
+#define PLAY_SIZE 7
 #define MIN_BRANCHING_DISTANCE 2
-#define INITIAL_GAME_SCORE 366
 // add your own #includes here
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
@@ -38,7 +37,7 @@ Player initialToPlayer(char initial);
 PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 
-// TODO: ADD YOUR OWN STRUCTS HERE
+// STRUCTS
 typedef struct playerData {
 	int historyCount;
 	PlaceId *history; // Move history of player
@@ -46,7 +45,6 @@ typedef struct playerData {
 } PlayerData;
 
 struct gameView {
-	// TODO: ADD FIELDS HERE
 	PlayerData *players;
 	Map places;
 	int score;
@@ -69,7 +67,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 		fprintf(stderr, "Couldn't allocate GameView!\n");
 		exit(EXIT_FAILURE);
 	}
-	new->score = INITIAL_GAME_SCORE;
+	new->score = GAME_START_SCORE;
 	new->turn = 0;
 	initialisePlayers(new);
 	storePastPlays(new, pastPlays);
@@ -311,9 +309,9 @@ void initialisePlayers(GameView gv) {
 	for (Player curr = PLAYER_LORD_GODALMING; curr <= PLAYER_DRACULA; curr++) {
 		(gv->players[curr]).historyCount = 0;
 		(gv->players[curr]).history = newMoveHistory(); 
-		(gv->players[curr]).health = 9; 
+		(gv->players[curr]).health = GAME_START_HUNTER_LIFE_POINTS; 
 	}
-	(gv->players[PLAYER_DRACULA]).health = 40;
+	(gv->players[PLAYER_DRACULA]).health = GAME_START_BLOOD_POINTS;
 	return;
 }
 
@@ -419,12 +417,12 @@ PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) 
 void updateGameScore(GameView gv, char *play, Player player) {
 	if (player == PLAYER_DRACULA) {
 		if (play[5] == 'V') {
-			gv->score = gv->score - 13;
+			gv->score = gv->score - SCORE_LOSS_VAMPIRE_MATURES;
 		}
 		gv->score --;
 	} else {
 		if ((gv->players[player]).health <= 0) {
-			gv->score = gv->score - 6;
+			gv->score = gv->score - SCORE_LOSS_HUNTER_HOSPITAL;
 		}
 	}
 }
@@ -436,22 +434,26 @@ void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player)
 	PlaceId *playerHistory = (gv->players[player]).history;
 	
 	if (player != PLAYER_DRACULA) {
+
+		if (health <= 0) {
+			health = GAME_START_HUNTER_LIFE_POINTS;
+		}
 	
-		for (int i = 3; i < MAX_MOVE_SIZE; i++) {
+		for (int i = 3; i < PLAY_SIZE; i++) {
 			if (play[i] == 'T') {
-				health = health - 2;
+				health = health - LIFE_LOSS_TRAP_ENCOUNTER;
 			}
 			if (play[i] == 'D') {
-				health = health - 4;	
+				health = health - LIFE_LOSS_DRACULA_ENCOUNTER;	
 			}
 		}
 		for (int i = 0; i < histCount - 1; i ++) {
 			if (playerHistory[i] == playerHistory[i + 1]) {
 				
-				health = health + 3;
+				health = health + LIFE_GAIN_REST;
 				
-				if (health > 9) {
-					health = 9;
+				if (health > GAME_START_HUNTER_LIFE_POINTS) {
+					health = GAME_START_HUNTER_LIFE_POINTS;
 				}
 			}
 		}
@@ -467,7 +469,7 @@ void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player)
 		
 		while ((play = strsep(&tmp, " ")) != NULL) {
 			if (play[0] != 'D') {
-				for (int i = 3; i < MAX_MOVE_SIZE; i++) {
+				for (int i = 3; i < PLAY_SIZE; i++) {
 					if (play[i] == 'D') {
 						encounter ++;
 					}
@@ -476,15 +478,15 @@ void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player)
 		}
 		free (freeTmp);
 
-		health = health - (10*encounter);
+		health = health - (LIFE_LOSS_HUNTER_ENCOUNTER * encounter);
 
 		//HEALTH LOSS AT SEA/ HEALTH GAIN AT CASTLE
 		for (int i = 0; i < histCount; i ++) {
 			if (placeIdToType(playerHistory[i]) == SEA) {
-				health = health - 2;
+				health = health - LIFE_LOSS_SEA;
 			}
 			if (playerHistory[i] == CASTLE_DRACULA) {
-				health = health + 10;
+				health = health + LIFE_GAIN_CASTLE_DRACULA;
 			}
 		}
 	}	
