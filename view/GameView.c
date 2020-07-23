@@ -23,6 +23,7 @@
 #define TOTAL_PLAYERS 5
 #define TOTAL_PLACES 71
 #define MIN_BRANCHING_DISTANCE 2
+#define INITIAL_GAME_SCORE 366
 // add your own #includes here
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
@@ -30,18 +31,12 @@ void initialisePlayers(GameView gv);
 PlaceId *newMoveHistory(void);
 void storePastPlays(GameView gv, char *pastPlays);
 void storeMoveHistory(GameView gv, char *play, Player player);
+void updateGameScore(GameView gv, char *play, Player player);
 Player initialToPlayer(char initial);
 PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 
 // TODO: ADD YOUR OWN STRUCTS HERE
-
-typedef struct travel {
-	int rail;
-	bool road;
-	bool sea;
-} Travel;
-
 typedef struct playerData {
 	int historyCount;
 	PlaceId *history; // Move history of player
@@ -50,8 +45,9 @@ typedef struct playerData {
 
 struct gameView {
 	// TODO: ADD FIELDS HERE
-	PlayerData players[NUM_PLAYERS];
+	PlayerData *players;
 	Map places;
+	int score;
 	int turn;
 };
 
@@ -67,7 +63,14 @@ GameView GvNew(char *pastPlays, Message messages[])
 		fprintf(stderr, "Couldn't allocate GameView!\n");
 		exit(EXIT_FAILURE);
 	}
-	
+	new->places = MapNew();
+	new->players = malloc(NUM_PLAYERS * sizeof (PlayerData));
+	if (new->players == NULL) {
+		fprintf(stderr, "Couldn't allocate GameView!\n");
+		exit(EXIT_FAILURE);
+	}
+	new->score = INITIAL_GAME_SCORE;
+	new->turn = 0;
 	initialisePlayers(new);
 	storePastPlays(new, pastPlays);
 
@@ -76,7 +79,12 @@ GameView GvNew(char *pastPlays, Message messages[])
 
 void GvFree(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	MapFree(gv->places);
+	for (int i = 0; i < NUM_PLAYERS; i++) {
+		PlaceId *hist = (gv->players[i]).history;
+		free(hist);
+	}
+	free(gv->players);
 	free(gv);
 }
 
@@ -95,8 +103,7 @@ Player GvGetPlayer(GameView gv)
 
 int GvGetScore(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->score;
 }
 
 int GvGetHealth(GameView gv, Player player)
@@ -340,6 +347,7 @@ void storePastPlays(GameView gv, char *pastPlays) {
 
 		// Extracting information from current play & storing into GameView data structure:
 		storeMoveHistory(gv, play, currPlayer);
+		updateGameScore (gv, play, currPlayer);
 
 		// TODO: add in health info, traps, encounters etc
 		
@@ -412,3 +420,17 @@ PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) 
 			return currMove;
 	}
 }
+
+void updateGameScore(GameView gv, char *play, Player player) {
+	if (player == PLAYER_DRACULA) {
+		if (play[5] == 'V') {
+			gv->score = gv->score - 13;
+		}
+		gv->score --;
+	} else {
+		if ((gv->players[player]).health <= 0) {
+			gv->score = gv->score - 6;
+		}
+	}
+}
+	
