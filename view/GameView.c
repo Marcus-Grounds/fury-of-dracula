@@ -48,7 +48,7 @@ void initTraps(GameView gv) ;
 PlaceId *setTraps(GameView gv);
 void updateGameScore(GameView gv, char *play, Player player);
 void vampireInGeneral(GameView gv, Player player);
-void encounterDrac(GameView gv);
+void encounterDrac(GameView gv, Player player);
 void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
 // TODO: ADD YOUR OWN STRUCTS HERE
 
@@ -112,17 +112,21 @@ GameView GvNew(char *pastPlays, Message messages[])
 	InitScoreRound(new);
 	initialisePlayers(new);
 	initTraps(new);
-	initVampires(new);
 	storePastPlays(new, pastPlays);
+	int last =  new->players[PLAYER_LORD_GODALMING].historyCount;
+
+	for (int curr = 0; curr < last; curr++) {
+		printf("LOCATION_STR: %d\n",new->players[PLAYER_LORD_GODALMING].history[curr]);
+	}
+	initVampires(new);
 	return new;
 }
 
 void GvFree(GameView gv)
 {
+	//TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	
-	free(gv);
+		free(gv);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -130,15 +134,13 @@ void GvFree(GameView gv)
 
 Round GvGetRound(GameView gv)
 {
-	Round round = (gv->turn) / TOTAL_PLAYERS;
-	
-	return round;
+	return ((gv->turn) / TOTAL_PLAYERS);
+
 }
 
 Player GvGetPlayer(GameView gv)
 {
-	Player turn = ((gv->turn) % TOTAL_PLAYERS);
-	return turn;
+	return ((gv->turn) % TOTAL_PLAYERS);
 }
 
 int GvGetScore(GameView gv)
@@ -169,13 +171,16 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 	}
 
 	PlaceId location = GetCurrentLocation(gv, player);
-
-	//TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	//If a turn has not been made, return NOWHERE
-	
-
 	//If the player is a hunter
 	if (gv->players[player].role == HUNTER) {
+		if (gv->players[player].health <= 0) {
+			gv->players[player].location = ST_JOSEPH_AND_ST_MARY;
+			gv->players[player].history[last_move - 1] = ST_JOSEPH_AND_ST_MARY;
+			return gv->players[player].location;
+
+		}
+
 		return location;
 	
 		//If the player is the Dracula
@@ -187,6 +192,7 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 		}
 		//If Dracula's last move was a TELEPORT
 		if ( gv->players[player].history[last_move - 1] == TELEPORT) {
+			 gv->players[player].history[last_move - 1] = CASTLE_DRACULA;
 			return CASTLE_DRACULA;
 		} 
 
@@ -197,6 +203,15 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 			return CITY_UNKNOWN;
 		}
 
+		if (location == 103) return locationOfDoubleBack(gv->players[player].history, 1, gv->players[player].location);
+		if (location == 104) return locationOfDoubleBack(gv->players[player].history, 2, gv->players[player].location);
+		if (location == 105) return locationOfDoubleBack(gv->players[player].history, 3, gv->players[player].location);
+		if (location == 106) return locationOfDoubleBack(gv->players[player].history, 4, gv->players[player].location);
+		if (location == 107) return locationOfDoubleBack(gv->players[player].history, 5, gv->players[player].location);
+				
+		
+		
+
 	}	
 	return NOWHERE;
 }
@@ -204,7 +219,9 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 PlaceId GvGetVampireLocation(GameView gv)
 {
 	
-	PlaceId location = vampirePlaced(gv);
+	PlaceId location = gv->vampires.location;
+
+	printf("VAMP HERE::%d\n\n", gv->vampires.is_alive);
 	if (vampireVanquished(gv, GvGetPlayer(gv)) == true) return NOWHERE;
 	Vampire vamp = gv->vampires;
 
@@ -219,6 +236,8 @@ PlaceId GvGetVampireLocation(GameView gv)
 
 	if (gv->if_drac_isrev == true){
 		return gv->vampires.location;
+	} else {
+		return CITY_UNKNOWN;
 	}
 
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
@@ -230,13 +249,17 @@ PlaceId vampirePlaced(GameView gv) {
 	int round = GvGetRound(gv);
 	PlaceId location = GvGetPlayerLocation(gv, PLAYER_DRACULA);
 	if (round == 1 || round % 13 == 0) {
-		if ( placeIdToType(GetCurrentLocation(gv, PLAYER_DRACULA) != SEA)) {
+		if (placeIdToType(GetCurrentLocation(gv, PLAYER_DRACULA) != SEA)) {
 			gv->vampires.location = location;
 			gv->vampires.is_alive = true;
-			return location;
+			gv->vampires.has_matured = false;
+			//printf("VAMP placed HERE::%d\n\n", location);
+			return gv->vampires.location;
 		}
 
 	} 
+	
+	if (gv->vampires.is_alive == true) return gv->vampires.location;
 
 	return NOWHERE;
 }
@@ -308,6 +331,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 			locHistory[i] = locationOfHide(moveHistory, i, currMove);
 		} else if ((currMove >= DOUBLE_BACK_1) && (currMove <= DOUBLE_BACK_5)) {
 			locHistory[i] = locationOfDoubleBack(moveHistory, i, currMove);
+			gv->players[PLAYER_DRACULA].historyCount = 1;
 		} else {
 			locHistory[i] = currMove;
 		}
@@ -465,14 +489,16 @@ void storePastPlays(GameView gv, char *pastPlays) {
 		gv->turn++;
 		gv->made_turn = true;
 		// Extracting information from current play & storing into GameView data structure:
-
-		storeMoveHistory(gv, play, currPlayer);
+		gv->round = GvGetRound(gv);
+		IsDracrRevealed(gv, currPlayer);
 		vampireInGeneral(gv, currPlayer);
-		encounterDrac(gv);
-		updateGameScore (gv, play, currPlayer);
+		//printf("\n \nVAMP/IS ALIVE%d\n\n", gv->vampires.is_alive);
+		storeMoveHistory(gv, play, currPlayer);
+		//printf("GV::: %d\n\n", gv->players[PLAYER_LORD_GODALMING].location);
+		//encounterDrac(gv, currPlayer);
 		updatePlayerHealth (gv, pastPlays ,play, currPlayer);
-		//printf("ROUND: %d  PLAYER: %d   LOCATION: %d \n", GvGetRound(gv), GvGetPlayer(gv), GvGetPlayerLocation(gv, GvGetPlayer(gv)));
-
+		updateGameScore (gv, play, currPlayer);
+		//printf("ROUND: %d PLAYER: %d -- LOCATION: %d  -- DRAC:%d\n  ", GvGetRound(gv), currPlayer, GvGetPlayerLocation(gv, currPlayer), GvGetPlayerLocation(gv, PLAYER_DRACULA));
 		// TODO: add in health info, traps, encounters etc
 	}
 	free(freeTmp);
@@ -548,7 +574,7 @@ PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) 
 //Initializing score and round
 void InitScoreRound(GameView gv) {
 	gv->score = GAME_START_SCORE;
-	gv->round = 0;
+	gv->round = 1;
 	gv->turn = 0;
 	gv->made_turn = true;
 }	
@@ -556,15 +582,31 @@ void InitScoreRound(GameView gv) {
 PlaceId GetCurrentLocation(GameView gv, Player player) {
 
 	int last = gv->players[player].historyCount;
-	gv->players[player].location = gv->players[player].history[last-1];
-	
 
+
+	if (gv->players[player].history[last-1] == 103 || gv->players[player].history[last-1] == 102 ) {
+
+		gv->players[player].history[last - 1] = gv->players[player].history[last - 2];		 
+	} else if (gv->players[player].history[last-1] == 104) {
+
+		gv->players[player].history[last - 1] = gv->players[player].history[last - 3];		 
+	} else if (gv->players[player].history[last-1] == 105) {
+
+		gv->players[player].history[last - 1] = gv->players[player].history[last - 4];		 
+	} else if (gv->players[player].history[last-1] == 106) {
+
+		gv->players[player].history[last - 1] = gv->players[player].history[last - 5];
+
+	} else if (gv->players[player].history[last-1] == 107) {
+		gv->players[player].history[last - 1] = gv->players[player].history[last - 6];
+	}
+	
+	gv->players[player].location = gv->players[player].history[last-1];
 	return gv->players[player].location;
 }
 
 bool IsDracrRevealed(GameView gv, Player player) {
 
-	gv->if_drac_isrev = false;
 	PlaceId Drac_location = gv->players[PLAYER_DRACULA].location; 
 	if (Drac_location == CASTLE_DRACULA) {
 		gv->if_drac_isrev = true;
@@ -584,7 +626,7 @@ bool vampireMatures(GameView gv) {
 	int round = GvGetRound(gv);
 	
 	if (gv->vampires.is_alive) {
-		if (round % 6 == 0 && round != 0) {
+		if (round % 6 == 0 && round != 0 ) {
 			gv->score = gv->score - 13;
 			gv->vampires.has_matured = true;
 			gv->vampires.is_alive = false;
@@ -640,6 +682,7 @@ PlaceId *setTraps(GameView gv) {
 		gv->traps.num++;
 	} else {
 		gv->traps.locations[count + 1] = location;
+		gv->traps.num++;
 	}
 		
 	
@@ -647,9 +690,6 @@ PlaceId *setTraps(GameView gv) {
 }
 
 void trap_encountered(GameView gv) {
-
-
-
 }
 
 void updateGameScore(GameView gv, char *play, Player player) {
@@ -658,25 +698,29 @@ void updateGameScore(GameView gv, char *play, Player player) {
 			gv->score = gv->score - 13;
 		}
 		gv->score --;
+	} else {
+		if ((gv->players[player]).health <= 0) {
+			gv->score = gv->score - SCORE_LOSS_HUNTER_HOSPITAL;
+		}
 	}
 }
 	
 void vampireInGeneral(GameView gv, Player player) {
-	GvGetVampireLocation(gv);
+
+	vampirePlaced(gv);
 	vampireMatures(gv);
 	vampireVanquished( gv, player) ;
 }
 
-void encounterDrac(GameView gv) {
+void encounterDrac(GameView gv, Player player) {
 
-	PlaceId drac_loc = GvGetPlayerLocation(gv, PLAYER_DRACULA);
-	Player curr = GvGetPlayer(gv);
-
-		if (GvGetPlayerLocation(gv, curr) == drac_loc && curr != PLAYER_DRACULA && GvGetRound(gv) != 0) {
+	Player curr = player;
+	PlaceId drac_loc = GetCurrentLocation(gv, PLAYER_DRACULA);
+		if (GetCurrentLocation(gv, curr) == drac_loc && curr != PLAYER_DRACULA && GvGetRound(gv) != 0) {
 			gv->if_drac_isrev = true;
 			gv->vampires.is_revealed = true;
 			gv->players[curr].health = gv->players[curr].health - 4;
-			gv->players[PLAYER_DRACULA].health = gv->players[PLAYER_DRACULA].health - 40;
+			gv->players[PLAYER_DRACULA].health = gv->players[PLAYER_DRACULA].health - 10;
 			printf("PLAYER::: %d   HELTHHH: %d\n \n",curr ,gv->players[curr].health);		
 		}
 
