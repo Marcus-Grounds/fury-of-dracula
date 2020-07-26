@@ -493,6 +493,3 @@ void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player)
 	
 	(gv->players[player]).health = health;
 }
-
-
-	
