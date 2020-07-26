@@ -26,8 +26,6 @@
 #define MIN_BRANCHING_DISTANCE 2
 // add your own #includes here
 
-<<<<<<< HEAD
-=======
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initialisePlayers(GameView gv);
 PlaceId *newMoveHistory(void);
@@ -46,18 +44,12 @@ typedef struct playerData {
 	int health;
 } PlayerData;
 
->>>>>>> 5e7747f278aa4e845291255d5de28d4f57ad46b5
 struct gameView {
 	PlayerData *players;
 	Map places;
 	int score;
 	int turn;
 };
-<<<<<<< HEAD
-
-int turn = 0;
-=======
->>>>>>> 5e7747f278aa4e845291255d5de28d4f57ad46b5
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -69,8 +61,6 @@ GameView GvNew(char *pastPlays, Message messages[])
 		fprintf(stderr, "Couldn't allocate GameView!\n");
 		exit(EXIT_FAILURE);
 	}
-<<<<<<< HEAD
-=======
 	new->places = MapNew();
 	new->players = malloc(NUM_PLAYERS * sizeof (PlayerData));
 	if (new->players == NULL) {
@@ -82,7 +72,6 @@ GameView GvNew(char *pastPlays, Message messages[])
 	initialisePlayers(new);
 	storePastPlays(new, pastPlays);
 
->>>>>>> 5e7747f278aa4e845291255d5de28d4f57ad46b5
 	return new;
 }
 
@@ -271,6 +260,7 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 	PlaceId *reachableLocations = malloc(sizeof(PlaceId));
 	reachableLocations[0] = from;
 	int maxRailDistance = (player + round) % 4;
+	ConnList allConnections = MapGetConnections(gv->places, from);
 	for (ConnList curr = allConnections; curr != NULL; curr = curr->next){
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
 		if (isRepeat(reachableLocations, curr->p, numReturnedLocs)) continue;
