@@ -36,9 +36,6 @@ PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 void vampireActivity(GameView gv, char *play, Player player);
 
-
-
-
 void initScoreRound(GameView gv);
 void PlayerInitLocation(GameView gv, char *pastPlays);
 //PlaceId GetCurrentLocation(GameView gv, Player player);
@@ -48,7 +45,7 @@ void PlayerInitLocation(GameView gv, char *pastPlays);
 // bool vampireVanquished(GameView gv, Player player);
 // void initVampires(GameView gv);
 void initTraps(GameView gv) ;
-PlaceId *setTraps(GameView gv);
+void storeTraps(GameView gv, char *pastPlays);
 void updateGameScore(GameView gv, char *play, Player player);
 //void vampireInGeneral(GameView gv, Player player);
 void encounterDrac(GameView gv, Player player);
@@ -56,10 +53,11 @@ void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player)
 // TODO: ADD YOUR OWN STRUCTS HERE
 
 typedef struct playerData {
-	int historyCount;
 	PlaceId *history; // Move history of player
-	int health;
 	PlaceId location; // is this needed?
+	int historyCount;	
+	int health;
+	
 } PlayerData;
 
 /*typedef struct vampire {
@@ -69,18 +67,18 @@ typedef struct playerData {
 	PlaceId location; 
 } Vampire;*/
 
-typedef struct traps {
-	int num;
-	int *locations;
+typedef struct traps {	
+	PlaceId *locations;
+	int trapCount;
 } Traps;
 
 struct gameView {
 	// TODO: ADD FIELDS HERE
 	PlayerData players[NUM_PLAYERS];
-	Traps traps;
 	// Vampire vampires;
 	PlaceId immatureVampLocation;
 	Map places;
+	Traps traps;
 
 	char *plays;
 	int turn;
@@ -254,11 +252,8 @@ PlaceId GvGetVampireLocation(GameView gv)
 PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numTraps = gv->traps.num;
-
-	PlaceId *locations = setTraps(gv);
-	
-	return locations;
+	*numTraps = gv->traps.trapCount;
+	return gv->traps.locations;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -494,6 +489,7 @@ void storePastPlays(GameView gv, char *pastPlays) {
 
 // Stores a player move into the move history of player (in GameView data structure)
 void storeMoveHistory(GameView gv, char *play, Player player) {
+	
 	PlaceId *moveHistory = (gv->players[player]).history;
 	assert (moveHistory != NULL);
 
@@ -656,30 +652,64 @@ void initVampires(GameView gv) {
 }*/
 
 void initTraps(GameView gv) {
-	gv->traps.locations = malloc(sizeof(int *));
-	gv->traps.num = 0;
+	//Can scan through drac history to determine size of trap store / look for 'M'
+	//in actual trap store we check count value along side size of m
+	gv->traps.locations = malloc(sizeof(PlaceId) * gv->players[PLAYER_DRACULA].historyCount);
+	gv->traps.trapCount = 0;
+
 }
 
-PlaceId *setTraps(GameView gv) {
+void storeTraps(GameView gv, char *pastPlays) {
 
-	PlaceId location = GvGetPlayerLocation(gv, PLAYER_DRACULA);
-	int count = gv->traps.num;
+	PlaceId * trapLoc = gv->traps.locations;
+	assert (trapLoc != NULL);
+	
+	int DracHistCount = gv->players[PLAYER_DRACULA].historyCount;
+	int trapCnt = 0;
+	
+	if (strcmp(pastPlays, "") == 0) return;
 
-	if (location == NOWHERE) return gv->traps.locations;
+	// Extracting each play from pastPlays string with strsep
+	char *tmp = strdup(pastPlays);
+	char *play;
 
-	if (count == 0) {
-		gv->traps.locations[0] = location;
-		gv->traps.num++;
-	} else {
-		gv->traps.locations[count + 1] = location;
-		gv->traps.num++;
+	// FIND THE NUMBER OF TRAPS
+	while ((play = strsep(&tmp, " ")) != NULL) {
+		
+		if (play[0] != 'D') continue;
+		if (play[3] == 'T') trapCnt ++;
+		if (play[5] == 'M') trapCnt --;	
+		printf ("%d", trapCnt);
 	}
-	return gv->traps.locations;
+
+	free(tmp);
+
+	tmp = strdup(pastPlays);
+	
+	int i = 0; int j = 0;
+	int trapSkipCnt = DracHistCount - trapCnt;
+	
+	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
+	
+	while ((play = strsep(&tmp, " ")) != NULL) {
+		
+		if (play[0] != 'D') continue;
+		
+		if (i >= trapSkipCnt && i < DracHistCount) { //SKIPS OVER TRAPS THAT HAVE VANISHED
+			
+			char placeAbbrev[3] = {play[1], play[2], '\0'};
+			PlaceId place = placeAbbrevToId(placeAbbrev);
+			
+			trapLoc[j] = place;	
+			j ++;
+		}
+		i ++;
+	}
+
+	gv->traps.trapCount = trapCnt;	
+	free(tmp);
 }
 
-void trap_encountered(GameView gv) {
-	// TODO
-}
 
 void updateGameScore(GameView gv, char *play, Player player) {
 	if (player == PLAYER_DRACULA) {
