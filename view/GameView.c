@@ -278,6 +278,7 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
 
+// todo: comment description for function
 PlaceId *addPlaceId(PlaceId new, PlaceId *reachableLocations,
 					int *numReturnedLocs) {
 	(*numReturnedLocs)++;
@@ -287,6 +288,7 @@ PlaceId *addPlaceId(PlaceId new, PlaceId *reachableLocations,
 	return reachableLocations;
 }
 
+// todo: comment description for function
 PlaceId *getConnectionsByRail(GameView gv, PlaceId from, PlaceId intermediate, 
 							  PlaceId *reachableLocations, int maxRailDistance, 
 							  int distance, int *numReturnedLocs) {
