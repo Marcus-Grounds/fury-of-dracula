@@ -106,9 +106,15 @@ GameView GvNew(char *pastPlays, Message messages[])
 
 void GvFree(GameView gv)
 {
-	//TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-
-		free(gv);
+	MapFree(gv->places);
+	/*
+	for (int i = 0; i < NUM_PLAYERS; i++) {
+		PlaceId *hist = (gv->players[i]).history;
+		free(hist);
+	}
+	free(gv->players);
+	*/
+	free(gv);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -127,14 +133,11 @@ Player GvGetPlayer(GameView gv)
 
 int GvGetScore(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	//int round = GvGetRound(gv); 
 	return gv->score;
 }
 
 int GvGetHealth(GameView gv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return gv->players[player].health;
 }
 
