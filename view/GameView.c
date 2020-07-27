@@ -28,7 +28,7 @@
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initPlayers(GameView gv);
-void initScoreRound(GameView gv);
+void initScoreTurn(GameView gv);
 void initTraps(GameView gv);
 
 void storePastPlays(GameView gv, char *pastPlays);
@@ -62,12 +62,8 @@ struct gameView {
 	Map places;
 	Traps traps;
 
-	char *plays;
 	int turn;
 	int score;
-	int round; // todo: check if needed
-	bool made_turn;
-	bool if_drac_isrev;
 };
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
@@ -82,7 +78,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 	}
 
 	new->places = MapNew();
-	initScoreRound(new);
+	initScoreTurn(new);
 	initPlayers(new);
 	initTraps(new);
 	new->immatureVampLocation = NOWHERE;
@@ -392,13 +388,9 @@ void storePastPlays(GameView gv, char *pastPlays) {
 	Player currPlayer;
 	while ((play = strsep(&tmp, " ")) != NULL) {
 		currPlayer = initialToPlayer(play[0]);
-
 		gv->turn++;
-		gv->made_turn = true; //todo: check if needed
 
 		// Extracting information from current play & storing into GameView data structure:
-		gv->round = GvGetRound(gv);
-
 		storeMoveHistory(gv, play, currPlayer);
 		vampireActivity(gv, play, currPlayer);
 		updatePlayerHealth (gv, pastPlays ,play, currPlayer);
@@ -477,11 +469,9 @@ PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) 
 }
 
 //Initializing score and round
-void initScoreRound(GameView gv) {
+void initScoreTurn(GameView gv) {
 	gv->score = GAME_START_SCORE;
-	gv->round = 1;
 	gv->turn = 0;
-	gv->made_turn = true;
 }	
 
 // todo: comment description for this function
