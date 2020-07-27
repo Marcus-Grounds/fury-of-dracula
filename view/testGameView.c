@@ -427,7 +427,7 @@ int main(void)
 			PlaceId *locs = GvGetReachableByType(gv, PLAYER_LORD_GODALMING,
 			                                     1, GALATZ, true, false,
 			                                     false, &numLocs);
-
+			printf("\nDEBUG: numLocs returned is %d\n\n", numLocs);
 			assert(numLocs == 5);
 			sortPlaces(locs, numLocs);
 			assert(locs[0] == BUCHAREST);
