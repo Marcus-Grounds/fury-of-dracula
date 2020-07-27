@@ -51,6 +51,7 @@ void updateGameScore(GameView gv, char *play, Player player);
 void encounterDrac(GameView gv, Player player);
 void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
 // TODO: ADD YOUR OWN STRUCTS HERE
+static int placeIdCmp(PlaceId x, PlaceId y);
 
 typedef struct playerData {
 	PlaceId *history; // Move history of player
@@ -103,11 +104,13 @@ GameView GvNew(char *pastPlays, Message messages[])
 	initScoreRound(new);
 	initPlayers(new);
 	initTraps(new);
+	
 	// initVampires(new);
 	new->immatureVampLocation = NOWHERE;
-
-	storePastPlays(new, pastPlays);
 	
+	storePastPlays(new, pastPlays);
+	storeTraps (new, pastPlays);
+
 	// todo DEBUG to delete
 	int last =  new->players[PLAYER_LORD_GODALMING].historyCount;
 	for (int curr = 0; curr < last; curr++) {
@@ -661,53 +664,91 @@ void initTraps(GameView gv) {
 
 void storeTraps(GameView gv, char *pastPlays) {
 
-	PlaceId * trapLoc = gv->traps.locations;
-	assert (trapLoc != NULL);
-	
-	int DracHistCount = gv->players[PLAYER_DRACULA].historyCount;
-	int trapCnt = 0;
-	
 	if (strcmp(pastPlays, "") == 0) return;
 
-	// Extracting each play from pastPlays string with strsep
+	PlaceId * trapLoc = gv->traps.locations;
+	PlaceId * trapEnc = malloc(sizeof(PlaceId) * gv->turn);
+	assert (trapLoc != NULL);
+	assert (trapEnc != NULL);
+
+	int DracHistCount = gv->players[PLAYER_DRACULA].historyCount;
+	int trapCnt = 0;
 	char *tmp = strdup(pastPlays);
 	char *play;
-
-	// FIND THE NUMBER OF TRAPS
-	while ((play = strsep(&tmp, " ")) != NULL) {
+	
+	
+	//CREATE A PLACEID ARRAY OF WHERE TRAPS WERE ENCOUTED
+	//ALSO FINDS TRAP COUNT
+	
+	int x = 0;
+	while ((play = strsep(&tmp, " ")) != NULL) { 
 		
-		if (play[0] != 'D') continue;
-		if (play[3] == 'T') trapCnt ++;
-		if (play[5] == 'M') trapCnt --;	
-		printf ("%d", trapCnt);
+		if (play[0] != 'D') {
+			if (play[3] == 'T') {
+				char placeAbbrev[3] = {play[1], play[2], '\0'};
+				PlaceId place = placeAbbrevToId(placeAbbrev);
+				trapEnc[x] = place;
+				x++;	
+			}
+			if (play[4] == 'T') {
+				char placeAbbrev[3] = {play[1], play[2], '\0'};
+				PlaceId place = placeAbbrevToId(placeAbbrev);
+				trapEnc[x] = place;
+				x++;	
+			}
+		} else {
+			if (play[3] == 'T') trapCnt ++;
+			if (play[5] == 'M') trapCnt --;	
+		}
 	}
 
 	free(tmp);
 
+	
 	tmp = strdup(pastPlays);
+	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
 	
 	int i = 0; int j = 0;
 	int trapSkipCnt = DracHistCount - trapCnt;
 	
-	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
-	
 	while ((play = strsep(&tmp, " ")) != NULL) {
-		
+			
 		if (play[0] != 'D') continue;
-		
+
+		int check = 0;
 		if (i >= trapSkipCnt && i < DracHistCount) { //SKIPS OVER TRAPS THAT HAVE VANISHED
 			
 			char placeAbbrev[3] = {play[1], play[2], '\0'};
-			PlaceId place = placeAbbrevToId(placeAbbrev);
+			PlaceId place = placeAbbrevToId(placeAbbrev);	
 			
-			trapLoc[j] = place;	
-			j ++;
+			for (int i = 0; i < x; i ++) {
+				
+				if (placeIdCmp(place, trapEnc[i]) != 0) continue;
+				
+				trapEnc[i] = NOWHERE;
+				trapCnt --;
+				check = 1;	
+				
+				break;
+			}		
+			
+			if (check != 1) {
+				trapLoc[j] = place; 
+				j ++;
+			} 
 		}
 		i ++;
 	}
 
 	gv->traps.trapCount = trapCnt;	
+	free(trapEnc);
 	free(tmp);
+}
+
+static int placeIdCmp(PlaceId x, PlaceId y) {
+	PlaceId p1 = x;
+	PlaceId p2 = y;
+	return p1 - p2;
 }
 
 
