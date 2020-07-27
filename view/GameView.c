@@ -264,7 +264,6 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 	reachableLocations = addPlaceId(from, reachableLocations, numReturnedLocs);
 	ConnList allConnections = MapGetConnections(gv->places, from);
 	int maxRailDistance = (player + round) % 4;
-	ConnList allConnections = MapGetConnections(gv->places, from);
 	for (ConnList curr = allConnections; curr != NULL; curr = curr->next){
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
 		if (isRepeat(reachableLocations, curr->p, numReturnedLocs)) continue;
