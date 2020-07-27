@@ -28,30 +28,26 @@
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initPlayers(GameView gv);
+void initScoreRound(GameView gv);
+void initTraps(GameView gv);
+
 void storePastPlays(GameView gv, char *pastPlays);
+void storeTraps(GameView gv, char *pastPlays);
 void storeMoveHistory(GameView gv, char *play, Player player);
+void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
+void updateGameScore(GameView gv, char *play, Player player);
+void vampireActivity(GameView gv, char *play, Player player);
+
 Player initialToPlayer(char initial);
 PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
-void vampireActivity(GameView gv, char *play, Player player);
-
-void initScoreRound(GameView gv);
-void PlayerInitLocation(GameView gv, char *pastPlays);
-void initTraps(GameView gv) ;
-void storeTraps(GameView gv, char *pastPlays);
-void updateGameScore(GameView gv, char *play, Player player);
-//void vampireInGeneral(GameView gv, Player player);
-void encounterDrac(GameView gv, Player player);
-void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
-// TODO: ADD YOUR OWN STRUCTS HERE
 static int placeIdCmp(PlaceId x, PlaceId y);
 
+// TODO: ADD YOUR OWN STRUCTS HERE
 typedef struct playerData {
 	PlaceId *history; // Move history of player
-	PlaceId location; // todo: is this needed?
 	int historyCount;	
 	int health;
-	
 } PlayerData;
 
 typedef struct traps {	
@@ -147,7 +143,6 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 	// If the player is a hunter
 	if (player != PLAYER_DRACULA) {
 		if (gv->players[player].health <= 0) {
-			gv->players[player].location = ST_JOSEPH_AND_ST_MARY; //TODO: is this needed?
 			return ST_JOSEPH_AND_ST_MARY;
 
 		}
