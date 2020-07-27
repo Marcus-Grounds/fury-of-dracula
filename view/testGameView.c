@@ -85,7 +85,8 @@ int main(void)
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == NOWHERE);
 
 		GvFree(gv);
-		printf("Test passed!\n");
+		printf("Test passed!\n"); 
+
 	}
 
 	{///////////////////////////////////////////////////////////////////
@@ -210,7 +211,7 @@ int main(void)
 		Message messages[6] = {};
 		GameView gv = GvNew(trail, messages);
 	
-		assert(GvGetHealth(gv, GAME_START_HUNTER_LIFE_POINTS));
+		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
 		
 		GvFree(gv);
 		printf("Test passed!\n");
