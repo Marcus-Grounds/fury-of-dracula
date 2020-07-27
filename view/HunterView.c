@@ -25,10 +25,12 @@
 
 struct hunterView {
 	GameView gv;
+	int round;
+	
+
 };
 
-////////////////////////////////////////////////////////////////////////
-// Constructor/Destructor
+
 
 HunterView HvNew(char *pastPlays, Message messages[])
 {
@@ -39,21 +41,22 @@ HunterView HvNew(char *pastPlays, Message messages[])
 		exit(EXIT_FAILURE);
 	}
 
+	new->gv = GvNew(pastPlays, messages);
+
 	return new;
 }
 
 void HvFree(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+
+
 	free(hv);
 }
 
-////////////////////////////////////////////////////////////////////////
-// Game State Information
 
 Round HvGetRound(HunterView hv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return GvGetRound(hv->gv);
 }
 
@@ -66,25 +69,25 @@ Player HvGetPlayer(HunterView hv)
 int HvGetScore(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return GvGetScore(hv->gv);
 }
 
 int HvGetHealth(HunterView hv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return GvGetHealth(hv->gv, player);
 }
 
 PlaceId HvGetPlayerLocation(HunterView hv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	
+	return GvGetPlayerLocation(hv->gv, player);
 }
 
 PlaceId HvGetVampireLocation(HunterView hv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return GvGetVampireLocation(hv->gv);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -93,7 +96,19 @@ PlaceId HvGetVampireLocation(HunterView hv)
 PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*round = 0;
+	bool *space = malloc(sizeof(bool *));
+	int *ptr = malloc(sizeof(int *));
+	
+	PlaceId *location_history = GvGetLocationHistory(hv->gv,  PLAYER_DRACULA, ptr,  space);
+
+	for (int i = *ptr; i >= 0; i--) {
+		if (location_history[i] != SEA_UNKNOWN && location_history[i] != CITY_UNKNOWN &&location_history[i] != 0) {
+			*round = i;
+			printf("LOC::%d   %d\n\n", i, location_history[i]);
+			return location_history[i];
+		}
+	}
+
 	return NOWHERE;
 }
 
@@ -104,6 +119,7 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 	*pathLength = 0;
 	return NULL;
 }
+
 
 ////////////////////////////////////////////////////////////////////////
 // Making a Move

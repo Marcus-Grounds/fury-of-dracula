@@ -25,7 +25,7 @@
 
 int main(void)
 {
-	{///////////////////////////////////////////////////////////////////
+	/*{///////////////////////////////////////////////////////////////////
 	
 		printf("Basic initialisation\n");
 		
@@ -117,7 +117,7 @@ int main(void)
 		printf("Test passed!\n");
 	}
 	
-	{///////////////////////////////////////////////////////////////////
+	*/{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
 
@@ -142,7 +142,6 @@ int main(void)
 		Round round = -1;
 		assert(HvGetLastKnownDraculaLocation(hv, &round) == GENEVA);
 		assert(round == 0);
-
 		HvFree(hv);
 		printf("Test passed\n");
 	}
