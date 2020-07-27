@@ -281,6 +281,14 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
 
+//todo: comment description for function
+bool isRepeat(PlaceId *reachableLocations, PlaceId newLocation, int *numReturnedLocs) {
+	for (int i = 0; i < (*numReturnedLocs); i++) {
+		if (reachableLocations[i] == newLocation) return true;
+	}
+	return false;
+}
+
 // todo: comment description for function
 PlaceId *addPlaceId(PlaceId new, PlaceId *reachableLocations,
 					int *numReturnedLocs) {
@@ -325,18 +333,18 @@ PlaceId *GvGetReachable(GameView gv, Player player, Round round,
 	int maxRailDistance = (player + round) % 4;
 	for (ConnList curr = allConnections; curr != NULL; curr = curr->next){
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
-		if (curr->type == ROAD || curr->type == BOAT) {
-			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
-		}
-		if (player == PLAYER_DRACULA || maxRailDistance == 0) continue;
-		if (curr->type == RAIL) {
-			addPlaceId(curr->p, reachableLocations, numReturnedLocs);
+		if (isRepeat(reachableLocations, curr->p, numReturnedLocs)) continue;
+		if (player != PLAYER_DRACULA && curr->type == RAIL && maxRailDistance > 0) {
+			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 			reachableLocations = getConnectionsByRail(gv, from, curr->p, 
 												      reachableLocations, 
 													  maxRailDistance, 
 													  MIN_BRANCHING_DISTANCE, 
 													  numReturnedLocs);
+			continue;
 		}
+		if (curr->type == ROAD || curr->type == BOAT)
+			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
 	}
 	return reachableLocations;
 }
@@ -351,7 +359,7 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 	reachableLocations = addPlaceId(from, reachableLocations, numReturnedLocs);
 	ConnList allConnections = MapGetConnections(gv->places, from);
 	int maxRailDistance = (player + round) % 4;
-	for (ConnList curr = allConnections; curr != NULL; curr = curr->next){
+	for (ConnList curr = allConnections; curr != NULL; curr = curr->next) {
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
 		if (isRepeat(reachableLocations, curr->p, numReturnedLocs)) continue;
 		if (player != PLAYER_DRACULA && rail && curr->type == RAIL && maxRailDistance > 0) {
