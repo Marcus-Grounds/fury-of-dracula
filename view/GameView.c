@@ -86,20 +86,13 @@ GameView GvNew(char *pastPlays, Message messages[])
 	}
 
 	new->places = MapNew();
-
 	initScoreRound(new);
 	initPlayers(new);
 	initTraps(new);
-	
 	new->immatureVampLocation = NOWHERE;
+
 	storePastPlays(new, pastPlays);
 	storeTraps (new, pastPlays);
-
-	// todo: DEBUG to delete
-	int last =  new->players[PLAYER_LORD_GODALMING].historyCount;
-	for (int curr = 0; curr < last; curr++) {
-		printf("LOCATION_STR: %d\n",new->players[PLAYER_LORD_GODALMING].history[curr]);
-	}
 
 	return new;
 }
@@ -293,11 +286,10 @@ bool isRepeat(PlaceId *reachableLocations, PlaceId newLocation, int *numReturned
 PlaceId *addPlaceId(PlaceId new, PlaceId *reachableLocations,
 					int *numReturnedLocs) {
 	(*numReturnedLocs)++;
-	PlaceId *oldArray = reachableLocations;
 	reachableLocations = realloc(reachableLocations, 
 								 (*numReturnedLocs) * sizeof(PlaceId));
+	assert(reachableLocations != NULL);
 	reachableLocations[(*numReturnedLocs) - 1] = new;
-	free(oldArray);
 	return reachableLocations;
 }
 
@@ -432,9 +424,8 @@ void storeMoveHistory(GameView gv, char *play, Player player) {
 	// Add new place into the player's move history
 	int count = (gv->players[player]).historyCount;
 	count++;
-	PlaceId *tmp = realloc(moveHistory, (sizeof(PlaceId) * count));
-	assert (tmp != NULL);
-	moveHistory = tmp;
+	moveHistory = realloc(moveHistory, (sizeof(PlaceId) * count));
+	assert (moveHistory != NULL);
 
 	moveHistory[count - 1] = place;
 
@@ -503,6 +494,7 @@ void initTraps(GameView gv) {
 	//Can scan through drac history to determine size of trap store / look for 'M'
 	//in actual trap store we check count value along side size of m
 	gv->traps.locations = malloc(sizeof(PlaceId) * gv->players[PLAYER_DRACULA].historyCount);
+	assert(gv->traps.locations != NULL);
 	gv->traps.trapCount = 0;
 }
 
@@ -550,7 +542,8 @@ void storeTraps(GameView gv, char *pastPlays) {
 	
 	tmp = strdup(pastPlays);
 	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
-	
+	assert(trapLoc != NULL);
+
 	int i = 0; int j = 0;
 	int trapSkipCnt = DracHistCount - trapCnt;
 	
