@@ -25,7 +25,7 @@
 
 int main(void)
 {
-		/*
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Basic initialisation\n");
@@ -87,7 +87,8 @@ int main(void)
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == NOWHERE);
 
 		GvFree(gv);
-		printf("Test passed!\n");
+		printf("Test passed!\n"); 
+
 	}
 
 	{///////////////////////////////////////////////////////////////////
@@ -221,7 +222,7 @@ int main(void)
 		printf("Test passed!\n");
 	}
 	
-	*/
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing a hunter 'dying'\n");
@@ -252,7 +253,7 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	/*
+	
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Testing Dracula doubling back to Castle Dracula\n");
@@ -438,7 +439,6 @@ int main(void)
 			PlaceId *locs = GvGetReachableByType(gv, PLAYER_LORD_GODALMING,
 			                                     1, GALATZ, true, false,
 			                                     false, &numLocs);
-
 			assert(numLocs == 5);
 			sortPlaces(locs, numLocs);
 			assert(locs[0] == BUCHAREST);
@@ -504,7 +504,7 @@ int main(void)
 
 		GvFree(gv);
 		printf("Test passed!\n");
-	}*/
+	}
 
 	return EXIT_SUCCESS;
 }
