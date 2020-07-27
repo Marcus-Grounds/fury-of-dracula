@@ -38,12 +38,6 @@ void vampireActivity(GameView gv, char *play, Player player);
 
 void initScoreRound(GameView gv);
 void PlayerInitLocation(GameView gv, char *pastPlays);
-//PlaceId GetCurrentLocation(GameView gv, Player player);
-// bool isDracRevealed(GameView gv, Player player);
-// PlaceId vampirePlaced(GameView gv);
-// bool vampireMatures(GameView gv);
-// bool vampireVanquished(GameView gv, Player player);
-// void initVampires(GameView gv);
 void initTraps(GameView gv) ;
 void storeTraps(GameView gv, char *pastPlays);
 void updateGameScore(GameView gv, char *play, Player player);
@@ -55,18 +49,11 @@ static int placeIdCmp(PlaceId x, PlaceId y);
 
 typedef struct playerData {
 	PlaceId *history; // Move history of player
-	PlaceId location; // is this needed?
+	PlaceId location; // todo: is this needed?
 	int historyCount;	
 	int health;
 	
 } PlayerData;
-
-/*typedef struct vampire {
-	bool is_revealed;
-	bool is_alive;
-	bool has_matured;
-	PlaceId location; 
-} Vampire;*/
 
 typedef struct traps {	
 	PlaceId *locations;
@@ -76,7 +63,6 @@ typedef struct traps {
 struct gameView {
 	// TODO: ADD FIELDS HERE
 	PlayerData players[NUM_PLAYERS];
-	// Vampire vampires;
 	PlaceId immatureVampLocation;
 	Map places;
 	Traps traps;
@@ -84,7 +70,7 @@ struct gameView {
 	char *plays;
 	int turn;
 	int score;
-	int round; // todo check if needed
+	int round; // todo: check if needed
 	bool made_turn;
 	bool if_drac_isrev;
 };
@@ -110,7 +96,7 @@ GameView GvNew(char *pastPlays, Message messages[])
 	storePastPlays(new, pastPlays);
 	storeTraps (new, pastPlays);
 
-	// todo DEBUG to delete
+	// todo: DEBUG to delete
 	int last =  new->players[PLAYER_LORD_GODALMING].historyCount;
 	for (int curr = 0; curr < last; curr++) {
 		printf("LOCATION_STR: %d\n",new->players[PLAYER_LORD_GODALMING].history[curr]);
@@ -158,9 +144,6 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 	//If a turn has not been made, return NOWHERE
 	if (gv->players[player].historyCount == 0) return NOWHERE;
 
-	// TODO getCurrentLocation function not needed?
-	//  PlaceId location = GetCurrentLocation(gv, player); 
-
 	int moveCount = gv->players[player].historyCount;
 	PlaceId *moveHistory = (gv->players[player]).history;
 	PlaceId currMove = moveHistory[moveCount - 1];
@@ -169,8 +152,7 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 	// If the player is a hunter
 	if (player != PLAYER_DRACULA) {
 		if (gv->players[player].health <= 0) {
-			gv->players[player].location = ST_JOSEPH_AND_ST_MARY; //TODO is this needed?
-			// gv->players[player].history[last_move - 1] = ST_JOSEPH_AND_ST_MARY;
+			gv->players[player].location = ST_JOSEPH_AND_ST_MARY; //TODO: is this needed?
 			return ST_JOSEPH_AND_ST_MARY;
 
 		}
@@ -178,8 +160,6 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 
 		//If the player is the Dracula
 	} else {
-		// bool dracRevealed = isDracRevealed(gv, player); 
-		//todo: dont need to care if dracrevealed? -> will be in string given to player?? check forum
 		PlaceId location;
 		if (currMove == TELEPORT) {
 			return CASTLE_DRACULA;
@@ -192,17 +172,6 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 		}
 		
 		return location;
-		/*if (dracRevealed == true) {
-			return location;
-		} else {
-			//todo
-			PlaceType locationType = placeIdToType(location);
-			if (locationType == SEA) {
-				return SEA_UNKNOWN;
-			} else if (locationType == LAND) {
-				return CITY_UNKNOWN;
-			}
-		}*/
 	}
 }
 
@@ -430,7 +399,7 @@ void storePastPlays(GameView gv, char *pastPlays) {
 		currPlayer = initialToPlayer(play[0]);
 
 		gv->turn++;
-		gv->made_turn = true; //TODO check if needed
+		gv->made_turn = true; //todo: check if needed
 
 		// Extracting information from current play & storing into GameView data structure:
 		gv->round = GvGetRound(gv);
@@ -521,6 +490,7 @@ void initScoreRound(GameView gv) {
 	gv->made_turn = true;
 }	
 
+// todo: comment description for this function
 void initTraps(GameView gv) {
 	//Can scan through drac history to determine size of trap store / look for 'M'
 	//in actual trap store we check count value along side size of m
@@ -528,6 +498,7 @@ void initTraps(GameView gv) {
 	gv->traps.trapCount = 0;
 }
 
+// todo: comment description for this function
 void storeTraps(GameView gv, char *pastPlays) {
 	if (strcmp(pastPlays, "") == 0) return;
 
@@ -615,6 +586,7 @@ static int placeIdCmp(PlaceId x, PlaceId y) {
 	return p1 - p2;
 }
 
+// todo: comment description for this function
 void updateGameScore(GameView gv, char *play, Player player) {
 	if (player == PLAYER_DRACULA) {
 		if (play[5] == 'V') {
@@ -629,6 +601,7 @@ void updateGameScore(GameView gv, char *play, Player player) {
 	}
 }
 
+// todo: comment description for this function
 void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player) {
 	
 	int health = (gv->players[player]).health;
