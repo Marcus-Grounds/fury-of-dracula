@@ -28,7 +28,6 @@
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initPlayers(GameView gv);
-PlaceId *newMoveHistory(void);
 void storePastPlays(GameView gv, char *pastPlays);
 void storeMoveHistory(GameView gv, char *play, Player player);
 Player initialToPlayer(char initial);
@@ -367,21 +366,11 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 void initPlayers(GameView gv) {
 	for (Player curr = PLAYER_LORD_GODALMING; curr <= PLAYER_DRACULA; curr++) {
 		(gv->players[curr]).historyCount = 0;
-		(gv->players[curr]).history = newMoveHistory(); 
+		(gv->players[curr]).history = NULL;
 		(gv->players[curr]).health = GAME_START_HUNTER_LIFE_POINTS; 
 	}
 	(gv->players[PLAYER_DRACULA]).health = GAME_START_BLOOD_POINTS;
 	return;
-}
-
-// Creates new empty array to store player move history
-PlaceId *newMoveHistory(void) {
-	PlaceId *new = malloc(sizeof(*new)); 
-	if (new == NULL) {
-		fprintf(stderr, "Couldn't allocate move history array\n");
-		exit(EXIT_FAILURE);
-	}
-	return new;
 }
 
 // TODO: need to free move history (function?)
@@ -416,7 +405,7 @@ void storePastPlays(GameView gv, char *pastPlays) {
 void storeMoveHistory(GameView gv, char *play, Player player) {
 	
 	PlaceId *moveHistory = (gv->players[player]).history;
-	assert (moveHistory != NULL);
+	//assert (moveHistory != NULL);
 
 	char placeAbbrev[3] = {play[1], play[2], '\0'};
 	PlaceId place = placeAbbrevToId(placeAbbrev);
