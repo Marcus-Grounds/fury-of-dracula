@@ -485,9 +485,11 @@ void initTraps(GameView gv) {
 
 // todo: comment description for this function
 void storeTraps(GameView gv, char *pastPlays) {
+	
 	if (strcmp(pastPlays, "") == 0) return;
 
 	PlaceId * trapLoc = gv->traps.locations;
+	PlaceId * DracHist = gv->players[PLAYER_DRACULA].history;
 	PlaceId * trapEnc = malloc(sizeof(PlaceId) * gv->turn);
 	assert (trapLoc != NULL);
 	assert (trapEnc != NULL);
@@ -539,7 +541,14 @@ void storeTraps(GameView gv, char *pastPlays) {
 		if (i >= trapSkipCnt && i < DracHistCount) { //SKIPS OVER TRAPS THAT HAVE VANISHED
 			
 			char placeAbbrev[3] = {play[1], play[2], '\0'};
-			PlaceId place = placeAbbrevToId(placeAbbrev);	
+			PlaceId place = placeAbbrevToId(placeAbbrev);
+
+			if (place == HIDE) {
+				place = locationOfHide(DracHist, i, place);
+			
+			} else if (place >= DOUBLE_BACK_1 && place <= DOUBLE_BACK_5) {
+				place = locationOfDoubleBack(DracHist, i, place);
+			}
 			
 			for (int i = 0; i < x; i ++) {
 				
