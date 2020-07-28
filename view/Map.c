@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sysexits.h>
-
+#include <limits.h>
 #include "Map.h"
 #include "Places.h"
 
@@ -32,7 +32,7 @@ static inline bool isSentinelEdge(Connection c);
 
 static ConnList connListInsert(ConnList l, PlaceId v, TransportType type);
 static bool connListContains(ConnList l, PlaceId v, TransportType type);
-
+void dijkstra(Map m, PlaceId src);
 ////////////////////////////////////////////////////////////////////////
 
 /** Creates a new map. */
@@ -194,3 +194,58 @@ ConnList MapGetConnections(Map m, PlaceId p)
 }
 
 ////////////////////////////////////////////////////////////////////////
+bool adjacent (Map m, PlaceId u, PlaceId v) {
+
+	ConnList new = m->connections[u];
+	while (new != NULL) {
+		if (new->p == v) return true;
+		new = new->next;
+	}
+
+	return false;
+}
+
+
+PlaceId getLowestCostVertex(Map m, int *dist, bool *vSet) {
+    // Initialize min value
+    int min = INT_MAX, min_index;
+    for (int v = 0; v < m -> nV; v++) {
+        if (vSet[v] == false && dist[v] <= min) {
+            min = dist[v];
+            min_index = v;
+        }
+    }
+   return min_index;
+}
+
+void dijkstra(Map m, PlaceId src) {
+    bool vSet[m -> nV]; 
+    int dist[m->nV];  
+    int pred[m->nV];
+    // Initialising all 3 arrays
+    for (int i = 0; i < m -> nV; i++) {
+        dist[i] = INT_MAX;
+        vSet[i] = false;
+        pred[i] = -1;
+    }
+
+    dist[src] = 0;
+	for (int count = 0; count < m->nV - 1; count++) {
+        // Pick the minimum distance vertex from the set of vertices not yet processed
+        int u = getLowestCostVertex(m, dist, vSet);
+        // Mark the chosen vertex as included
+        vSet[u] = true;
+
+		for (int v = 0; v < m -> nV; v++) {
+            // Look at all the unincluded neighbours of the newly included vertex 
+            if (!vSet[v] && adjacent(m, u, v)) {
+                // Update dist[v] if the total weight of the path, dist[u] + weight of u-v, 
+                // is smaller than value of dist[v] we currently have
+                if (dist[u] != INT_MAX && dist[u]+ m->connections[u]->type < dist[v]) {
+                    dist[v] = dist[u] + m->connections[u]->type;
+                    pred[v] = u;
+                }
+            }
+		}
+	}
+}

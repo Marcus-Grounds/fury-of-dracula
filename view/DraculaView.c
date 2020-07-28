@@ -22,6 +22,7 @@
 // TODO: ADD YOUR OWN STRUCTS HERE
 #define isDoubleBack(move) (move == DOUBLE_BACK_1 || move == DOUBLE_BACK_2 || move == DOUBLE_BACK_3 || move == DOUBLE_BACK_4 || move == DOUBLE_BACK_5)
 #define CAN_DRACULA_RAIL false 
+
 struct draculaView {
 	GameView gv;
 };
@@ -38,6 +39,7 @@ DraculaView DvNew(char *pastPlays, Message messages[])
 		exit(EXIT_FAILURE);
 	}
 
+	new->gv = GvNew(pastPlays, messages);
 	return new;
 }
 
@@ -59,32 +61,32 @@ Round DvGetRound(DraculaView dv)
 int DvGetScore(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return GvGetScore(dv->gv);
 }
 
 int DvGetHealth(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return GvGetHealth(dv->gv, player);
 }
 
 PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return GvGetPlayerLocation(dv->gv, player);
 }
 
 PlaceId DvGetVampireLocation(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return GvGetVampireLocation(dv->gv);
 }
 
 PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numTraps = 0;
-	return NULL;
+	PlaceId *TrapLocations = GvGetTrapLocations(dv->gv, numTraps);
+	return TrapLocations;
 }
 
 ////////////////////////////////////////////////////////////////////////
