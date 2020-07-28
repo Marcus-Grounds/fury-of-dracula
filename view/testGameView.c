@@ -433,6 +433,44 @@ int main(void)
 		GameView gv = GvNew(trail, messages);
 
 		{
+		printf("\tChecking Barcelona connections "
+			    "(Dr Seward, Round 2)\n");
+			int numLocs = -1;
+			PlaceId *locs = GvGetReachable(gv, PLAYER_DR_SEWARD,
+			                            	2, BARCELONA, &numLocs);
+
+			assert(numLocs == 10);
+			sortPlaces(locs, numLocs);
+			assert(locs[0] == ALICANTE);
+			assert(locs[1] == BARCELONA);
+			assert(locs[2] == BORDEAUX);
+			assert(locs[3] == LISBON);
+			assert(locs[4] == MADRID);
+			assert(locs[5] == MEDITERRANEAN_SEA);
+			assert(locs[6] == PARIS);
+			assert(locs[7] == SANTANDER);
+			assert(locs[8] == SARAGOSSA);
+			assert(locs[9] == TOULOUSE);
+			free(locs);
+		}
+
+		{
+		printf("\tChecking Alicante connections "
+			    "(Dracula, Round 1)\n");
+			int numLocs = -1;
+			PlaceId *locs = GvGetReachable(gv, PLAYER_DRACULA,
+			                            	1, ALICANTE, &numLocs);
+			assert(numLocs == 5);
+			sortPlaces(locs, numLocs);
+			assert(locs[0] == ALICANTE);
+			assert(locs[1] == GRANADA);
+			assert(locs[2] == MADRID);
+			assert(locs[3] == MEDITERRANEAN_SEA);
+			assert(locs[4] == SARAGOSSA);
+			free(locs);
+		}
+
+		{
 			printf("\tChecking Galatz road connections "
 			       "(Lord Godalming, Round 1)\n");
 			int numLocs = -1;
