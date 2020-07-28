@@ -163,9 +163,72 @@ PlaceId *addRealPlaces(PlaceId *reachableLocations, PlaceId *validMoves,
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	int numTrail = 0; 
+	bool trailCanFree = false;
+	PlaceId *trail = GvGetLastMoves(dv->gv, PLAYER_DRACULA, 6, &numTrail, &trailCanFree);
+	
+	Round round = GvGetRound(dv->gv);
+	PlaceId currLoc = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA);
+	int numReachable = 0;
+	PlaceId *reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round, currLoc, &numReachable);
+
+	int numHistory = 0; 
+	bool historyCanFree = false;
+	PlaceId *locHistory = GvGetLocationHistory(dv->gv, PLAYER_DRACULA, &numHistory, &historyCanFree);
+
+	// Adding the reachable move into validMoves if it is not in the trail
 	*numReturnedMoves = 0;
-	return NULL;
+	PlaceId *validMoves = NULL;
+	for (int i = 0; i < numReachable; i++) {
+		if (DvIsRepeat(trail, reachable[i], &numTrail)) continue;
+
+		(*numReturnedMoves)++;
+		validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
+		assert (validMoves != NULL);
+		validMoves[(*numReturnedMoves) - 1] = reachable[i];
+	}
+
+	// Checking if DOUBLE_BACK and HIDE moves have already occured in the trail
+	bool doubleBackValid = true;
+	bool hideValid = true;
+	for (int i = 0; i < numTrail; i++) {
+		if ((trail[i] >= DOUBLE_BACK_1) && (trail[i] <= DOUBLE_BACK_5)) {
+			doubleBackValid = false;
+		}
+		if (trail[i] == HIDE) hideValid = false;
+	}
+
+	// Adding DOUBLE_BACK moves into trail if it has not appeared in the trail, 
+	// if it is possible to (trail is long enough), and if the location of the DOUBLE_BACK move is reachable
+	if (doubleBackValid == true) {
+		for (PlaceId curr = DOUBLE_BACK_1; curr <= DOUBLE_BACK_5; curr++) {
+			if (numTrail <= (curr - DOUBLE_BACK_1)) break;
+
+			// Finding the location of the DOUBLE_BACK move
+			PlaceId doubleBackLoc = locHistory[numHistory - 1 - (curr - DOUBLE_BACK_1)];
+
+			if (DvIsRepeat(reachable, doubleBackLoc, &numReachable)) {
+				(*numReturnedMoves)++;
+				validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
+				assert (validMoves != NULL);
+				validMoves[(*numReturnedMoves) - 1] = curr;
+			}
+		}
+	}
+
+	// Adding HIDE to validMoves if it has not appeared in trail, if Dracula's current location is not
+	// the SEA and if there has been more than 1 move in the trail
+	if ((hideValid == true) && (placeIdToType(currLoc) != SEA) && (numTrail > 0)) { 
+		(*numReturnedMoves)++;
+		validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
+		assert (validMoves != NULL);
+		validMoves[(*numReturnedMoves) - 1] = HIDE;
+	}
+
+	free(reachable);
+	if (trailCanFree == true) free(trail);
+	if (historyCanFree == true) free(locHistory);
+	return validMoves;
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
