@@ -226,11 +226,11 @@ void dijkstra(Map m, PlaceId src) {
     for (int i = 0; i < m -> nV; i++) {
         dist[i] = INT_MAX;
         vSet[i] = false;
-        pred[i] = -1;   // NO_PRED is #defined as -1
+        pred[i] = -1;
     }
-    // The distance to itself is 0
+
     dist[src] = 0;
-	for (int count = 0; count < m -> nV - 1; count++) {
+	for (int count = 0; count < m->nV - 1; count++) {
         // Pick the minimum distance vertex from the set of vertices not yet processed
         int u = getLowestCostVertex(m, dist, vSet);
         // Mark the chosen vertex as included

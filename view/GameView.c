@@ -527,7 +527,6 @@ void storeTraps(GameView gv, char *pastPlays) {
 	
 	tmp = strdup(pastPlays);
 	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
-	assert(trapLoc != NULL);
 
 	int i = 0; int j = 0;
 	int trapSkipCnt = DracHistCount - trapCnt;
