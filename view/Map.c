@@ -218,6 +218,7 @@ PlaceId getLowestCostVertex(Map m, int *dist, bool *vSet) {
    return min_index;
 }
 
+/*
 void dijkstra(Map m, PlaceId src) {
     bool vSet[m -> nV]; 
     int dist[m->nV];  
@@ -249,3 +250,4 @@ void dijkstra(Map m, PlaceId src) {
 		}
 	}
 }
+*/
