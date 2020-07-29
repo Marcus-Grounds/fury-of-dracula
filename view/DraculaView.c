@@ -179,7 +179,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 	*numReturnedMoves = 0;
 	PlaceId *validMoves = NULL;
 	for (int i = 0; i < numReachable; i++) {
-		if (DvIsRepeat(trail, reachable[i], &numTrail)) continue;
+		if (DvIsRepeat(reachable[i], trail, &numTrail)) continue;
 
 		(*numReturnedMoves)++;
 		validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
@@ -206,7 +206,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 			// Finding the location of the DOUBLE_BACK move
 			PlaceId doubleBackLoc = locHistory[numHistory - 1 - (curr - DOUBLE_BACK_1)];
 
-			if (DvIsRepeat(reachable, doubleBackLoc, &numReachable)) {
+			if (DvIsRepeat(doubleBackLoc, reachable, &numReachable)) {
 				(*numReturnedMoves)++;
 				validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
 				assert (validMoves != NULL);
@@ -217,7 +217,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 	// Adding HIDE to validMoves if it has not appeared in trail, if Dracula's current location is not
 	// the SEA and if there has been more than 1 move in the trail
-	if ((hideValid == true) && (placeIdToType(currLoc) != SEA) && (numTrail > 0)) { 
+	if ((hideValid == true) && (!placeIsSea(currLoc)) && (numTrail > 0)) { 
 		(*numReturnedMoves)++;
 		validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
 		assert (validMoves != NULL);
