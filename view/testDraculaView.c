@@ -25,7 +25,7 @@
 
 int main(void)
 {
-	/*{///////////////////////////////////////////////////////////////////
+	{///////////////////////////////////////////////////////////////////
 	
 		printf("Test for basic functions, "
 			   "just before Dracula's first move\n");
@@ -51,6 +51,7 @@ int main(void)
 		int numTraps = -1;
 		PlaceId *traps = DvGetTrapLocations(dv, &numTraps);
 		assert(numTraps == 0);
+		//printf("%d\n", traps[1]);
 		free(traps);
 
 		printf("Test passed!\n");
@@ -136,7 +137,7 @@ int main(void)
 		
 		printf("Test passed!\n");
 		DvFree(dv);
-	} */
+	} 
 	
 	{///////////////////////////////////////////////////////////////////
 	

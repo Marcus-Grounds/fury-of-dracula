@@ -170,7 +170,9 @@ PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	*numTraps = gv->traps.trapCount;
-	return gv->traps.locations;
+	PlaceId *traps = malloc(sizeof(PlaceId) * (*numTraps));
+	traps = memcpy(traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
+	return traps;
 }
 
 ////////////////////////////////////////////////////////////////////////

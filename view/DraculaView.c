@@ -61,13 +61,13 @@ Round DvGetRound(DraculaView dv)
 int DvGetScore(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return GvGetScore(dv->gv);
 }
 
 int DvGetHealth(DraculaView dv, Player player)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return GvGetHealth(dv->gv, player);
 }
 
 PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
@@ -79,14 +79,15 @@ PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
 PlaceId DvGetVampireLocation(DraculaView dv)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	return GvGetVampireLocation(dv->gv);
 }
 
 PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	*numTraps = 0;
-	return NULL;
+	
+	return GvGetTrapLocations(dv->gv, numTraps);
 }
 
 ////////////////////////////////////////////////////////////////////////
