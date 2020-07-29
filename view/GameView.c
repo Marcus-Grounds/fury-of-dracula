@@ -179,6 +179,7 @@ PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 PlaceId *GvGetMoveHistory(GameView gv, Player player,
                           int *numReturnedMoves, bool *canFree)
 {
+	*numReturnedMoves = 0;
 	*numReturnedMoves = (gv->players[player]).historyCount;
 	*canFree = false;
 	return (gv->players[player]).history;
@@ -187,6 +188,7 @@ PlaceId *GvGetMoveHistory(GameView gv, Player player,
 PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
                         int *numReturnedMoves, bool *canFree)
 {
+	*numReturnedMoves = 0;
 	if (numMoves >= (gv->players[player]).historyCount) {
 		return GvGetMoveHistory(gv, player, numReturnedMoves, canFree);
 	}
@@ -210,6 +212,7 @@ PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
 PlaceId *GvGetLocationHistory(GameView gv, Player player,
                               int *numReturnedLocs, bool *canFree)
 {
+	*numReturnedLocs = 0;
 	if (player != PLAYER_DRACULA) {
 		// TODO: dont have to care abt teleporting to hospital?
 		return GvGetMoveHistory(gv, player, numReturnedLocs, canFree);
@@ -230,11 +233,11 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 			locHistory[i] = locationOfHide(moveHistory, i, currMove);
 		} else if ((currMove >= DOUBLE_BACK_1) && (currMove <= DOUBLE_BACK_5)) {
 			locHistory[i] = locationOfDoubleBack(moveHistory, i, currMove);
-			gv->players[PLAYER_DRACULA].historyCount = 1;
 		} else {
 			locHistory[i] = currMove;
 		}
 	}
+
 	*numReturnedLocs = moveCount;
 	*canFree = true;
 	return locHistory;
@@ -243,6 +246,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
                             int *numReturnedLocs, bool *canFree)
 {
+	*numReturnedLocs = 0;
 	PlaceId *locHistory = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
 	if (numLocs >= (*numReturnedLocs)) {
 		return locHistory;

@@ -111,7 +111,7 @@ int main(void)
 		
 		printf("Test passed!\n");
 		DvFree(dv);
-	}*/
+	}
 
 	{///////////////////////////////////////////////////////////////////
 	
@@ -136,7 +136,7 @@ int main(void)
 		
 		printf("Test passed!\n");
 		DvFree(dv);
-	}
+	} */
 	
 	{///////////////////////////////////////////////////////////////////
 	
@@ -153,12 +153,14 @@ int main(void)
 		DraculaView dv = DvNew(trail, messages);
 ////////////////////////////////////////////////////
 //
-/*		int numMoves = -1;
+		// todo: debug to delete START
+		int numMoves = -1;
 		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-		printf("numMoves = %d\n", numMoves);				// Prints 4
+		printf("numMoves = %d\n", numMoves); 			// Prints 4
 		moves = DvGetValidMoves(dv, &numMoves);
 		printf("numMoves = %d\n", numMoves);				// Prints 8
-		free(moves);*/
+		free(moves);
+		// todo: debug to delete END
 
 		int numLocs = -1;
 		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
@@ -169,10 +171,11 @@ int main(void)
 		assert(locs[2] == GALATZ);
 		assert(locs[3] == SOFIA);							// Fails if DvGetValidMoves is called before
 															// Succeeds if not called.
-
-/*		moves = DvGetValidMoves(dv, &numMoves);
+		// todo: debug to delete START
+		moves = DvGetValidMoves(dv, &numMoves);
 		printf("numMoves = %d\n", numMoves);				// Prints 8
-		free (moves);*/
+		free (moves);
+		// todo: debug to delete END
 		free(locs);
 
 	}
