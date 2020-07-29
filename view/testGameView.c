@@ -540,6 +540,18 @@ int main(void)
 			free(locs);
 		}
 
+		{
+			printf("\tChecking Bucharest boat connections (none)\n");
+			int numLocs = -1;
+			PlaceId *locs = GvGetReachableByType(gv, PLAYER_DRACULA,
+			                                     1, BUCHAREST, false, false,
+			                                     true, &numLocs);
+			
+			assert(numLocs == 1);
+			assert(locs[0] == BUCHAREST);
+			free(locs);
+		}
+
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
