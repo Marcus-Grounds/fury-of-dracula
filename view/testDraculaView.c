@@ -287,6 +287,24 @@ int main(void)
 		printf("Test passed!\n");
 		DvFree(dv);
 	}
+	
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves when Dracula has not made any moves\n");
+		
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+		assert(numMoves == 0);
+		assert (moves == NULL);
+		printf("Test passed!\n");
+		DvFree(dv);
+	} 
 
 	return EXIT_SUCCESS;
 }

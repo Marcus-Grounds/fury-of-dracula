@@ -166,9 +166,11 @@ PlaceId *addRealPlaces(PlaceId *reachableLocations, PlaceId *validMoves,
 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
+	*numReturnedMoves = 0;
 	int numTrail = 0; 
 	bool trailCanFree = false;
 	PlaceId *trail = GvGetLastMoves(dv->gv, PLAYER_DRACULA, TRAIL_SIZE, &numTrail, &trailCanFree);
+	if (numTrail == 0) return NULL;
 	
 	Round round = GvGetRound(dv->gv);
 	PlaceId currLoc = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA);
@@ -180,7 +182,6 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 	PlaceId *locHistory = GvGetLocationHistory(dv->gv, PLAYER_DRACULA, &numHistory, &historyCanFree);
 
 	// Adding the reachable move into validMoves if it is not in the trail
-	*numReturnedMoves = 0;
 	PlaceId *validMoves = NULL;
 	for (int i = 0; i < numReachable; i++) {
 		if (DvIsRepeat(reachable[i], trail, &numTrail)) continue;
