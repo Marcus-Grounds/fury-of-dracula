@@ -290,7 +290,8 @@ int main(void)
 	
 	{///////////////////////////////////////////////////////////////////
 	
-		printf("Test for DvGetValidMoves when Dracula has not made any moves\n");
+		printf("Test for DvGetValidMoves 1\n"); 
+		printf("Case: Dracula has not made any moves\n");
 		
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE....";
@@ -305,6 +306,89 @@ int main(void)
 		printf("Test passed!\n");
 		DvFree(dv);
 	} 
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves 2\n"); 
+		printf("Case: Dracula has made 1 location move at city\n");
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DLS.V.. "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+		
+		assert(numMoves == 6);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == ATLANTIC_OCEAN);
+		assert(moves[1] == CADIZ);
+		assert(moves[2] == MADRID);
+		assert(moves[3] == SANTANDER);
+		assert(moves[4] == HIDE);
+		assert(moves[5] == DOUBLE_BACK_1);
+		free(moves);
+		
+		printf("Test passed!\n");
+		DvFree(dv);
+		
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves 2\n"); 
+		printf("Case: Dracula has made 1 location move at sea\n");
+		
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DBS.V.. "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 4);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == CONSTANTA);
+		assert(moves[1] == IONIAN_SEA);
+		assert(moves[2] == VARNA);
+		assert(moves[3] == DOUBLE_BACK_1);
+		free(moves);
+		
+		printf("Test passed!\n");
+		DvFree(dv);
+	} 
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves when Dracula has made 2 location moves at city\n");
+		
+	} 
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves when Dracula has made 2 moves including HIDE\n");
+		
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves when Dracula has made 2 moves including DOUBLE_BACK_1\n");
+		
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves when Dracula has no adjacent locations to DOUBLE_BACK to\n");
+		
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Test for DvGetValidMoves when Dracula has a short trail\n");
+		
+	} 
+	
 
 	return EXIT_SUCCESS;
 }
