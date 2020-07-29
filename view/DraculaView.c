@@ -220,7 +220,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 	// Adding HIDE to validMoves if it has not appeared in trail, if Dracula's current location is not
 	// the SEA and if there has been more than 1 move in the trail
-	if ((hideValid == true) && (placeIdToType(currLoc) != SEA) && (numTrail > 0)) { 
+	if ((hideValid == true) && (!placeIsSea(currLoc)) && (numTrail > 0)) { 
 		(*numReturnedMoves)++;
 		validMoves = realloc(validMoves, sizeof(PlaceId) * (*numReturnedMoves));
 		assert (validMoves != NULL);
