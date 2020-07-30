@@ -13,25 +13,26 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "queue.h"
 
 #include "Game.h"
 #include "GameView.h"
 #include "HunterView.h"
 #include "Map.h"
 #include "Places.h"
-// add your own #includes here
 
-// TODO: ADD YOUR OWN STRUCTS HERE
+
+
+
+////////////////////////////////////////////////////////////////////////
+// Taken from testUtils.h to make HvGetShortestPathTo pass tests.
+void HvSortPlaces(PlaceId *places, int numPlaces);
 
 struct hunterView {
 	GameView gv;
 	int round;
-	
-
 };
-
-
-
+////////////////////////////////////////////////////////////////////////
 HunterView HvNew(char *pastPlays, Message messages[])
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
@@ -112,28 +113,75 @@ PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 	return NOWHERE;
 }
 
+PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
+					int *numReturnedLocs) {
+	(*numReturnedLocs)++;
+	reachableLocations = realloc(reachableLocations, 
+								 (*numReturnedLocs) * sizeof(PlaceId));
+	assert(reachableLocations != NULL);
+	reachableLocations[(*numReturnedLocs) - 1] = new;
+	return reachableLocations;
+}
+
 PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
                              int *pathLength)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	Map m = MapNew();
-	MapShow(m);
 	*pathLength = 0;
-	return NULL;
+	PlaceId src = HvGetPlayerLocation(hv, hunter);
+	Round round = HvGetRound(hv);
+
+	// Initialise visited array to 0;
+	PlaceId visited[NUM_REAL_PLACES];
+	for (int i = 0; i < NUM_REAL_PLACES; i++) {
+		visited[i] = NOWHERE;
+	}
+	visited[src] = src;
+
+	Queue q = createQueue();
+
+	enqueue(q, src);
+	while (!queueIsEmpty(q)) {
+		PlaceId intermediate = dequeue(q);
+		if (intermediate != dest) {
+			PlaceId roundsFromSrc = 0;
+			for (PlaceId inBetween = intermediate; inBetween != src; inBetween = visited[inBetween]) {
+				roundsFromSrc++;
+			}
+			int numLocs = -1;
+			PlaceId *intermediateConns = GvGetReachable(hv->gv, hunter, round + roundsFromSrc, intermediate, &numLocs);
+			HvSortPlaces(intermediateConns, numLocs);
+			for (int i = 0; i < numLocs; i++) {
+				if (visited[intermediateConns[i]] == NOWHERE) {
+					enqueue(q, intermediateConns[i]);
+					visited[intermediateConns[i]] = intermediate;
+				}
+			}
+		}
+	}
+
+	// Find shortest path in reverse order
+	PlaceId *shortestReversePath = NULL;
+	int reversePathLength = 0;
+	for (PlaceId intermediate = dest; intermediate != src; intermediate = visited[intermediate]) {
+		shortestReversePath = HvAddPlaceId(intermediate, shortestReversePath, &reversePathLength);
+	}
+
+	// Find shortest path in correct order
+	PlaceId *shortestPath = NULL;
+	for (int i = reversePathLength - 1; i >= 0; i--) {
+		shortestPath = HvAddPlaceId(shortestReversePath[i], shortestPath, pathLength);
+	}
+
+	free(shortestReversePath);
+	return shortestPath;
 }
 
 
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
-bool canRevealDracula(HunterView hv) {
-	PlaceId draculaLoc = GvGetPlayerLocation(hv->gv, PLAYER_DRACULA);
-	if (draculaLoc == CASTLE_DRACULA) return true;
-	for (Player i = PLAYER_LORD_GODALMING; i < PLAYER_MINA_HARKER; i++) {
-		if (draculaLoc == GvGetPlayerLocation(hv->gv, i)) return true; 
-	}
-	return false;
-}
 
+// Returns all reachable locations for given hunter player, and NULL
+// if player hasn't made a move.
 PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 {
 	*numReturnedLocs = 0;
@@ -145,6 +193,7 @@ PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 	return GvGetReachable(hv->gv, player, round, location, numReturnedLocs);
 }
 
+// Returns all reachable locations for current player, 
 PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
                              bool boat, int *numReturnedLocs)
 {
@@ -190,4 +239,14 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 ////////////////////////////////////////////////////////////////////////
 // Your own interface functions
 
-// TODO
+// Functions used to sort places in numeric order.
+// Taken from testUtils.c to make HvGetShortestPathTo pass tests.
+int HvPlaceIdCmp(const void *ptr1, const void *ptr2) {
+	PlaceId p1 = *(PlaceId *)ptr1;
+	PlaceId p2 = *(PlaceId *)ptr2;
+	return p1 - p2;
+}
+
+void HvSortPlaces(PlaceId *places, int numPlaces) {
+	qsort(places, (size_t)numPlaces, sizeof(PlaceId), HvPlaceIdCmp);
+}
