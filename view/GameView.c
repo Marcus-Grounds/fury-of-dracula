@@ -24,7 +24,6 @@
 #define TOTAL_PLACES 71
 #define MIN_BRANCHING_DISTANCE 2
 #define PLAY_SIZE 7
-// add your own #includes here
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initPlayers(GameView gv);
@@ -43,9 +42,8 @@ PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 static int placeIdCmp(PlaceId x, PlaceId y);
 
-// TODO: ADD YOUR OWN STRUCTS HERE
 typedef struct playerData {
-	PlaceId *history; // Move history of player
+	PlaceId *history;
 	int historyCount;	
 	int health;
 } PlayerData;
@@ -56,7 +54,6 @@ typedef struct traps {
 } Traps;
 
 struct gameView {
-	// TODO: ADD FIELDS HERE
 	PlayerData players[NUM_PLAYERS];
 	PlaceId immatureVampLocation;
 	Map places;
@@ -92,13 +89,12 @@ GameView GvNew(char *pastPlays, Message messages[])
 void GvFree(GameView gv)
 {
 	MapFree(gv->places);
-	/*
+	
 	for (int i = 0; i < NUM_PLAYERS; i++) {
-		PlaceId *hist = (gv->players[i]).history;
+		PlaceId *hist = gv->players[i].history;
 		free(hist);
 	}
-	free(gv->players);
-	*/
+	free(gv->traps.locations);
 	free(gv);
 }
 
@@ -169,7 +165,10 @@ PlaceId GvGetVampireLocation(GameView gv)
 PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
 	*numTraps = gv->traps.trapCount;
-	return gv->traps.locations;
+	PlaceId *traps = malloc(sizeof(PlaceId) * (*numTraps));
+	traps = memcpy(traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
+	return traps;
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -213,7 +212,6 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 {
 	*numReturnedLocs = 0;
 	if (player != PLAYER_DRACULA) {
-		// TODO: dont have to care abt teleporting to hospital?
 		return GvGetMoveHistory(gv, player, numReturnedLocs, canFree);
 	}
 
@@ -362,7 +360,6 @@ void initPlayers(GameView gv) {
 	return;
 }
 
-// TODO: need to free move history (function?)
 
 // Stores data from pastPlays into the GameView data structure
 void storePastPlays(GameView gv, char *pastPlays) {
@@ -486,8 +483,8 @@ void storeTraps(GameView gv, char *pastPlays) {
 	char *tmp = strdup(pastPlays);
 	char *play;
 	
-	//CREATE A PLACEID ARRAY OF WHERE TRAPS WERE ENCOUTED
-	//ALSO FINDS TRAP COUNT
+	//SET UP AN ARRAY OF ALL THE PLACES A HUNTER ENCOUNTERED A TRAP
+	//FIND TRAP COUNT
 	
 	int x = 0;
 	while ((play = strsep(&tmp, " ")) != NULL) { 
@@ -523,7 +520,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 	if (trapCnt > 0) assert(trapLoc != NULL);
 
 	int i = 0; int j = 0;
-	int trapSkipCnt = DracHistCount - trapCnt;
+	int trapSkipCnt = DracHistCount - trapCnt; 
 	
 	while ((play = strsep(&tmp, " ")) != NULL) {
 			
@@ -541,7 +538,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 			} else if (place >= DOUBLE_BACK_1 && place <= DOUBLE_BACK_5) {
 				place = locationOfDoubleBack(DracHist, i, place);
 			}
-			
+			//CHECKS IF TRAP IN TRAIL HAS BEEN USED ON A HUNTER
 			for (int i = 0; i < x; i ++) {
 				
 				if (placeIdCmp(place, trapEnc[i]) != 0) continue;
@@ -552,7 +549,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 				
 				break;
 			}		
-			
+			//IF TRAP IS USED ON HUNTER, REMOVE FROM TRAPLOC ARRAY
 			if (check != 1) {
 				trapLoc[j] = place; 
 				j ++;
@@ -561,6 +558,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 		i ++;
 	}
 
+	gv->traps.locations = trapLoc;
 	gv->traps.trapCount = trapCnt;	
 	free(trapEnc);
 	free(tmp);

@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "queue.h"
 
 #include "Game.h"
 #include "GameView.h"
@@ -21,27 +22,9 @@
 #include "Places.h"
 
 
-////////////////////////////////////////////////////////////////////////
-// Queue implementation
-typedef struct queueNode *QueueNode;
-struct queueNode {
-	PlaceId place;
-	QueueNode next;
-};
 
-typedef struct queue *Queue;
 
-struct queue {
-	QueueNode head;
-	QueueNode tail;
-	int count;
-};
 
-Queue createQueue(void);
-void enqueue(Queue q, PlaceId place);
-PlaceId dequeue(Queue q);
-int queueIsEmpty(Queue q);
-void dropQueue(Queue q);
 ////////////////////////////////////////////////////////////////////////
 // Taken from testUtils.h to make HvGetShortestPathTo pass tests.
 void HvSortPlaces(PlaceId *places, int numPlaces);
@@ -52,6 +35,7 @@ struct hunterView {
 	PlaceId *shortestPathStrings[NUM_PLAYERS];
 	int pathLengths[NUM_PLAYERS];*/
 };
+
 ////////////////////////////////////////////////////////////////////////
 HunterView HvNew(char *pastPlays, Message messages[])
 {
@@ -77,9 +61,7 @@ HunterView HvNew(char *pastPlays, Message messages[])
 
 void HvFree(HunterView hv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-
-
+	GvFree(hv->gv);
 	free(hv);
 }
 
@@ -259,60 +241,6 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 
 ////////////////////////////////////////////////////////////////////////
 // Your own interface functions
-
-// TODO
-
-// Queue functions
-Queue createQueue(void) {
-	Queue q = malloc(sizeof(struct queue));
-	q->head = NULL;
-	q->tail = NULL;
-	q->count = 0;
-	return q;
-}
-
-QueueNode newNode(PlaceId place) {
-	QueueNode new = malloc(sizeof(struct queueNode));
-	new->next = NULL;
-	new->place = place;
-	return new;
-}
-
-void enqueue(Queue q, PlaceId place) {
-	assert(q != NULL);
-	QueueNode new = newNode(place);
-	if (q->head == NULL) {
-		q->head = new;
-		q->tail = new;
-	} else {
-		q->tail->next = new;
-		q->tail = new;
-	}
-	q->count++;
-}
-
-PlaceId dequeue(Queue q) {
-	assert(q != NULL);
-	if (q->head == NULL) return NOWHERE;
-	PlaceId place = q->head->place;
-	QueueNode delNode = q->head;
-	q->head = q->head->next;
-	free(delNode);
-	q->count--;
-	return place;
-}
-
-int queueIsEmpty(Queue q) {
-	return !(q->count);
-}
-
-void dropQueue(Queue q) {
-	assert(q != NULL);
-	for (QueueNode curr = q->head; curr != NULL; curr = curr->next) {
-		free(curr);
-	}
-	free(q);
-}
 
 // Functions used to sort places in numeric order.
 // Taken from testUtils.c to make HvGetShortestPathTo pass tests.

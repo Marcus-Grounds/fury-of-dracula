@@ -45,7 +45,7 @@ DraculaView DvNew(char *pastPlays, Message messages[])
 
 void DvFree(DraculaView dv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	GvFree (dv->gv);
 	free(dv);
 }
 
