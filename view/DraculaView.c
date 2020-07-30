@@ -128,15 +128,16 @@ PlaceId *DvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
 
 PlaceId *removeLocation(PlaceId *reachableLocations, PlaceId whichLocation, int *numReturnedLocs) 
 {
+
 	int i = 0;
 	// Look for location in array.
-	for (int i = 0; i < *numReturnedLocs; i++) {
+	for (i = 0; i < *numReturnedLocs; i++) {
 		if (reachableLocations[i] == whichLocation) break;
 	}
 
 	// Location was not found in array.
 	if (i == *numReturnedLocs) return reachableLocations;
-
+	
 	// Remove location.
 	(*numReturnedLocs)--;
 
@@ -144,10 +145,10 @@ PlaceId *removeLocation(PlaceId *reachableLocations, PlaceId whichLocation, int 
 		reachableLocations[i] = reachableLocations[i + 1];
 		i++;
 	}
-
 	// Reduce size of array.
-	reachableLocations = realloc(reachableLocations, (*numReturnedLocs) * sizeof(PlaceId));
 
+	reachableLocations = realloc(reachableLocations, (*numReturnedLocs) * sizeof(PlaceId));
+	
 	return reachableLocations;
 }
 
@@ -294,6 +295,7 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 			}
 			if (*numReturnedLocs == 0) return NULL;
 		}
+
 		return reachableLocations;
 	}
 
