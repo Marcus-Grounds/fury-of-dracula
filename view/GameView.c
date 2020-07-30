@@ -166,7 +166,7 @@ PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
 	*numTraps = gv->traps.trapCount;
 	PlaceId *traps = malloc(sizeof(PlaceId) * (*numTraps));
-	traps = memcpy (traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
+	traps = memcpy(traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
 	return traps;
 
 }
@@ -212,7 +212,6 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 {
 	*numReturnedLocs = 0;
 	if (player != PLAYER_DRACULA) {
-		// TODO: dont have to care abt teleporting to hospital?
 		return GvGetMoveHistory(gv, player, numReturnedLocs, canFree);
 	}
 
@@ -361,7 +360,6 @@ void initPlayers(GameView gv) {
 	return;
 }
 
-// TODO: need to free move history (function?)
 
 // Stores data from pastPlays into the GameView data structure
 void storePastPlays(GameView gv, char *pastPlays) {
@@ -519,7 +517,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 
 	tmp = strdup(pastPlays);
 	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
-	assert(trapLoc != NULL);
+	if (trapCnt > 0) assert(trapLoc != NULL);
 
 	int i = 0; int j = 0;
 	int trapSkipCnt = DracHistCount - trapCnt;
@@ -560,6 +558,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 		i ++;
 	}
 
+	gv->traps.locations = trapLoc;
 	gv->traps.trapCount = trapCnt;	
 	free(trapEnc);
 	free(tmp);
