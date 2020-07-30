@@ -168,11 +168,8 @@ PlaceId GvGetVampireLocation(GameView gv)
 
 PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	*numTraps = gv->traps.trapCount;
-	PlaceId *traps = malloc(sizeof(PlaceId) * (*numTraps));
-	traps = memcpy(traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
-	return traps;
+	return gv->traps.locations;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -468,9 +465,10 @@ void initScoreTurn(GameView gv) {
 void initTraps(GameView gv) {
 	//Can scan through drac history to determine size of trap store / look for 'M'
 	//in actual trap store we check count value along side size of m
-	gv->traps.locations = malloc(sizeof(PlaceId) * gv->players[PLAYER_DRACULA].historyCount);
-	assert(gv->traps.locations != NULL);
 	gv->traps.trapCount = 0;
+	gv->traps.locations = malloc(sizeof(PlaceId));
+	assert(gv->traps.locations != NULL);
+	
 }
 
 // todo: comment description for this function
@@ -481,11 +479,11 @@ void storeTraps(GameView gv, char *pastPlays) {
 	PlaceId * trapLoc = gv->traps.locations;
 	PlaceId * DracHist = gv->players[PLAYER_DRACULA].history;
 	PlaceId * trapEnc = malloc(sizeof(PlaceId) * gv->turn);
-	assert (trapLoc != NULL);
-	assert (trapEnc != NULL);
 
-	int DracHistCount = gv->players[PLAYER_DRACULA].historyCount;
+	assert (trapEnc != NULL);
+	
 	int trapCnt = 0;
+	int DracHistCount = gv->players[PLAYER_DRACULA].historyCount;
 	char *tmp = strdup(pastPlays);
 	char *play;
 	
@@ -516,6 +514,10 @@ void storeTraps(GameView gv, char *pastPlays) {
 
 	free(tmp);
 
+	if (trapCnt == 0) {
+		free(trapEnc);
+		return;
+	}
 	
 	tmp = strdup(pastPlays);
 	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
