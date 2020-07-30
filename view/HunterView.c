@@ -67,9 +67,7 @@ HunterView HvNew(char *pastPlays, Message messages[])
 
 void HvFree(HunterView hv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-
-
+	GvFree(hv->gv);
 	free(hv);
 }
 

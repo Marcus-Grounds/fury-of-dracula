@@ -24,7 +24,6 @@
 #define TOTAL_PLACES 71
 #define MIN_BRANCHING_DISTANCE 2
 #define PLAY_SIZE 7
-// add your own #includes here
 
 // Helper Function Declarations: //TODO: make static or move this to GameView.h later?
 void initPlayers(GameView gv);
@@ -43,9 +42,8 @@ PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
 PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 static int placeIdCmp(PlaceId x, PlaceId y);
 
-// TODO: ADD YOUR OWN STRUCTS HERE
 typedef struct playerData {
-	PlaceId *history; // Move history of player
+	PlaceId *history;
 	int historyCount;	
 	int health;
 } PlayerData;
@@ -56,7 +54,6 @@ typedef struct traps {
 } Traps;
 
 struct gameView {
-	// TODO: ADD FIELDS HERE
 	PlayerData players[NUM_PLAYERS];
 	PlaceId immatureVampLocation;
 	Map places;
@@ -92,13 +89,12 @@ GameView GvNew(char *pastPlays, Message messages[])
 void GvFree(GameView gv)
 {
 	MapFree(gv->places);
-	/*
+	
 	for (int i = 0; i < NUM_PLAYERS; i++) {
-		PlaceId *hist = (gv->players[i]).history;
+		PlaceId *hist = gv->players[i].history;
 		free(hist);
 	}
-	free(gv->players);
-	*/
+	free(gv->traps.locations);
 	free(gv);
 }
 
@@ -169,7 +165,10 @@ PlaceId GvGetVampireLocation(GameView gv)
 PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
 	*numTraps = gv->traps.trapCount;
-	return gv->traps.locations;
+	PlaceId *traps = malloc(sizeof(PlaceId) * (*numTraps));
+	traps = memcpy (traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
+	return traps;
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -520,7 +519,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 
 	tmp = strdup(pastPlays);
 	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
-	if (trapCnt > 0) assert(trapLoc != NULL);
+	assert(trapLoc != NULL);
 
 	int i = 0; int j = 0;
 	int trapSkipCnt = DracHistCount - trapCnt;
