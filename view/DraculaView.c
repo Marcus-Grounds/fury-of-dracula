@@ -86,7 +86,6 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	*numTraps = 0;
-	
 	return GvGetTrapLocations(dv->gv, numTraps);
 }
 

@@ -148,6 +148,7 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 	PlaceId src = HvGetPlayerLocation(hv, hunter);
 	Round round = HvGetRound(hv);
 
+	// Initialise visited array to 0;
 	PlaceId visited[NUM_REAL_PLACES];
 	for (int i = 0; i < NUM_REAL_PLACES; i++) {
 		visited[i] = NOWHERE;
