@@ -24,6 +24,7 @@
 
 
 
+
 ////////////////////////////////////////////////////////////////////////
 // Taken from testUtils.h to make HvGetShortestPathTo pass tests.
 void HvSortPlaces(PlaceId *places, int numPlaces);
@@ -32,6 +33,7 @@ struct hunterView {
 	GameView gv;
 	int round;
 };
+
 ////////////////////////////////////////////////////////////////////////
 HunterView HvNew(char *pastPlays, Message messages[])
 {
@@ -49,9 +51,7 @@ HunterView HvNew(char *pastPlays, Message messages[])
 
 void HvFree(HunterView hv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-
-
+	GvFree(hv->gv);
 	free(hv);
 }
 
