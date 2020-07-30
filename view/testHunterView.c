@@ -117,7 +117,7 @@ int main(void)
 		printf("Test passed!\n");
 	}
 	
-	*/{///////////////////////////////////////////////////////////////////
+	{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
 
@@ -284,7 +284,7 @@ int main(void)
 
 		HvFree(hv);
 		printf("Test passed!\n");
-	}
+	}*/
 
 	{///////////////////////////////////////////////////////////////////
 		
@@ -333,7 +333,7 @@ int main(void)
 		
 		{
 			printf("\tMarseilles -> Constanta (Mina Harker, Round 1)\n");
-			int pathLength = -1;
+			int pathLength = -1; 
 			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_MINA_HARKER,
 			                                    CONSTANTA, &pathLength);
 			assert(pathLength == 4);
@@ -363,7 +363,17 @@ int main(void)
 		HvFree(hv);
 		printf("Test passed!\n");
 	}
-	
+	{
+		/*printf("Checking case when play string doesn't reveal Dracula's location");
+		char *trail = "GGA.... ";
+		Message messages[1] = {};
+		HunterView hv = HvNew(trail, messages);
+		int numLocs = -1;
+		PlaceId *locs = HvWhereCanTheyGo(hv, PLAYER_DRACULA, &numLocs);*/
+		
+
+	}
+
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Checking Galatz road connections "

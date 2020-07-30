@@ -141,8 +141,8 @@ int main(void)
 	
 	{///////////////////////////////////////////////////////////////////
 	
-		printf("Test for DvWhereCanIGo 1\n");
-		printf("Double back and hide is invalid.\n");
+		printf("Test for DvWhereCanIGo & DvWhereCanIGoByType\n");
+		printf("\tDouble back and hide is invalid.\n");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DKL.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DD1T... "
@@ -152,16 +152,6 @@ int main(void)
 		
 		Message messages[24] = {};
 		DraculaView dv = DvNew(trail, messages);
-////////////////////////////////////////////////////
-//
-		// todo: debug to delete START
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-		printf("numMoves = %d\n", numMoves); 			// Prints 4
-		moves = DvGetValidMoves(dv, &numMoves);
-		printf("numMoves = %d\n", numMoves);				// Prints 8
-		free(moves);
-		// todo: debug to delete END
 
 		int numLocs = -1;
 		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
@@ -170,44 +160,29 @@ int main(void)
 		assert(locs[0] == BELGRADE);
 		assert(locs[1] == CONSTANTA);
 		assert(locs[2] == GALATZ);
-		assert(locs[3] == SOFIA);							// Fails if DvGetValidMoves is called before
-															// Succeeds if not called.
-		// todo: debug to delete START
-		moves = DvGetValidMoves(dv, &numMoves);
-		printf("numMoves = %d\n", numMoves);				// Prints 8
-		free (moves);
-		// todo: debug to delete END
+		assert(locs[3] == SOFIA);							
 		free(locs);
 
-	}
-
-	{	
-		
-		printf("Test for DvWhereCanIGoByType 1\n");
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DKL.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DD1T... "
-			"GGE.... SGE.... HGE.... MGE.... DBCT... "
-			"GGE.... SGE.... HGE.... MGE.... DHIT... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[24] = {};
-		DraculaView dv = DvNew(trail, messages);
-
-		int numLocs = -1;
-
-		PlaceId *locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
 		assert(numLocs == 0);
-		assert(locs == NULL);
-		
-		printf("Test passed!\n");
+		assert(locs == NULL);											
+		free(locs);
 
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
+		assert(numLocs == 4);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BELGRADE);
+		assert(locs[1] == CONSTANTA);
+		assert(locs[2] == GALATZ);
+		assert(locs[3] == SOFIA);												
+		free(locs);
 		DvFree(dv);
 	}
 
-	{
-		printf("Test for DvWhereCanIGo & DvWhereCanIGoByType 2\n");
-		printf("Case: Double back is valid.\n");
+	{///////////////////////////////////////////////////////////////////
+		printf("\tCase: Double back is valid.\n");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DZU.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DSTT... "
@@ -229,14 +204,11 @@ int main(void)
 		assert(locs[4] == NANTES);
 		assert(locs[5] == PARIS);
 		assert(locs[6] == TOULOUSE);
-
-		printf("Test passed!\n");
 		DvFree(dv);
 	}
 	
-	{
-		printf("Test for DvWhereCanIGo & DvWhereCanIGoByType 3\n");
-		printf("Case: Doubleback is invalid, hide is valid, Dracula is at sea\n.");
+	{///////////////////////////////////////////////////////////////////
+		printf("\tCase: Doubleback is invalid, hide is valid, Dracula is at sea\n.");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DAL.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DGRT... "
@@ -256,14 +228,11 @@ int main(void)
 		assert(locs[2] == CAGLIARI);
 		assert(locs[3] == MARSEILLES);
 		assert(locs[4] == TYRRHENIAN_SEA);
-
-		printf("Test passed!\n");
 		DvFree(dv);
 	}
 
-	{
-		printf("Test for DvWhereCanIGo & DvWhereCanIGoByType 3\n");
-		printf("Case: Doubleback is invalid, hide is valid, Dracula is on land\n.");
+	{///////////////////////////////////////////////////////////////////
+		printf("\tCase: Doubleback is invalid, hide is valid, Dracula is on land\n.");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DPA.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DLET... "
