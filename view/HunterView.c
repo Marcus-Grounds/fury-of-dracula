@@ -116,6 +116,8 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
                              int *pathLength)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	Map m = MapNew();
+	MapShow(m);
 	*pathLength = 0;
 	return NULL;
 }

@@ -470,7 +470,6 @@ void initTraps(GameView gv) {
 	assert(gv->traps.locations != NULL);
 	
 }
-
 // todo: comment description for this function
 void storeTraps(GameView gv, char *pastPlays) {
 	
@@ -515,10 +514,10 @@ void storeTraps(GameView gv, char *pastPlays) {
 	free(tmp);
 
 	if (trapCnt == 0) {
-		free(trapEnc);
+		free (trapEnc);
 		return;
-	}
-	
+	} 
+
 	tmp = strdup(pastPlays);
 	trapLoc = realloc(trapLoc, (sizeof(PlaceId) * trapCnt));
 	if (trapCnt > 0) assert(trapLoc != NULL);
