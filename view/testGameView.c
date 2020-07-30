@@ -301,7 +301,7 @@ int main(void)
 	
 	{///////////////////////////////////////////////////////////////////
 	
-		printf("Testing trap locations after one is destroyed\n");
+		printf("Testing trap locations after one is encountered\n");
 		
 		char *trail =
 			"GVI.... SGE.... HGE.... MGE.... DBC.V.. "
@@ -322,6 +322,36 @@ int main(void)
 		assert(numTraps == 2);
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == CONSTANTA && traps[1] == GALATZ);
+		free(traps);
+		
+		GvFree(gv);
+		printf("Test passed!\n");
+	}
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Testing trap locations after one is encountered and malfunctions\n");
+		
+		char *trail =
+			"GVI.... SGE.... HGE.... MGE.... DBC.V.. "
+			"GBD.... SGE.... HGE.... MGE.... DKLT... "
+			"GSZ.... SGE.... HGE.... MGE.... DGAT... "
+			"GBE.... SGE.... HGE.... MGE.... DCNT... "
+			"GKLT... SGE.... HGE.... MGE.... DBAT.M. "
+			"GGAT... SGE.... HGE.... MGE....";
+		
+		Message messages[24] = {};
+		GameView gv = GvNew(trail, messages);
+		
+		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) ==
+				GAME_START_HUNTER_LIFE_POINTS - 2*LIFE_LOSS_TRAP_ENCOUNTER);
+		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == GALATZ);
+		assert(GvGetVampireLocation(gv) == BUCHAREST);
+		int numTraps = 0;
+		PlaceId *traps = GvGetTrapLocations(gv, &numTraps);
+		assert(numTraps == 2);
+		sortPlaces(traps, numTraps);
+		assert(traps[0] == BARCELONA);
 		free(traps);
 		
 		GvFree(gv);

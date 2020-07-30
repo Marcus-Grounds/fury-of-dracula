@@ -485,8 +485,8 @@ void storeTraps(GameView gv, char *pastPlays) {
 	char *tmp = strdup(pastPlays);
 	char *play;
 	
-	//CREATE A PLACEID ARRAY OF WHERE TRAPS WERE ENCOUTED
-	//ALSO FINDS TRAP COUNT
+	//SET UP AN ARRAY OF ALL THE PLACES A HUNTER ENCOUNTERED A TRAP
+	//FIND TRAP COUNT
 	
 	int x = 0;
 	while ((play = strsep(&tmp, " ")) != NULL) { 
@@ -522,7 +522,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 	assert(trapLoc != NULL);
 
 	int i = 0; int j = 0;
-	int trapSkipCnt = DracHistCount - trapCnt;
+	int trapSkipCnt = DracHistCount - trapCnt; 
 	
 	while ((play = strsep(&tmp, " ")) != NULL) {
 			
@@ -540,7 +540,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 			} else if (place >= DOUBLE_BACK_1 && place <= DOUBLE_BACK_5) {
 				place = locationOfDoubleBack(DracHist, i, place);
 			}
-			
+			//CHECKS IF TRAP IN TRAIL HAS BEEN USED ON A HUNTER
 			for (int i = 0; i < x; i ++) {
 				
 				if (placeIdCmp(place, trapEnc[i]) != 0) continue;
@@ -551,7 +551,7 @@ void storeTraps(GameView gv, char *pastPlays) {
 				
 				break;
 			}		
-			
+			//IF TRAP IS USED ON HUNTER, REMOVE FROM TRAPLOC ARRAY
 			if (check != 1) {
 				trapLoc[j] = place; 
 				j ++;
