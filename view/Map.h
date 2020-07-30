@@ -19,6 +19,7 @@
 #define FOD__MAP_H_
 
 typedef struct connNode *ConnList;
+
 struct connNode {
 	PlaceId p; // ALICANTE, etc.
 	TransportType type; // ROAD, RAIL, BOAT
@@ -48,5 +49,6 @@ int MapNumConnections(Map m, TransportType type);
  *  The returned list should NOT be modified or freed.
  */
 ConnList MapGetConnections(Map m, PlaceId p);
+
 
 #endif // !defined(FOD__MAP_H_)
