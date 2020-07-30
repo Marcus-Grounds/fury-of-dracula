@@ -194,16 +194,3 @@ ConnList MapGetConnections(Map m, PlaceId p)
 }
 
 ////////////////////////////////////////////////////////////////////////
-bool is_connected(Map m, PlaceId x, PlaceId y) {
-
-	ConnList new = m->connections[x];
-
-	while (new->next != NULL) {
-		if(new->p == y) return true;
-		new = new->next;
-
-	}
-
-
-	return false;
-}

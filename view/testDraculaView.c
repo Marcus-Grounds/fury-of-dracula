@@ -182,8 +182,7 @@ int main(void)
 		assert(locs[0] == BELGRADE);
 		assert(locs[1] == CONSTANTA);
 		assert(locs[2] == GALATZ);
-		printf("LOC: %s\n\n\n", placeIdToName(locs[3]));											
-		assert(locs[3] == SOFIA);	
+		assert(locs[3] == SOFIA);												
 		free(locs);
 		DvFree(dv);
 	}
