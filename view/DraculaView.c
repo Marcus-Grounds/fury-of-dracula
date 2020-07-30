@@ -289,25 +289,30 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 	// If hide and double back is not a valid move, the only valid moves are his 
 	// location moves. Eliminate any reachable locations that aren't a valid location move.
 	if (!foundHide(validMoves, &numValidMoves) || placeIsSea(location)) {
-		for (int i = 0; i < numValidMoves; i++) {
+		for (int i = 0; i < *numReturnedLocs; i++) {
+
 			if (!DvIsRepeat(reachableLocations[i], validMoves, &numValidMoves)) {
 				reachableLocations = removeLocation(reachableLocations, reachableLocations[i], numReturnedLocs);
+				i--;
+				if (*numReturnedLocs == 0) return NULL;
 			}
-			if (*numReturnedLocs == 0) return NULL;
 		}
-
 		return reachableLocations;
 	}
 
 	// If hide is a valid move but not double back, another possible valid move
 	// is staying at his current location, given that his current location is not at
 	// sea.
-	for (int i = 0; i < numValidMoves; i++) {
+	for (int i = 0; i < *numReturnedLocs; i++) {
 		if (reachableLocations[i] == location) continue;
 		if (!DvIsRepeat(reachableLocations[i], validMoves, &numValidMoves)) {
+			// The current location in reachableLocation[i] array is not a valid location move
 			reachableLocations = removeLocation(reachableLocations, reachableLocations[i], numReturnedLocs);
+			i--;
+			if (*numReturnedLocs == 0) return NULL;
 		}
 	}
+	
 	return reachableLocations;
 }
 

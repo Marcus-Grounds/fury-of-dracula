@@ -119,7 +119,6 @@ int main(void)
 	}
 
 	{///////////////////////////////////////////////////////////////////
-	
 		printf("Test for Dracula's valid moves 1\n");
 		
 		char *trail =
@@ -145,9 +144,9 @@ int main(void)
 	} 
 	
 	{///////////////////////////////////////////////////////////////////
-	
-		printf("Test for DvWhereCanIGo & DvWhereCanIGoByType\n");
-		printf("\tDouble back and hide is invalid.\n");
+
+		printf("Testing DvWhereCanIGo & DvWhereCanIGoByType.\n");
+		printf("\tCase: From Bucharest. Double back and hide is invalid.\n");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DKL.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DD1T... "
@@ -158,9 +157,9 @@ int main(void)
 		Message messages[24] = {};
 		DraculaView dv = DvNew(trail, messages);
 
+		printf("\t\tAll connections...\n");
 		int numLocs = -1;
 		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
-		printf("NUMLOCS: %d\n\n\n", numLocs);
 		assert(numLocs == 4);
 		sortPlaces(locs, numLocs);
 		assert(locs[0] == BELGRADE);
@@ -169,12 +168,14 @@ int main(void)
 		assert(locs[3] == SOFIA);							
 		free(locs);
 
+		printf("\t\tBoat connections...\n");
 		numLocs = -1;
 		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
 		assert(numLocs == 0);
 		assert(locs == NULL);											
 		free(locs);
 
+		printf("\t\tRoad connections...\n");
 		numLocs = -1;
 		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
 		assert(numLocs == 4);
@@ -185,10 +186,12 @@ int main(void)
 		assert(locs[3] == SOFIA);												
 		free(locs);
 		DvFree(dv);
+
 	}
 
 	{///////////////////////////////////////////////////////////////////
-		printf("\tCase: Double back is valid.\n");
+
+		printf("\tCase: From Clermont Ferrand. Double back is valid.\n");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DZU.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DSTT... "
@@ -199,6 +202,7 @@ int main(void)
 		Message messages[24] = {};
 		DraculaView dv = DvNew(trail, messages);
 
+		printf("\t\tAll connections...\n");
 		int numLocs = -1;
 		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
 		assert(numLocs == 7);
@@ -210,11 +214,33 @@ int main(void)
 		assert(locs[4] == NANTES);
 		assert(locs[5] == PARIS);
 		assert(locs[6] == TOULOUSE);
+
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
+		assert(numLocs == 1);
+		assert(locs[0] == CLERMONT_FERRAND);
+		free(locs);
+
+		printf("\t\tRoad connections...\n");		
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
+		assert(numLocs == 7);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BORDEAUX);
+		assert(locs[1] == CLERMONT_FERRAND);
+		assert(locs[2] == GENEVA);
+		assert(locs[3] == MARSEILLES);
+		assert(locs[4] == NANTES);
+		assert(locs[5] == PARIS);
+		assert(locs[6] == TOULOUSE);
+		free(locs);
 		DvFree(dv);
 	}
 	
 	{///////////////////////////////////////////////////////////////////
-		printf("\tCase: Doubleback is invalid, hide is valid, Dracula is at sea\n.");
+
+		printf("\tCase: From Mediterranean Sea. Doubleback is invalid, hide is valid, Dracula is at sea.\n");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DAL.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DGRT... "
@@ -224,7 +250,8 @@ int main(void)
 		
 		Message messages[24] = {};
 		DraculaView dv = DvNew(trail, messages);
-
+		
+		printf("\t\tAll connections...\n");
 		int numLocs = -1;
 		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
 		assert(numLocs == 5);
@@ -234,11 +261,31 @@ int main(void)
 		assert(locs[2] == CAGLIARI);
 		assert(locs[3] == MARSEILLES);
 		assert(locs[4] == TYRRHENIAN_SEA);
+
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
+		assert(numLocs == 5);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == ATLANTIC_OCEAN);
+		assert(locs[1] == BARCELONA);
+		assert(locs[2] == CAGLIARI);
+		assert(locs[3] == MARSEILLES);
+		assert(locs[4] == TYRRHENIAN_SEA);
+		free(locs);
+
+		printf("\t\tRoad connections...\n");		
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
+		assert(numLocs == 0);
+		assert(locs == NULL);
+		free(locs);
 		DvFree(dv);
 	}
 
 	{///////////////////////////////////////////////////////////////////
-		printf("\tCase: Doubleback is invalid, hide is valid, Dracula is on land\n.");
+
+		printf("\tCase: From Paris. Doubleback is invalid, hide is valid, Dracula is on land.\n");
 		char *trail =
 			"GGE.... SGE.... HGE.... MGE.... DPA.V.. "
 			"GGE.... SGE.... HGE.... MGE.... DLET... "
@@ -249,6 +296,7 @@ int main(void)
 		Message messages[24] = {};
 		DraculaView dv = DvNew(trail, messages);
 
+		printf("\t\tAll connections...\n");
 		int numLocs = -1;
 		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
 		assert(numLocs == 5);
@@ -258,14 +306,293 @@ int main(void)
 		assert(locs[2] == GENEVA);
 		assert(locs[3] == PARIS);
 		assert(locs[4] == STRASBOURG);
+		free(locs);
 
-		printf("Test passed!\n");
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
+		assert(numLocs == 1);
+		assert(locs[0] == PARIS);
+		free(locs);
+
+		printf("\t\tRoad connections...\n");		
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
+		assert(numLocs == 5);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BRUSSELS);
+		assert(locs[1] == CLERMONT_FERRAND);
+		assert(locs[2] == GENEVA);
+		assert(locs[3] == PARIS);
+		assert(locs[4] == STRASBOURG);
+		free(locs);
+
 		DvFree(dv);
 	}
-	
+
+	{///////////////////////////////////////////////////////////////////
+
+		printf("\tCase: From Bordeaux. Some valid routes are by road, others are by sea.\n");
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DPA.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DLET... "
+			"GGE.... SGE.... HGE.... MGE.... DNAT... "
+			"GGE.... SGE.... HGE.... MGE.... DBOT... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[24] = {};
+		DraculaView dv = DvNew(trail, messages);
+
+		printf("\t\tAll connections...\n");
+		int numLocs = -1;
+		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
+		assert(numLocs == 6);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BAY_OF_BISCAY);
+		assert(locs[1] == BORDEAUX); 
+		assert(locs[2] == CLERMONT_FERRAND);
+		assert(locs[3] == NANTES);
+		assert(locs[4] == SARAGOSSA);
+		assert(locs[5] == TOULOUSE);
+
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
+		assert(numLocs == 2);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BAY_OF_BISCAY);
+		assert(locs[1] == BORDEAUX); 
+		free(locs);
+
+		printf("\t\tRoad connections...\n");		
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
+		assert(numLocs == 5);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BORDEAUX); 
+		assert(locs[1] == CLERMONT_FERRAND);
+		assert(locs[2] == NANTES);
+		assert(locs[3] == SARAGOSSA);
+		assert(locs[4] == TOULOUSE);	
+		free(locs);
+
+		DvFree(dv);
+	}
+	{///////////////////////////////////////////////////////////////////
+		printf("\tCase: From Nowhere. Dracula hasn't made a move yet.\n");
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE....";
+		Message messages[4] = {};
+		DraculaView dv = DvNew(trail, messages);
+		printf("\t\tAll connections...\n");
+		int numLocs = -1;
+		PlaceId *locs = DvWhereCanIGo(dv, &numLocs);
+		assert(numLocs == 0);
+		assert(locs == NULL);
+		free(locs);
+
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, false, true, &numLocs);
+		assert(numLocs == 0);
+		assert(locs == NULL);
+		free(locs);
+
+		printf("\t\tRoad connections...\n");		
+		numLocs = -1;
+		locs = DvWhereCanIGoByType(dv, true, false, &numLocs);
+		assert(numLocs == 0);
+		assert(locs == NULL);
+		free(locs);
+
+		printf("Test passed!\n");
+
+		DvFree(dv);
+	}
+
+	{///////////////////////////////////////////////////////////////////
+		printf("Testing DvWhereCanTheyGo & DvWhereCanTheyGoByType.\n");
+		char *trail =
+			"GST.... SRO.... HRO.... MHA.... DAM.V.. "
+			"GST.... SRO.... HRO.... MHA....";
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+
+		printf("\tCase: Lord Godalming, from Strausbourg (Round 2).\n");
+		printf("\t\tAll connections...\n");
+		int numLocs = -1;
+		PlaceId *locs = DvWhereCanTheyGo(dv, PLAYER_LORD_GODALMING, &numLocs);
+
+		assert(numLocs == 11);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BRUSSELS);
+		assert(locs[1] == COLOGNE);
+		assert(locs[2] == FRANKFURT);
+		assert(locs[3] == GENEVA);
+		assert(locs[4] == LEIPZIG);
+		assert(locs[5] == MILAN);
+		assert(locs[6] == MUNICH);
+		assert(locs[7] == NUREMBURG);
+		assert(locs[8] == PARIS);
+		assert(locs[9] == STRASBOURG);
+		assert(locs[10] == ZURICH);
+		free(locs);
+
+		printf("\t\tBoat connections...\n");
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_LORD_GODALMING, false, false, true, &numLocs);
+
+		assert(numLocs == 1);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == STRASBOURG);
+
+		free(locs);
+
+		printf("\t\tRail connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_LORD_GODALMING, false, true, false, &numLocs);
+
+		assert(numLocs == 6);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == COLOGNE);
+		assert(locs[1] == FRANKFURT);
+		assert(locs[2] == LEIPZIG);
+		assert(locs[3] == MILAN);
+		assert(locs[4] == STRASBOURG);
+		assert(locs[5] == ZURICH);
+
+		free(locs);
+
+		printf("\t\tRoad connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_LORD_GODALMING, true, false, false, &numLocs);
+
+		assert(numLocs == 9);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BRUSSELS);
+		assert(locs[1] == COLOGNE);
+		assert(locs[2] == FRANKFURT);
+		assert(locs[3] == GENEVA);
+		assert(locs[4] == MUNICH);
+		assert(locs[5] == NUREMBURG);
+		assert(locs[6] == PARIS);
+		assert(locs[7] == STRASBOURG);
+		assert(locs[8] == ZURICH);
+		free(locs);
+
+		printf("\tCase: Dr Seward, from Rome (Round 2).\n");
+		printf("\t\tAll connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGo(dv, PLAYER_DR_SEWARD, &numLocs);
+
+		assert(numLocs == 9);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BARI);
+		assert(locs[1] == FLORENCE);
+		assert(locs[2] == GENEVA);
+		assert(locs[3] == GENOA);
+		assert(locs[4] == MILAN);
+		assert(locs[5] == NAPLES);
+		assert(locs[6] == ROME);
+		assert(locs[7] == TYRRHENIAN_SEA);
+		assert(locs[8] == ZURICH);
+		free(locs);
+
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_DR_SEWARD, false, false, true, &numLocs);
+
+		assert(numLocs == 2);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == ROME);
+		assert(locs[1] == TYRRHENIAN_SEA);
+
+		free(locs);
+
+		printf("\t\tRail connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_DR_SEWARD, false, true, false, &numLocs);
+
+		assert(numLocs == 8);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BARI);
+		assert(locs[1] == FLORENCE);
+		assert(locs[2] == GENEVA);
+		assert(locs[3] == GENOA);
+		assert(locs[4] == MILAN);
+		assert(locs[5] == NAPLES);
+		assert(locs[6] == ROME);
+		assert(locs[7] == ZURICH);
+
+		free(locs);
+
+		printf("\t\tRoad connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_DR_SEWARD, true, false, false, &numLocs);
+
+		assert(numLocs == 4);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BARI);
+		assert(locs[1] == FLORENCE);
+		assert(locs[2] == NAPLES);
+		assert(locs[3] == ROME);
+
+		free(locs);
+
+		printf("\tCase: Van Helsing, from Rome (Round 2).\n");
+		printf("\t\tAll connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGo(dv, PLAYER_VAN_HELSING, &numLocs);
+
+		assert(numLocs == 5);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BARI);
+		assert(locs[1] == FLORENCE);
+		assert(locs[2] == NAPLES);
+		assert(locs[3] == ROME);
+		assert(locs[4] == TYRRHENIAN_SEA);
+
+		free(locs);
+
+		printf("\t\tBoat connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_VAN_HELSING, false, false, true, &numLocs);
+
+		assert(numLocs == 2);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == ROME);
+		assert(locs[1] == TYRRHENIAN_SEA);
+
+		free(locs);
+
+		printf("\t\tRail connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_VAN_HELSING, false, true, false, &numLocs);
+
+		assert(numLocs == 1);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == ROME);
+
+		free(locs);
+
+		printf("\t\tRoad connections...\n");
+		numLocs = -1;
+		locs = DvWhereCanTheyGoByType(dv, PLAYER_VAN_HELSING, true, false, false, &numLocs);
+
+		assert(numLocs == 4);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BARI);
+		assert(locs[1] == FLORENCE);
+		assert(locs[2] == NAPLES);
+		assert(locs[3] == ROME);
+
+		free(locs);
+
+		printf("Tests passed!\n");
+	}
+
 	{///////////////////////////////////////////////////////////////////
 	
-		printf("Test for DvGetValidMoves 1\n"); 
+		printf("Testing DvGetValidMoves 1\n"); 
 		printf("Case: Dracula has not made any moves\n");
 		
 		char *trail =

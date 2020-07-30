@@ -48,7 +48,9 @@ void HvSortPlaces(PlaceId *places, int numPlaces);
 
 struct hunterView {
 	GameView gv;
-	int round;
+	/*PlaceId playerTargets[NUM_PLAYERS];
+	PlaceId *shortestPathStrings[NUM_PLAYERS];
+	int pathLengths[NUM_PLAYERS];*/
 };
 ////////////////////////////////////////////////////////////////////////
 HunterView HvNew(char *pastPlays, Message messages[])
@@ -61,6 +63,14 @@ HunterView HvNew(char *pastPlays, Message messages[])
 	}
 
 	new->gv = GvNew(pastPlays, messages);
+
+	/*for (int i = 0; i < NUM_PLAYERS; i++) {
+		playerTargets[i] = NOWHERE;
+	}
+
+	for (int i = 0; i < NUM_PLAYERS; i++) {
+		shortestPathStrings[i] = NULL;
+	}*/
 
 	return new;
 }
@@ -146,9 +156,10 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 {
 	*pathLength = 0;
 	PlaceId src = HvGetPlayerLocation(hv, hunter);
-	Round round = HvGetRound(hv);
+	//if (hv->playerTargets[hunter] == dest && HvIsRepeat(player);
 
-	// Initialise visited array to 0;
+	Round round = HvGetRound(hv);
+	// Initialise visited array to NOWHERE;
 	PlaceId visited[NUM_REAL_PLACES];
 	for (int i = 0; i < NUM_REAL_PLACES; i++) {
 		visited[i] = NOWHERE;
@@ -228,15 +239,7 @@ PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
 PlaceId *HvWhereCanTheyGo(HunterView hv, Player player,
                           int *numReturnedLocs)
 {
-	*numReturnedLocs = 0;
-	Player currPlayer = HvGetPlayer(hv);
-	Round round = player >= currPlayer? HvGetRound(hv): HvGetRound(hv) + 1;
-	PlaceId location = HvGetPlayerLocation(hv, player);
-	if (location == NOWHERE) return NULL;
-	if (player != PLAYER_DRACULA || (location != CITY_UNKNOWN && location != SEA_UNKNOWN))
-		return GvGetReachable(hv->gv, player, round, location, numReturnedLocs);
-	
-	return NULL;
+	return HvWhereCanTheyGoByType(hv, player, true, true, true, numReturnedLocs);
 }
 
 PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,

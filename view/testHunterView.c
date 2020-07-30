@@ -25,7 +25,7 @@
 
 int main(void)
 {
-	/*{///////////////////////////////////////////////////////////////////
+	{///////////////////////////////////////////////////////////////////
 	
 		printf("Basic initialisation\n");
 		
@@ -284,11 +284,11 @@ int main(void)
 
 		HvFree(hv);
 		printf("Test passed!\n");
-	}*/
+	}
 
 	{///////////////////////////////////////////////////////////////////
 		
-		printf("Testing shortest path 1\n");
+		printf("Testing shortest path\n");
 		
 		char *trail =
 			"GLS.... SLS.... HSW.... MMR.... DCD.V..";
@@ -362,16 +362,6 @@ int main(void)
 		
 		HvFree(hv);
 		printf("Test passed!\n");
-	}
-	{
-		/*printf("Checking case when play string doesn't reveal Dracula's location");
-		char *trail = "GGA.... ";
-		Message messages[1] = {};
-		HunterView hv = HvNew(trail, messages);
-		int numLocs = -1;
-		PlaceId *locs = HvWhereCanTheyGo(hv, PLAYER_DRACULA, &numLocs);*/
-		
-
 	}
 
 	{///////////////////////////////////////////////////////////////////
@@ -477,6 +467,89 @@ int main(void)
 		HvFree(hv);
 		printf("Test passed!\n");	
 	}
+
+	{///////////////////////////////////////////////////////////////////
 	
+		printf("Checking Geneva connections. "
+		       "Called by Lord Godalming, Round 1. "
+			   "(Dr Seward, Round 1)\n");
+		
+		char *trail =
+			"GSZ.... SGE.... HGE.... MGE.... DSZ.V..";
+		
+		Message messages[5] = {};
+		HunterView hv = HvNew(trail, messages);
+		
+		int numLocs = -1;
+		PlaceId *locs = HvWhereCanTheyGo(hv, PLAYER_DR_SEWARD, &numLocs);
+
+		assert(numLocs == 9);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == CLERMONT_FERRAND);
+		assert(locs[1] == FLORENCE);
+		assert(locs[2] == GENEVA);
+		assert(locs[3] == GENOA);
+		assert(locs[4] == MARSEILLES);
+		assert(locs[5] == MILAN);
+		assert(locs[6] == PARIS);
+		assert(locs[7] == STRASBOURG);
+		assert(locs[8] == ZURICH);
+		free(locs);
+
+		HvFree(hv);
+		printf("Test passed!\n");	
+	}
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("Checking Szeged connections. "
+		       "Called by Dr Seward, Round 1. "
+			   "(Lord Godalming, Round 2)\n");
+		
+		char *trail =
+			"GSZ.... SGE.... HGE.... MGE.... DSZ.V.. "
+			"GSZ....";
+		
+		Message messages[6] = {};
+		HunterView hv = HvNew(trail, messages);
+		
+		int numLocs = -1;
+		PlaceId *locs = HvWhereCanTheyGo(hv, PLAYER_LORD_GODALMING, &numLocs);
+		assert(numLocs == 11);
+		sortPlaces(locs, numLocs);
+		assert(locs[0] == BELGRADE);
+		assert(locs[1] == BUCHAREST);
+		assert(locs[2] == BUDAPEST);
+		assert(locs[3] == CONSTANTA);
+		assert(locs[4] == GALATZ);
+		assert(locs[5] == KLAUSENBURG);
+		assert(locs[6] == SOFIA);
+		assert(locs[7] == ST_JOSEPH_AND_ST_MARY);
+		assert(locs[8] == SZEGED);
+		assert(locs[9] == VIENNA);
+		assert(locs[10] == ZAGREB);
+		free(locs);
+		
+		HvFree(hv);
+		printf("Test passed!\n");	
+	}
+
+	{///////////////////////////////////////////////////////////////////
+
+		printf("Checking City Unknown connections (none)\n");
+		char *trail = "GGA.... SGE.... HGE.... MGE.... DC?.V..";
+		Message messages[5] = {};
+		HunterView hv = HvNew(trail, messages);
+		
+		int numLocs = -1;
+		PlaceId *locs = HvWhereCanTheyGo(hv, PLAYER_DRACULA, &numLocs);
+
+		assert(numLocs == 0);
+		assert(locs == NULL);
+		free(locs);
+		
+		printf("Test passed!\n");
+	}
+
 	return EXIT_SUCCESS;
 }
