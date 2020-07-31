@@ -257,15 +257,12 @@ int main(void)
 		Message messages[21] = {};
 		GameView gv = GvNew(trail, messages);
 		
-		printf("CURR SCORE: %d\n\n\n", GvGetScore(gv));
-		//assert(GvGetScore(gv) == GAME_START_SCORE
-		//                        - 4 * SCORE_LOSS_DRACULA_TURN
-		//                         - SCORE_LOSS_HUNTER_HOSPITAL);
-		//printf("HEALTH: %d\n\n\n", GvGetHealth(gv, PLAYER_LORD_GODALMING));
-		//assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == 0);
-		//assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == HOSPITAL_PLACE);
-		printf("LOCATION: %d\n", GvGetVampireLocation(gv));
-		//assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == STRASBOURG);
+		assert(GvGetScore(gv) == GAME_START_SCORE
+		                         - 4 * SCORE_LOSS_DRACULA_TURN
+		                         - SCORE_LOSS_HUNTER_HOSPITAL);
+		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == 0);
+		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == HOSPITAL_PLACE);
+		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == STRASBOURG);
 		
 		int *start = malloc(sizeof(int *));
 		GvGetTrapLocations(gv, start);

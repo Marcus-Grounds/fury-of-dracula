@@ -51,7 +51,6 @@ int main(void)
 		int numTraps = -1;
 		PlaceId *traps = DvGetTrapLocations(dv, &numTraps);
 		assert(numTraps == 0);
-		//printf("%d\n", traps[1]);
 		free(traps);
 
 		printf("Test passed!\n");
@@ -103,15 +102,12 @@ int main(void)
 		assert(DvGetVampireLocation(dv) == EDINBURGH);
 		int numTraps = -1;
 		PlaceId *traps = DvGetTrapLocations(dv, &numTraps);
-		for (int i = 0; i < numTraps; i++) {
-			printf("TRAP NUMBER: %d,TRAP LOC: %d\n", i, traps[i]);
-		}
 		
-		/*assert(numTraps == 3);
+		assert(numTraps == 3);
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == LONDON);
 		assert(traps[1] == LONDON);
-		assert(traps[2] == MANCHESTER);*/
+		assert(traps[2] == MANCHESTER);
 		free(traps);
 		
 		printf("Test passed!\n");
