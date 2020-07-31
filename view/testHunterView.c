@@ -663,5 +663,91 @@ int main(void)
 		printf("Test passed!\n");
 	}
 
+	{ ///////////////////////////////////////////////////////////////////
+
+		printf("Checking last known Dracula position when Dracula has not made a move\n");
+
+
+		char *trail =
+			"GST.... SAO.... HZU....";
+		
+		Message messages[3] = {};
+		HunterView hv = HvNew(trail, messages);
+		Round round = HvGetRound(hv);
+
+		assert(HvGetRound(hv) == 0);
+		assert(HvGetPlayer(hv) == PLAYER_MINA_HARKER);
+		assert(HvGetScore(hv) == GAME_START_SCORE);
+		assert(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == STRASBOURG);
+		assert(HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == ATLANTIC_OCEAN);
+		assert(HvGetPlayerLocation(hv, PLAYER_VAN_HELSING) == ZURICH);
+		assert(HvGetPlayerLocation(hv, PLAYER_MINA_HARKER) == NOWHERE);
+		assert(HvGetPlayerLocation(hv, PLAYER_DRACULA) == NOWHERE);
+		assert(HvGetLastKnownDraculaLocation(hv, &round) == NOWHERE);
+
+		printf("test passed\n");
+
+		HvFree(hv);
+
+	}
+
+	{ ///////////////////////////////////////////////////////////////////
+
+		printf("Checking last known Dracula position when Dracula is at Adriatic Sea\n");
+
+
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DS?.V.."
+			"GGE.... SGE.... HGE.... MGE.... DAS.T..";
+		
+		Message messages[3] = {};
+		HunterView hv = HvNew(trail, messages);
+		Round round = HvGetRound(hv);
+
+		assert(HvGetScore(hv) == GAME_START_SCORE - 2 *SCORE_LOSS_DRACULA_TURN);
+		assert(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_VAN_HELSING) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_MINA_HARKER) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_DRACULA) == ADRIATIC_SEA);
+		assert(HvGetLastKnownDraculaLocation(hv, &round) == ADRIATIC_SEA);
+		assert(round == 1);
+
+		printf("test passed\n");
+
+		HvFree(hv);
+
+	}
+
+	{ ///////////////////////////////////////////////////////////////////
+
+		printf("Checking last known Dracula position with multiple unknowns\n");
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DC?.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DCD.... "
+			"GGE.... SGE.... HGE.... MGE.... DC?T... "
+			"GGE.... SGE.... HGE.... MGE.... DC?T... "
+			"GGE.... SGE.... HGE.... MGE.... DCD.... "
+			"GGE.... SGE.... HGE.... MGE.... DHIT... "
+			"GGE.... SGE.... HGE.... MGE.... DD2T...";
+		
+		Message messages[3] = {};
+		HunterView hv = HvNew(trail, messages);
+		Round round = HvGetRound(hv);
+
+		assert(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_DR_SEWARD) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_VAN_HELSING) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_MINA_HARKER) == GENEVA);
+		assert(HvGetPlayerLocation(hv, PLAYER_DRACULA) == CASTLE_DRACULA);
+		assert(HvGetLastKnownDraculaLocation(hv, &round) == CASTLE_DRACULA);
+		assert(round == 6);
+
+		printf("test passed\n");
+
+		HvFree(hv);
+
+	}
+
 	return EXIT_SUCCESS;
 }

@@ -22,11 +22,13 @@
 #include "Places.h"
 
 ////////////////////////////////////////////////////////////////////////
-bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs);
-PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
-					  int *numReturnedLocs);
+static bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, 
+                       int *numReturnedLocs);
+static PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
+					        int *numReturnedLocs);
 // Taken from testUtils.h to make HvGetShortestPathTo pass tests.
-void HvSortPlaces(PlaceId *places, int numPlaces);
+static void HvSortPlaces(PlaceId *places, int numPlaces);
+static int HvPlaceIdCmp(const void *ptr1, const void *ptr2);
 
 struct hunterView {
 	GameView gv;
@@ -213,16 +215,18 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 	Round round = player >= currPlayer? HvGetRound(hv): HvGetRound(hv) + 1;
 	PlaceId location = HvGetPlayerLocation(hv, player);
 	if (location == NOWHERE) return NULL;
-	if (player != PLAYER_DRACULA || (location != CITY_UNKNOWN && location != SEA_UNKNOWN))
-		return GvGetReachableByType(hv->gv, player, round, location, road, rail, boat, 
-									numReturnedLocs);
+	if (player != PLAYER_DRACULA || (location != CITY_UNKNOWN && 
+	                                 location != SEA_UNKNOWN))
+		return GvGetReachableByType(hv->gv, player, round, location, road, 
+		                            rail, boat, numReturnedLocs);
 	return NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////
 // Your own interface functions
 // Checks if a location is already in reachable locations array.
-bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs) {
+static bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, 
+                       int *numReturnedLocs) {
 	for (int i = 0; i < (*numReturnedLocs); i++) {
 		if (reachableLocations[i] == new) return true;
 	}
@@ -230,7 +234,7 @@ bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs) 
 }
 
 // Add a PlaceId to an array of locations.
-PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
+static PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
 					  int *numReturnedLocs) {
 	if (HvIsRepeat(new, reachableLocations, numReturnedLocs)) 
 		return reachableLocations;
@@ -244,12 +248,12 @@ PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
 
 // Functions used to sort places in numeric (and alphabetic) order.
 // Taken from testUtils.c to make HvGetShortestPathTo pass tests.
-int HvPlaceIdCmp(const void *ptr1, const void *ptr2) {
+static int HvPlaceIdCmp(const void *ptr1, const void *ptr2) {
 	PlaceId p1 = *(PlaceId *)ptr1;
 	PlaceId p2 = *(PlaceId *)ptr2;
 	return p1 - p2;
 }
 
-void HvSortPlaces(PlaceId *places, int numPlaces) {
+static void HvSortPlaces(PlaceId *places, int numPlaces) {
 	qsort(places, (size_t)numPlaces, sizeof(PlaceId), HvPlaceIdCmp);
 }
