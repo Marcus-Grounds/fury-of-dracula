@@ -22,9 +22,10 @@
 #include "Places.h"
 
 ////////////////////////////////////////////////////////////////////////
-static bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs);
+static bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, 
+                       int *numReturnedLocs);
 static PlaceId *HvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
-					  int *numReturnedLocs);
+					        int *numReturnedLocs);
 // Taken from testUtils.h to make HvGetShortestPathTo pass tests.
 static void HvSortPlaces(PlaceId *places, int numPlaces);
 static int HvPlaceIdCmp(const void *ptr1, const void *ptr2);
@@ -214,16 +215,18 @@ PlaceId *HvWhereCanTheyGoByType(HunterView hv, Player player,
 	Round round = player >= currPlayer? HvGetRound(hv): HvGetRound(hv) + 1;
 	PlaceId location = HvGetPlayerLocation(hv, player);
 	if (location == NOWHERE) return NULL;
-	if (player != PLAYER_DRACULA || (location != CITY_UNKNOWN && location != SEA_UNKNOWN))
-		return GvGetReachableByType(hv->gv, player, round, location, road, rail, boat, 
-									numReturnedLocs);
+	if (player != PLAYER_DRACULA || (location != CITY_UNKNOWN && 
+	                                 location != SEA_UNKNOWN))
+		return GvGetReachableByType(hv->gv, player, round, location, road, 
+		                            rail, boat, numReturnedLocs);
 	return NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////
 // Your own interface functions
 // Checks if a location is already in reachable locations array.
-static bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs) {
+static bool HvIsRepeat(PlaceId new, PlaceId *reachableLocations, 
+                       int *numReturnedLocs) {
 	for (int i = 0; i < (*numReturnedLocs); i++) {
 		if (reachableLocations[i] == new) return true;
 	}

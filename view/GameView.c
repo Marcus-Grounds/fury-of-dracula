@@ -35,19 +35,22 @@ static void initTraps(GameView gv);
 static void storePastPlays(GameView gv, char *pastPlays);
 static void storeTraps(GameView gv, char *pastPlays);
 static void storeMoveHistory(GameView gv, char *play, Player player);
-static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
+static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, 
+                               Player player);
 static void updateGameScore(GameView gv, char *play, Player player);
 static void vampireActivity(GameView gv, char *play, Player player);
 
 static Player initialToPlayer(char initial);
-static PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
-static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
+static PlaceId locationOfHide(PlaceId *moveHistory, int index, 
+                              PlaceId currMove);
+static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, 
+                                    PlaceId currMove);
 static int placeIdCmp(PlaceId x, PlaceId y);
 
 // Helper functions for GvGetReachable and GvGetReachableByType
 bool GvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs);
 PlaceId *GvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
-					int *numReturnedLocs);
+					  int *numReturnedLocs);
 PlaceId *GvGetConnectionsByRail(GameView gv, PlaceId intermediate, 
 							  PlaceId *reachableLocations, int maxRailDistance, 
 							  int distance, int *numReturnedLocs);
@@ -157,7 +160,8 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 		} else if (currMove == HIDE) {
 			location = locationOfHide(moveHistory, moveCount - 1, currMove);
 		} else if ((currMove) >= DOUBLE_BACK_1 && (currMove <= DOUBLE_BACK_5)) {
-			location = locationOfDoubleBack(moveHistory, moveCount - 1, currMove);
+			location = locationOfDoubleBack(moveHistory, moveCount - 1, 
+			                                currMove);
 		} else {
 			location = currMove;
 		}
@@ -252,7 +256,8 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
                             int *numReturnedLocs, bool *canFree)
 {
 	*numReturnedLocs = 0;
-	PlaceId *locHistory = GvGetLocationHistory(gv, player, numReturnedLocs, canFree);
+	PlaceId *locHistory = GvGetLocationHistory(gv, player, numReturnedLocs, 
+	                                           canFree);
 	if (numLocs >= (*numReturnedLocs)) {
 		return locHistory;
 	}
@@ -353,7 +358,8 @@ static void storePastPlays(GameView gv, char *pastPlays) {
 		currPlayer = initialToPlayer(play[0]);
 		gv->turn++;
 
-		// Extracting information from current play & storing into GameView data structure:
+		// Extracting information from current play & storing into 
+		// GameView data structure:
 		storeMoveHistory(gv, play, currPlayer);
 		vampireActivity(gv, play, currPlayer);
 		updatePlayerHealth (gv, pastPlays ,play, currPlayer);
@@ -362,7 +368,8 @@ static void storePastPlays(GameView gv, char *pastPlays) {
 	free(freeTmp);
 }
 
-// Stores a player move into the move history of player (in GameView data structure)
+// Stores a player move into the move history of player 
+// (in GameView data structure)
 static void storeMoveHistory(GameView gv, char *play, Player player) {
 	
 	PlaceId *moveHistory = (gv->players[player]).history;
@@ -402,7 +409,8 @@ static Player initialToPlayer(char initial) {
 }
 
 // Resolves location of Dracula's HIDE move to a city or sea
-static PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove) {
+static PlaceId locationOfHide(PlaceId *moveHistory, int index, 
+                              PlaceId currMove) {
 
 	if (currMove != HIDE) return currMove;
 	// Check if the resolved location of hide is a doubleback move
@@ -410,20 +418,26 @@ static PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove)
 }
 
 // Resolves location of Dracula's DOUBLE_BACK_n move to a city or sea
-static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) {
+static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, 
+                                    PlaceId currMove) {
 
 	// Doubling back and checking if the resolved location is a hide move
 	switch(currMove) {
 		case DOUBLE_BACK_1:
-			return locationOfHide(moveHistory, index - 1, moveHistory[index - 1]);
+			return locationOfHide(moveHistory, index - 1, 
+			                      moveHistory[index - 1]);
 		case DOUBLE_BACK_2:
-			return locationOfHide(moveHistory, index - 2, moveHistory[index - 2]);
+			return locationOfHide(moveHistory, index - 2, 
+			                      moveHistory[index - 2]);
 		case DOUBLE_BACK_3:
-			return locationOfHide(moveHistory, index - 3, moveHistory[index - 3]);
+			return locationOfHide(moveHistory, index - 3, 
+			                      moveHistory[index - 3]);
 		case DOUBLE_BACK_4:
-			return locationOfHide(moveHistory, index - 4, moveHistory[index - 4]);
+			return locationOfHide(moveHistory, index - 4, 
+			                      moveHistory[index - 4]);
 		case DOUBLE_BACK_5:
-			return locationOfHide(moveHistory, index - 5, moveHistory[index - 5]);
+			return locationOfHide(moveHistory, index - 5, 
+			                      moveHistory[index - 5]);
 		default: 
 			// Move given is not a double back move
 			return currMove;
@@ -438,7 +452,8 @@ static void initScoreTurn(GameView gv) {
 
 //Initializing Traps
 static void initTraps(GameView gv) {
-	//Can scan through drac history to determine size of trap store / look for 'M'
+	//Can scan through drac history to determine size of trap store / 
+	//look for 'M'
 	//in actual trap store we check count value along side size of m
 	gv->traps.trapCount = 0;
 	gv->traps.locations = malloc(sizeof(PlaceId));
@@ -506,7 +521,8 @@ static void storeTraps(GameView gv, char *pastPlays) {
 		if (play[0] != 'D') continue;
 
 		int check = 0;
-		if (i >= trapSkipCnt && i < DracHistCount) { //SKIPS OVER TRAPS THAT HAVE VANISHED
+		if (i >= trapSkipCnt && i < DracHistCount) { 
+		    //SKIPS OVER TRAPS THAT HAVE VANISHED
 			
 			char placeAbbrev[3] = {play[1], play[2], '\0'};
 			PlaceId place = placeAbbrevToId(placeAbbrev);
@@ -566,7 +582,8 @@ static void updateGameScore(GameView gv, char *play, Player player) {
 }
 
 // Updates Player Health
-static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player) {
+static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, 
+                               Player player) {
 	
 	int health = (gv->players[player]).health;
 	int histCount = (gv->players[player]).historyCount;
@@ -584,7 +601,9 @@ static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player 
 			}
 			if (play[i] == 'D') {
 				health = health - LIFE_LOSS_DRACULA_ENCOUNTER;	
-				gv->players[PLAYER_DRACULA].health = gv->players[PLAYER_DRACULA].health - LIFE_LOSS_HUNTER_ENCOUNTER;
+				gv->players[PLAYER_DRACULA].health = 
+				(gv->players[PLAYER_DRACULA].health - 
+				LIFE_LOSS_HUNTER_ENCOUNTER);
 			}
 		}
 
@@ -657,8 +676,8 @@ bool GvIsRepeat(PlaceId new, PlaceId *reachableLocations,
 	return false;
 }
 
-// Adds a PlaceId to the array of reachable locations, given the PlaceId is not a
-// already present in the array.
+// Adds a PlaceId to the array of reachable locations, given the PlaceId 
+// is not already present in the array.
 PlaceId *GvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
 					  int *numReturnedLocs) {
 	if (GvIsRepeat(new, reachableLocations, numReturnedLocs)) 
