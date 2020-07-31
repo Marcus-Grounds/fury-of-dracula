@@ -263,9 +263,6 @@ int main(void)
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == 0);
 		assert(GvGetPlayerLocation(gv, PLAYER_LORD_GODALMING) == HOSPITAL_PLACE);
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == STRASBOURG);
-		
-		int *start = malloc(sizeof(int *));
-		GvGetTrapLocations(gv, start);
 
 		GvFree(gv);
 		printf("Test passed!\n");
