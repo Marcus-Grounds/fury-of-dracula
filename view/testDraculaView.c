@@ -140,6 +140,256 @@ int main(void)
 	} 
 	
 	{///////////////////////////////////////////////////////////////////
+	
+		printf("Testing DvGetValidMoves.\n"); 
+		printf("\tCase: Dracula has not made any moves.\n");
+	
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+		assert(numMoves == 0);
+		assert (moves == NULL);
+		DvFree(dv);
+	} 
+
+	{///////////////////////////////////////////////////////////////////
+		
+		printf("\tCase: Made 1 LOCATION move at city.\n");
+	
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DLS.V.. "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+		
+		assert(numMoves == 6);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == ATLANTIC_OCEAN);
+		assert(moves[1] == CADIZ);
+		assert(moves[2] == MADRID);
+		assert(moves[3] == SANTANDER);
+		assert(moves[4] == HIDE);
+		assert(moves[5] == DOUBLE_BACK_1);
+		free(moves);
+		
+		DvFree(dv);
+		
+	} 
+	
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: Made 1 LOCATION move at sea.\n");
+	
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DBS.V.. "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 4);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == CONSTANTA);
+		assert(moves[1] == IONIAN_SEA);
+		assert(moves[2] == VARNA);
+		assert(moves[3] == DOUBLE_BACK_1);
+		free(moves);
+		
+		DvFree(dv);
+	} 
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: Made 2 LOCATION moves at city.\n");
+
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DST.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DGET... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 7);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == CLERMONT_FERRAND);
+		assert(moves[1] == MARSEILLES);
+		assert(moves[2] == PARIS);
+		assert(moves[3] == ZURICH);
+		assert(moves[4] == HIDE);
+		assert(moves[5] == DOUBLE_BACK_1);
+		assert(moves[6] == DOUBLE_BACK_2);
+		free(moves);
+		
+		DvFree(dv);
+	} 
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: Made 1 LOCATION move at city and HIDE.\n");
+
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DST.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DHIT... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 10);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == BRUSSELS);
+		assert(moves[1] == COLOGNE);
+		assert(moves[2] == FRANKFURT);
+		assert(moves[3] == GENEVA);
+		assert(moves[4] == MUNICH);
+		assert(moves[5] == NUREMBURG);
+		assert(moves[6] == PARIS);
+		assert(moves[7] == ZURICH);
+		assert(moves[8] == DOUBLE_BACK_1);
+		assert(moves[9] == DOUBLE_BACK_2);
+		free(moves);
+		
+		DvFree(dv);
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: Made 1 LOCATION move at city and DOUBLE_BACK_1.\n");
+
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DST.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DD1T... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 9);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == BRUSSELS);
+		assert(moves[1] == COLOGNE);
+		assert(moves[2] == FRANKFURT);
+		assert(moves[3] == GENEVA);
+		assert(moves[4] == MUNICH);
+		assert(moves[5] == NUREMBURG);
+		assert(moves[6] == PARIS);
+		assert(moves[7] == ZURICH);
+		assert(moves[8] == HIDE);
+		free(moves);
+		
+		DvFree(dv);
+
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: All currently reachable locations are in trail. HIDE and DOUBLE_BACK are valid.\n");
+
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DBE.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DKLT... "
+			"GGE.... SGE.... HGE.... MGE.... DBDT... "
+			"GGE.... SGE.... HGE.... MGE.... DZAT... "
+			"GGE.... SGE.... HGE.... MGE.... DSZT... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 6);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == HIDE);
+		assert(moves[1] == DOUBLE_BACK_1);
+		assert(moves[2] == DOUBLE_BACK_2);
+		assert(moves[3] == DOUBLE_BACK_3);
+		assert(moves[4] == DOUBLE_BACK_4);
+		assert(moves[5] == DOUBLE_BACK_5);
+		free(moves);
+		
+		DvFree(dv);
+	} 
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: Not all DOUBLE_BACK locations are adjacent.\n");
+		
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DSN.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DLST... "
+			"GGE.... SGE.... HGE.... MGE.... DCAT... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 6);
+		sortPlaces(moves, numMoves);
+		assert(moves[0] == ATLANTIC_OCEAN);
+		assert(moves[1] == GRANADA);
+		assert(moves[2] == MADRID);
+		assert(moves[3] == HIDE);
+		assert(moves[4] == DOUBLE_BACK_1);
+		assert(moves[5] == DOUBLE_BACK_2);
+		free(moves);
+		
+		DvFree(dv);
+	} 
+
+	{///////////////////////////////////////////////////////////////////
+	
+		printf("\tCase: No valid moves other than TELEPORT.\n");
+
+		char *trail =
+			"GGE.... SGE.... HGE.... MGE.... DIO.V.. "
+			"GGE.... SGE.... HGE.... MGE.... DBST... "
+			"GGE.... SGE.... HGE.... MGE.... DCNT... "
+			"GGE.... SGE.... HGE.... MGE.... DVRT... "
+			"GGE.... SGE.... HGE.... MGE.... DD3T... "
+			"GGE.... SGE.... HGE.... MGE....";
+		
+		Message messages[9] = {};
+		DraculaView dv = DvNew(trail, messages);
+		
+		int numMoves = -1;
+		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
+	
+		assert(numMoves == 0);
+		sortPlaces(moves, numMoves);
+		assert(moves == NULL);
+		free(moves);
+		
+		DvFree(dv);
+
+		printf("Tests passed!\n");
+		
+	} 
+	
+	{///////////////////////////////////////////////////////////////////
 
 		printf("Testing DvWhereCanIGo & DvWhereCanIGoByType.\n");
 		printf("\tCase: From Bucharest. Double back and hide is invalid.\n");
@@ -586,255 +836,6 @@ int main(void)
 		printf("Tests passed!\n");
 	}
 
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("Testing DvGetValidMoves.\n"); 
-		printf("\tCase: Dracula has not made any moves.\n");
-	
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-		assert(numMoves == 0);
-		assert (moves == NULL);
-		DvFree(dv);
-	} 
-
-	{///////////////////////////////////////////////////////////////////
-		
-		printf("\tCase: Made 1 LOCATION move at city.\n");
-	
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DLS.V.. "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-		
-		assert(numMoves == 6);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == ATLANTIC_OCEAN);
-		assert(moves[1] == CADIZ);
-		assert(moves[2] == MADRID);
-		assert(moves[3] == SANTANDER);
-		assert(moves[4] == HIDE);
-		assert(moves[5] == DOUBLE_BACK_1);
-		free(moves);
-		
-		DvFree(dv);
-		
-	} 
-	
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: Made 1 LOCATION move at sea.\n");
-	
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DBS.V.. "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 4);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == CONSTANTA);
-		assert(moves[1] == IONIAN_SEA);
-		assert(moves[2] == VARNA);
-		assert(moves[3] == DOUBLE_BACK_1);
-		free(moves);
-		
-		DvFree(dv);
-	} 
-
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: Made 2 LOCATION moves at city.\n");
-
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DST.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DGET... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 7);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == CLERMONT_FERRAND);
-		assert(moves[1] == MARSEILLES);
-		assert(moves[2] == PARIS);
-		assert(moves[3] == ZURICH);
-		assert(moves[4] == HIDE);
-		assert(moves[5] == DOUBLE_BACK_1);
-		assert(moves[6] == DOUBLE_BACK_2);
-		free(moves);
-		
-		DvFree(dv);
-	} 
-
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: Made 1 LOCATION move at city and HIDE.\n");
-
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DST.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DHIT... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 10);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == BRUSSELS);
-		assert(moves[1] == COLOGNE);
-		assert(moves[2] == FRANKFURT);
-		assert(moves[3] == GENEVA);
-		assert(moves[4] == MUNICH);
-		assert(moves[5] == NUREMBURG);
-		assert(moves[6] == PARIS);
-		assert(moves[7] == ZURICH);
-		assert(moves[8] == DOUBLE_BACK_1);
-		assert(moves[9] == DOUBLE_BACK_2);
-		free(moves);
-		
-		DvFree(dv);
-	} 
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: Made 1 LOCATION move at city and DOUBLE_BACK_1.\n");
-
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DST.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DD1T... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 9);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == BRUSSELS);
-		assert(moves[1] == COLOGNE);
-		assert(moves[2] == FRANKFURT);
-		assert(moves[3] == GENEVA);
-		assert(moves[4] == MUNICH);
-		assert(moves[5] == NUREMBURG);
-		assert(moves[6] == PARIS);
-		assert(moves[7] == ZURICH);
-		assert(moves[8] == HIDE);
-		free(moves);
-		
-		DvFree(dv);
-
-	} 
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: All currently reachable locations are in trail. HIDE and DOUBLE_BACK are valid.\n");
-
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DBE.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DKLT... "
-			"GGE.... SGE.... HGE.... MGE.... DBDT... "
-			"GGE.... SGE.... HGE.... MGE.... DZAT... "
-			"GGE.... SGE.... HGE.... MGE.... DSZT... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 6);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == HIDE);
-		assert(moves[1] == DOUBLE_BACK_1);
-		assert(moves[2] == DOUBLE_BACK_2);
-		assert(moves[3] == DOUBLE_BACK_3);
-		assert(moves[4] == DOUBLE_BACK_4);
-		assert(moves[5] == DOUBLE_BACK_5);
-		free(moves);
-		
-		DvFree(dv);
-	} 
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: Not all DOUBLE_BACK locations are adjacent.\n");
-		
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DSN.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DLST... "
-			"GGE.... SGE.... HGE.... MGE.... DCAT... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 6);
-		sortPlaces(moves, numMoves);
-		assert(moves[0] == ATLANTIC_OCEAN);
-		assert(moves[1] == GRANADA);
-		assert(moves[2] == MADRID);
-		assert(moves[3] == HIDE);
-		assert(moves[4] == DOUBLE_BACK_1);
-		assert(moves[5] == DOUBLE_BACK_2);
-		free(moves);
-		
-		DvFree(dv);
-	} 
-
-	{///////////////////////////////////////////////////////////////////
-	
-		printf("\tCase: No valid moves other than TELEPORT.\n");
-
-		char *trail =
-			"GGE.... SGE.... HGE.... MGE.... DIO.V.. "
-			"GGE.... SGE.... HGE.... MGE.... DBST... "
-			"GGE.... SGE.... HGE.... MGE.... DCNT... "
-			"GGE.... SGE.... HGE.... MGE.... DVRT... "
-			"GGE.... SGE.... HGE.... MGE.... DD3T... "
-			"GGE.... SGE.... HGE.... MGE....";
-		
-		Message messages[9] = {};
-		DraculaView dv = DvNew(trail, messages);
-		
-		int numMoves = -1;
-		PlaceId *moves = DvGetValidMoves(dv, &numMoves);
-	
-		assert(numMoves == 0);
-		sortPlaces(moves, numMoves);
-		assert(moves == NULL);
-		free(moves);
-		
-		DvFree(dv);
-
-		printf("Tests passed!\n");
-		
-	} 
 
 	return EXIT_SUCCESS;
 }
