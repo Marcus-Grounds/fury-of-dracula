@@ -25,21 +25,21 @@
 #define MIN_BRANCHING_DISTANCE 2
 #define PLAY_SIZE 7
 
-// Helper Function Declarations: //TODO: make static or move this to GameView.h later?
-void initPlayers(GameView gv);
-void initScoreTurn(GameView gv);
-void initTraps(GameView gv);
+// Helper Function Declarations
+static void initPlayers(GameView gv);
+static void initScoreTurn(GameView gv);
+static void initTraps(GameView gv);
 
-void storePastPlays(GameView gv, char *pastPlays);
-void storeTraps(GameView gv, char *pastPlays);
-void storeMoveHistory(GameView gv, char *play, Player player);
-void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
-void updateGameScore(GameView gv, char *play, Player player);
-void vampireActivity(GameView gv, char *play, Player player);
+static void storePastPlays(GameView gv, char *pastPlays);
+static void storeTraps(GameView gv, char *pastPlays);
+static void storeMoveHistory(GameView gv, char *play, Player player);
+static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player);
+static void updateGameScore(GameView gv, char *play, Player player);
+static void vampireActivity(GameView gv, char *play, Player player);
 
-Player initialToPlayer(char initial);
-PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
-PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
+static Player initialToPlayer(char initial);
+static PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove);
+static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 static int placeIdCmp(PlaceId x, PlaceId y);
 
 typedef struct playerData {
@@ -104,7 +104,6 @@ void GvFree(GameView gv)
 Round GvGetRound(GameView gv)
 {
 	return ((gv->turn) / TOTAL_PLAYERS);
-
 }
 
 Player GvGetPlayer(GameView gv)
@@ -136,7 +135,6 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 	if (player != PLAYER_DRACULA) {
 		if (gv->players[player].health <= 0) {
 			return ST_JOSEPH_AND_ST_MARY;
-
 		}
 		return currMove;
 
@@ -168,7 +166,6 @@ PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 	PlaceId *traps = malloc(sizeof(PlaceId) * (*numTraps));
 	traps = memcpy(traps, gv->traps.locations, sizeof(PlaceId) * (*numTraps));
 	return traps;
-
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -219,6 +216,7 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 	int moveCount = (gv->players[player]).historyCount;
 
 	PlaceId *locHistory = malloc(sizeof(PlaceId) * moveCount);
+	
 	assert (locHistory != NULL);
 
 	for (int i = 0; i < moveCount; i++) {
@@ -350,7 +348,7 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 // Your own interface functions
 
 // Initialises the players[] field of the GameView data structure
-void initPlayers(GameView gv) {
+static void initPlayers(GameView gv) {
 	for (Player curr = PLAYER_LORD_GODALMING; curr <= PLAYER_DRACULA; curr++) {
 		(gv->players[curr]).historyCount = 0;
 		(gv->players[curr]).history = NULL;
@@ -360,9 +358,9 @@ void initPlayers(GameView gv) {
 	return;
 }
 
-
 // Stores data from pastPlays into the GameView data structure
-void storePastPlays(GameView gv, char *pastPlays) {
+static void storePastPlays(GameView gv, char *pastPlays) {
+
 	if (strcmp(pastPlays, "") == 0) return;
 
 	// Extracting each play from pastPlays string with strsep
@@ -384,10 +382,9 @@ void storePastPlays(GameView gv, char *pastPlays) {
 }
 
 // Stores a player move into the move history of player (in GameView data structure)
-void storeMoveHistory(GameView gv, char *play, Player player) {
+static void storeMoveHistory(GameView gv, char *play, Player player) {
 	
 	PlaceId *moveHistory = (gv->players[player]).history;
-	//assert (moveHistory != NULL);
 
 	char placeAbbrev[3] = {play[1], play[2], '\0'};
 	PlaceId place = placeAbbrevToId(placeAbbrev);
@@ -405,7 +402,7 @@ void storeMoveHistory(GameView gv, char *play, Player player) {
 }
 
 // Returns a player given their initial
-Player initialToPlayer(char initial) {
+static Player initialToPlayer(char initial) {
 	switch(initial) {
 		case 'G':
 			return PLAYER_LORD_GODALMING;
@@ -424,7 +421,7 @@ Player initialToPlayer(char initial) {
 }
 
 // Resolves location of Dracula's HIDE move to a city or sea
-PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove) {
+static PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove) {
 
 	if (currMove != HIDE) return currMove;
 	// Check if the resolved location of hide is a doubleback move
@@ -432,7 +429,7 @@ PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove) {
 }
 
 // Resolves location of Dracula's DOUBLE_BACK_n move to a city or sea
-PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) {
+static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) {
 
 	// Doubling back and checking if the resolved location is a hide move
 	switch(currMove) {
@@ -453,13 +450,13 @@ PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove) 
 }
 
 //Initializing score and round
-void initScoreTurn(GameView gv) {
+static void initScoreTurn(GameView gv) {
 	gv->score = GAME_START_SCORE;
 	gv->turn = 0;
 }	
 
-// todo: comment description for this function
-void initTraps(GameView gv) {
+//Initializing Traps
+static void initTraps(GameView gv) {
 	//Can scan through drac history to determine size of trap store / look for 'M'
 	//in actual trap store we check count value along side size of m
 	gv->traps.trapCount = 0;
@@ -467,8 +464,9 @@ void initTraps(GameView gv) {
 	assert(gv->traps.locations != NULL);
 	
 }
-// todo: comment description for this function
-void storeTraps(GameView gv, char *pastPlays) {
+
+// Stores Traps into an array from pasPlays
+static void storeTraps(GameView gv, char *pastPlays) {
 	
 	if (strcmp(pastPlays, "") == 0) return;
 
@@ -570,8 +568,8 @@ static int placeIdCmp(PlaceId x, PlaceId y) {
 	return p1 - p2;
 }
 
-// todo: comment description for this function
-void updateGameScore(GameView gv, char *play, Player player) {
+// Function to update Game score
+static void updateGameScore(GameView gv, char *play, Player player) {
 	if (player == PLAYER_DRACULA) {
 		if (play[5] == 'V') {
 			gv->immatureVampLocation = NOWHERE;
@@ -585,8 +583,8 @@ void updateGameScore(GameView gv, char *play, Player player) {
 	}
 }
 
-// todo: comment description for this function
-void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player) {
+// Updates Player Health
+static void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player) {
 	
 	int health = (gv->players[player]).health;
 	int histCount = (gv->players[player]).historyCount;
@@ -636,7 +634,7 @@ void updatePlayerHealth(GameView gv, char *pastPlays, char *play, Player player)
 
 // Checks if an immature vampire was placed or vanquished and updates field 
 // in gameView struct
-void vampireActivity(GameView gv, char *play, Player player) {
+static void vampireActivity(GameView gv, char *play, Player player) {
 	if (player == PLAYER_DRACULA) {
 		if (play[4] == 'V') {
 			// Immature vampire is placed

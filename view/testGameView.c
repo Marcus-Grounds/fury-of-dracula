@@ -119,6 +119,28 @@ int main(void)
 		printf("Test passed!\n");
 	}
 
+	{ ///////////////////////////////////////////////////////////////////
+		printf("Dracula's plays Teleport\n");
+
+		char *trail =
+			"GST.... SAO.... HZU.... MBB.... DTP....";
+		
+		Message messages[] = {
+			"Hello", "Goodbye", "Stuff", "...", "Mwahahahaha"
+		};
+		
+		GameView gv = GvNew(trail, messages);
+
+		assert(GvGetRound(gv) == 1);
+		assert(GvGetPlayer(gv) == PLAYER_LORD_GODALMING);
+		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
+		assert(GvGetHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS + LIFE_GAIN_CASTLE_DRACULA);
+		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == CASTLE_DRACULA);
+		assert(GvGetVampireLocation(gv) == CITY_UNKNOWN);
+		GvFree(gv);
+		printf("Test passed!\n");
+	}
+
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Encountering Dracula\n");
@@ -148,7 +170,6 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed\n");
 	}
-
 
 	{///////////////////////////////////////////////////////////////////
 	
@@ -221,7 +242,6 @@ int main(void)
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
-	
 	
 	{///////////////////////////////////////////////////////////////////
 	
