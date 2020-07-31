@@ -286,9 +286,72 @@ int main(void)
 		printf("Test passed!\n");
 	}
 
+	{//////////////////////////////////////////////////////////////////
+
+		printf("Testing shortest path, called on Mina Harker's turn (Round 0)\n");
+		
+				char *trail =
+			"GLS.... SLS.... HSW....";
+		
+		Message messages[5] = {};
+		HunterView hv = HvNew(trail, messages);
+		
+		{
+			printf("\tLisbon -> Barcelona (Lord Godalming, Round 1)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_LORD_GODALMING,
+			                                    BARCELONA, &pathLength);
+			assert(pathLength == 2);
+			assert(path[0] == MADRID);
+			assert(path[1] == BARCELONA);
+			free(path);
+		}
+		
+		{
+			printf("\tLisbon -> Cologne (Lord Godalming, Round 1)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_LORD_GODALMING,
+			                                    COLOGNE, &pathLength);
+			assert(pathLength == 3);
+			assert(path[0] == MADRID);
+			assert(path[1] == BORDEAUX);
+			assert(path[2] == COLOGNE);
+			free(path);
+		}
+		
+		{
+			printf("\tSwansea -> Hamburg (Van Helsing, Round 1)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_VAN_HELSING,
+			                                    HAMBURG, &pathLength);
+			assert(pathLength == 3);
+			assert(path[0] == EDINBURGH);
+			assert(path[1] == NORTH_SEA);
+			assert(path[2] == HAMBURG);
+			free(path);
+		}
+		
+		{
+			printf("\tLisbon -> Castle Dracula (Dr. Seward, Round 1)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_DR_SEWARD,
+			                                    CASTLE_DRACULA, &pathLength);
+			assert(pathLength == 7);
+			assert(path[0] == SARAGOSSA);
+			assert(path[1] == MARSEILLES);
+			assert(path[2] == GENOA);
+			assert(path[3] == VENICE);
+			assert(path[4] == BUDAPEST);
+			assert(path[5] == GALATZ);
+			assert(path[6] == CASTLE_DRACULA);
+			free(path);
+		}
+		
+	}
+
 	{///////////////////////////////////////////////////////////////////
 		
-		printf("Testing shortest path\n");
+		printf("Testing shortest path, called on Lord Godalming's turn (Round 1)\n");
 		
 		char *trail =
 			"GLS.... SLS.... HSW.... MMR.... DCD.V..";
@@ -360,6 +423,55 @@ int main(void)
 			free(path);
 		}
 		
+		
+		HvFree(hv);
+	}
+
+	{//////////////////////////////////////////////////////////////////
+
+		printf("Testing shortest path, called on Lord Godalming's turn (Round 2)\n");
+		
+				char *trail =
+			"GLS.... SLS.... HSW.... MMR.... DCD.V.. "
+			"GLS.... SMA.... HSR.... MGO.... DD1T...";
+		
+		Message messages[5] = {};
+		HunterView hv = HvNew(trail, messages);
+		
+		{
+			printf("\tMadrid -> Clermont Ferrand (Dr Seward, Round 2)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_DR_SEWARD,
+			                                    CLERMONT_FERRAND, &pathLength);
+			assert(pathLength == 2);
+			assert(path[0] == BORDEAUX);
+			assert(path[1] == CLERMONT_FERRAND);
+			free(path);
+		}
+		
+		{
+			printf("\tSaragossa -> Genoa (Van Helsing, Round 2)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_VAN_HELSING,
+			                                    GENOA, &pathLength);
+			assert(pathLength == 3);
+			assert(path[0] == TOULOUSE);
+			assert(path[1] == MARSEILLES);
+			assert(path[2] == GENOA);
+			free(path);
+		}
+		
+		{
+			printf("\tGenoa -> Athens (Mina Harker, Round 2)\n");
+			int pathLength = -1;
+			PlaceId *path = HvGetShortestPathTo(hv, PLAYER_MINA_HARKER,
+			                                    ATHENS, &pathLength);
+			assert(pathLength == 3);
+			assert(path[0] == TYRRHENIAN_SEA);
+			assert(path[1] == IONIAN_SEA);
+			assert(path[2] == ATHENS);
+			free(path);
+		}
 		HvFree(hv);
 		printf("Test passed!\n");
 	}
@@ -471,7 +583,7 @@ int main(void)
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Checking Geneva connections. "
-		       "Called by Lord Godalming, Round 1. "
+		       "Called on Lord Godalming's turn, Round 1. "
 			   "(Dr Seward, Round 1)\n");
 		
 		char *trail =
@@ -503,7 +615,7 @@ int main(void)
 	{///////////////////////////////////////////////////////////////////
 	
 		printf("Checking Szeged connections. "
-		       "Called by Dr Seward, Round 1. "
+		       "Called on Dr Seward's turn, Round 1. "
 			   "(Lord Godalming, Round 2)\n");
 		
 		char *trail =

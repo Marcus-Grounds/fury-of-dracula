@@ -42,6 +42,15 @@ static PlaceId locationOfHide(PlaceId *moveHistory, int index, PlaceId currMove)
 static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index, PlaceId currMove);
 static int placeIdCmp(PlaceId x, PlaceId y);
 
+// Helper functions for GvGetReachable and GvGetReachableByType
+bool GvIsRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs);
+PlaceId *GvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
+					int *numReturnedLocs);
+PlaceId *GvGetConnectionsByRail(GameView gv, PlaceId intermediate, 
+							  PlaceId *reachableLocations, int maxRailDistance, 
+							  int distance, int *numReturnedLocs);
+
+
 typedef struct playerData {
 	PlaceId *history;
 	int historyCount;	
@@ -67,7 +76,6 @@ struct gameView {
 
 GameView GvNew(char *pastPlays, Message messages[])
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	GameView new = malloc(sizeof(*new));
 	if (new == NULL) {
 		fprintf(stderr, "Couldn't allocate GameView!\n");
@@ -123,7 +131,7 @@ int GvGetHealth(GameView gv, Player player)
 
 PlaceId GvGetPlayerLocation(GameView gv, Player player)
 {
-	//If a turn has not been made, return NOWHERE
+	// If a turn has not been made, return NOWHERE
 	if (gv->players[player].historyCount == 0) return NOWHERE;
 
 	int moveCount = gv->players[player].historyCount;
@@ -131,7 +139,7 @@ PlaceId GvGetPlayerLocation(GameView gv, Player player)
 	PlaceId currMove = moveHistory[moveCount - 1];
 
 
-	// If the player is a hunter
+	// If the player is a hunter 
 	if (player != PLAYER_DRACULA) {
 		if (gv->players[player].health <= 0) {
 			return ST_JOSEPH_AND_ST_MARY;
@@ -263,52 +271,6 @@ PlaceId *GvGetLastLocations(GameView gv, Player player, int numLocs,
 
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
-
-// Checks whether the location to be added is already in the array of reachable 
-// locations 
-bool isRepeat(PlaceId new, PlaceId *reachableLocations, int *numReturnedLocs) {
-	for (int i = 0; i < (*numReturnedLocs); i++) {
-		if (reachableLocations[i] == new) return true;
-	}
-	return false;
-}
-
-// Adds a PlaceId to the array of reachable locations, given the PlaceId is not a
-// already present in the array.
-PlaceId *addPlaceId(PlaceId new, PlaceId *reachableLocations,
-					int *numReturnedLocs) {
-	if (isRepeat(new, reachableLocations, numReturnedLocs)) return reachableLocations;
-	(*numReturnedLocs)++;
-	reachableLocations = realloc(reachableLocations, 
-								 (*numReturnedLocs) * sizeof(PlaceId));
-	assert(reachableLocations != NULL);
-	reachableLocations[(*numReturnedLocs) - 1] = new;
-	return reachableLocations;
-}
-
-// From a given location, get all locations reachable by rail, including
-// those with a distance greater than 1 from a city, up until maximum allowed
-// rail distance for a given round.
-PlaceId *getConnectionsByRail(GameView gv, PlaceId intermediate, 
-							  PlaceId *reachableLocations, int maxRailDistance, 
-							  int distance, int *numReturnedLocs) {
-
-	if (maxRailDistance < distance) return reachableLocations;
-
-	ConnList intermediateConns = MapGetConnections(gv->places, intermediate);
-	for (ConnList curr = intermediateConns; curr != NULL; curr = curr->next) {
-		if (curr->type == RAIL) {
-			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
-			reachableLocations = getConnectionsByRail(gv, curr->p, 
-								 		        	  reachableLocations,
-													  maxRailDistance,
-													  distance + 1, 
-													  numReturnedLocs);
-		}
-	}
-	return reachableLocations;
-}
-
 PlaceId *GvGetReachable(GameView gv, Player player, Round round,
                         PlaceId from, int *numReturnedLocs)
 {	
@@ -323,24 +285,41 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 	*numReturnedLocs = 0;
 	PlaceId *reachableLocations = NULL;
 
-	reachableLocations = addPlaceId(from, reachableLocations, numReturnedLocs);
+	// Add current location to array of reachable connections.
+	reachableLocations = GvAddPlaceId(from, reachableLocations,
+									  numReturnedLocs);
+
+	// Get all adjacent connections.
 	ConnList allConnections = MapGetConnections(gv->places, from);
 	int maxRailDistance = (player + round) % 4;
 	for (ConnList curr = allConnections; curr != NULL; curr = curr->next) {
+		// If player is Dracula and place of consideration is hospital, 
+		// move to next iteration.
 		if (curr->p == HOSPITAL_PLACE && player == PLAYER_DRACULA) continue;
-		if (player != PLAYER_DRACULA && rail && curr->type == RAIL && maxRailDistance > 0) {
-			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
-			reachableLocations = getConnectionsByRail(gv, curr->p, 
+		// If player is a hunter and a connection by rail is found...
+		if (player != PLAYER_DRACULA && rail && curr->type == RAIL 
+		    && maxRailDistance > 0) {
+			// ... add PlaceId of intermediate location to array of reachable
+			// locations , if not already in that array and add all connections 
+			// from that intermediate location by rail.
+			reachableLocations = GvAddPlaceId(curr->p, reachableLocations, 
+			                                  numReturnedLocs);
+			reachableLocations = GvGetConnectionsByRail(gv, curr->p, 
 												      reachableLocations, 
 													  maxRailDistance, 
 													  MIN_BRANCHING_DISTANCE, 
 													  numReturnedLocs);
 			continue;
 		}
+		// If a connection by road or boat is found...
 		if ((road && curr->type == ROAD) || (boat && curr->type == BOAT)) {
-			reachableLocations = addPlaceId(curr->p, reachableLocations, numReturnedLocs);
+			// add PlaceId of destination, given destination is not already
+			// in reachable locations array.
+			reachableLocations = GvAddPlaceId(curr->p, reachableLocations, 
+			                                  numReturnedLocs);
 		}
 	}
+
 	return reachableLocations;
 }
 
@@ -652,4 +631,53 @@ static void vampireActivity(GameView gv, char *play, Player player) {
 		}
 	}
 	return;
+}
+
+// Checks whether the location to be added is already in the array of reachable
+// locations 
+bool GvIsRepeat(PlaceId new, PlaceId *reachableLocations, 
+				int *numReturnedLocs) {
+	for (int i = 0; i < (*numReturnedLocs); i++) {
+		if (reachableLocations[i] == new) return true;
+	}
+	return false;
+}
+
+// Adds a PlaceId to the array of reachable locations, given the PlaceId is not a
+// already present in the array.
+PlaceId *GvAddPlaceId(PlaceId new, PlaceId *reachableLocations,
+					  int *numReturnedLocs) {
+	if (GvIsRepeat(new, reachableLocations, numReturnedLocs)) 
+		return reachableLocations;
+	(*numReturnedLocs)++;
+	reachableLocations = realloc(reachableLocations, 
+								 (*numReturnedLocs) * sizeof(PlaceId));
+	assert(reachableLocations != NULL);
+	reachableLocations[(*numReturnedLocs) - 1] = new;
+	return reachableLocations;
+}
+
+// From a given location, get all locations reachable by rail, including
+// those with a distance greater than 1 from a city, up until maximum allowed
+// rail distance for a given round.
+PlaceId *GvGetConnectionsByRail(GameView gv, PlaceId intermediate, 
+							  PlaceId *reachableLocations, int maxRailDistance, 
+							  int distance, int *numReturnedLocs) {
+	// Terminating condition: the maximum rail distance for this player in
+	// this round has been exceeded
+	if (maxRailDistance < distance) return reachableLocations;
+
+	// Get all connections by rail from an intermediate location.
+	ConnList intermediateConns = MapGetConnections(gv->places, intermediate);
+	for (ConnList curr = intermediateConns; curr != NULL; curr = curr->next) {
+		if (curr->type == RAIL) {
+			reachableLocations = GvAddPlaceId(curr->p, reachableLocations, numReturnedLocs);
+			reachableLocations = GvGetConnectionsByRail(gv, curr->p, 
+								 		        	  reachableLocations,
+													  maxRailDistance,
+													  distance + 1, 
+													  numReturnedLocs);
+		}
+	}
+	return reachableLocations;
 }
