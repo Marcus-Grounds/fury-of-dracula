@@ -435,7 +435,7 @@ int main(void)
 			"GLS.... SLS.... HSW.... MMR.... DCD.V.. "
 			"GLS.... SMA.... HSR.... MGO.... DD1T...";
 		
-		Message messages[5] = {};
+		Message messages[10] = {};
 		HunterView hv = HvNew(trail, messages);
 		
 		{
