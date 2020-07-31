@@ -25,11 +25,13 @@
 #define MIN_BRANCHING_DISTANCE 2
 #define PLAY_SIZE 7
 
-// Helper Function Declarations
+// Helper Function Declarations:
+// Helper functions for initialisation
 static void initPlayers(GameView gv);
 static void initScoreTurn(GameView gv);
 static void initTraps(GameView gv);
 
+// Helper functions for extracting information from the pastPlays string
 static void storePastPlays(GameView gv, char *pastPlays);
 static void storeTraps(GameView gv, char *pastPlays);
 static void storeMoveHistory(GameView gv, char *play, Player player);
@@ -200,7 +202,6 @@ PlaceId *GvGetLastMoves(GameView gv, Player player, int numMoves,
 	PlaceId *lastMoves = malloc(sizeof(PlaceId) * numMoves);
 	assert (lastMoves != NULL);
 
-
 	// Copy the last 'numMoves' moves of moveHistory into 'lastMoves'
 	int startIndex = (gv->players[player]).historyCount - numMoves;
 	for (int i = 0; i < numMoves; i++) {
@@ -224,9 +225,9 @@ PlaceId *GvGetLocationHistory(GameView gv, Player player,
 	int moveCount = (gv->players[player]).historyCount;
 
 	PlaceId *locHistory = malloc(sizeof(PlaceId) * moveCount);
-	
 	assert (locHistory != NULL);
 
+	// Resolving HIDE, DOUBLE_BACK and TELEPORT moves to a location
 	for (int i = 0; i < moveCount; i++) {
 		PlaceId currMove = moveHistory[i];
 
@@ -541,6 +542,7 @@ static void storeTraps(GameView gv, char *pastPlays) {
 	free(tmp);
 }
 
+// Compares 2 PlaceIds
 static int placeIdCmp(PlaceId x, PlaceId y) {
 	PlaceId p1 = x;
 	PlaceId p2 = y;
@@ -626,6 +628,7 @@ static void vampireActivity(GameView gv, char *play, Player player) {
 		for (int i = 3; i < PLAY_SIZE; i++) {
 			if (play[i] == 'V') {
 				// Immature vampire is vanquished
+
 				gv->immatureVampLocation = NOWHERE;
 			}
 		}
