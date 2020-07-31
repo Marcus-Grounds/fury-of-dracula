@@ -43,7 +43,6 @@ PlaceId *DvAddRealPlaces(PlaceId *reachableLocations, PlaceId *validMoves,
 
 DraculaView DvNew(char *pastPlays, Message messages[])
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	DraculaView new = malloc(sizeof(*new));
 	if (new == NULL) {
 		fprintf(stderr, "Couldn't allocate DraculaView\n");
@@ -65,37 +64,31 @@ void DvFree(DraculaView dv)
 
 Round DvGetRound(DraculaView dv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return GvGetRound(dv->gv);
 }
 
 int DvGetScore(DraculaView dv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return GvGetScore(dv->gv);
 }
 
 int DvGetHealth(DraculaView dv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return GvGetHealth(dv->gv, player);
 }
 
 PlaceId DvGetPlayerLocation(DraculaView dv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return GvGetPlayerLocation(dv->gv, player);
 }
 
 PlaceId DvGetVampireLocation(DraculaView dv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	return GvGetVampireLocation(dv->gv);
 }
 
 PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	*numTraps = 0;
 	return GvGetTrapLocations(dv->gv, numTraps);
 }
