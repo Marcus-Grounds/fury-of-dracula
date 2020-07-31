@@ -52,7 +52,7 @@ PlaceId *GvGetConnectionsByRail(GameView gv, PlaceId intermediate,
 							  PlaceId *reachableLocations, int maxRailDistance, 
 							  int distance, int *numReturnedLocs);
 
-
+// Structs:
 typedef struct playerData {
 	PlaceId *history;
 	int historyCount;	
@@ -73,6 +73,7 @@ struct gameView {
 	int turn;
 	int score;
 };
+
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
@@ -622,6 +623,16 @@ static void vampireActivity(GameView gv, char *play, Player player) {
 			
 			char placeAbbrev[3] = {play[1], play[2], '\0'};
 			PlaceId place = placeAbbrevToId(placeAbbrev);
+
+			PlaceId *moveHistory = (gv->players[player]).history;
+			int count = (gv->players[player]).historyCount;
+			if (place == TELEPORT) {
+				place = CASTLE_DRACULA;
+			} else if (place == HIDE) {
+				place = locationOfHide(moveHistory, count - 1, place);
+			} else if ((place >= DOUBLE_BACK_1) && (place <= DOUBLE_BACK_5)) {
+				place = locationOfDoubleBack(moveHistory, count - 1, place);
+			} 
 			gv->immatureVampLocation = place;
 		}
 	} else {

@@ -123,7 +123,7 @@ int main(void)
 		printf("Dracula's plays Teleport\n");
 
 		char *trail =
-			"GST.... SAO.... HZU.... MBB.... DTP....";
+			"GST.... SAO.... HZU.... MBB.... DTP.V..";
 		
 		Message messages[] = {
 			"Hello", "Goodbye", "Stuff", "...", "Mwahahahaha"
@@ -136,7 +136,7 @@ int main(void)
 		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
 		assert(GvGetHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS + LIFE_GAIN_CASTLE_DRACULA);
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == CASTLE_DRACULA);
-		assert(GvGetVampireLocation(gv) == CITY_UNKNOWN);
+		assert(GvGetVampireLocation(gv) == CASTLE_DRACULA);
 		GvFree(gv);
 		printf("Test passed!\n");
 	}
