@@ -16,5 +16,50 @@
 void decideHunterMove(HunterView hv)
 {
 	// TODO: Replace this with something better!
-	registerBestPlay("TO", "Have we nothing Toulouse?");
+	Round round = HvGetRound(hv);
+	Player player = HvGetPlayer(hv);
+	PlaceId lastSeenDrac = HvGetLastKnownDraculaLocation(hv, &round);
+
+	if (round == 0) {
+		switch (player) {
+            case PLAYER_LORD_GODALMING:
+                registerBestPlay(placeIdToAbbrev(MUNICH), "Godalming to rescue");
+                return;
+            case PLAYER_DR_SEWARD:
+               registerBestPlay(placeIdToAbbrev(MARSEILLES), "Time to go SewWards");
+                return;
+            case PLAYER_VAN_HELSING:
+                registerBestPlay(placeIdToAbbrev(VIENNA), "See you in HEL dracula");
+                return;
+            case PLAYER_MINA_HARKER:
+               registerBestPlay(placeIdToAbbrev(BERLIN), "Down to hunt!");
+                return;
+			case PLAYER_DRACULA:
+				return;
+        }
+
+
+	}
+
+	//If Dracula's last known position is unknown, 
+	//The hunters would rest to find the location 
+	if (lastSeenDrac == UNKNOWN && round % 6 == 0 ) {
+		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)),
+				"Rest y'all, we gotta find the blood sucking villain");
+	}
+
+	//Rest a round if health is too low 
+	//TODO: Add conditions
+	if (HvGetHealth(hv, player) < 2) {
+		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), "Health is too low, have to rest");
+	}
+
+}
+
+
+//IF the hunter finds himself on the trail of dracula
+//By falling prey to his traps
+void Ontrail(HunterView hv) {
+
+
 }
