@@ -399,10 +399,14 @@ PlaceId *DvAddRealPlaces(PlaceId *reachableLocations, PlaceId *validMoves,
 	return reachableLocations;
 }
 
-
 // Returns the location history of dracula (to be used for AI) 
 PlaceId *DvGetLocationHistory(DraculaView dv, int *numReturnedLocs, 
                              bool *canFree) {
 	return GvGetLocationHistory(dv->gv, PLAYER_DRACULA,
                              	numReturnedLocs, canFree);
+PlaceId *DvWhereCanTheyGoByRound(DraculaView dv, Player player, Round round, 
+								 PlaceId from, int *numReturnedLocs) {
+	PlaceId location = DvGetPlayerLocation(dv, player);
+	// Return the valid moves for the player in this round from current location.
+	return GvGetReachable(dv->gv, player, round, location, numReturnedLocs);
 }
