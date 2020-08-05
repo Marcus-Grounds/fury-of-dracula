@@ -9,6 +9,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h>
 #include "dracula.h"
 #include "DraculaView.h"
 #include "GameView.h"
@@ -18,17 +19,28 @@
 #define NUM_HUNTERS 4
 #define MIN_STARTING_DISTANCE 4
 #define WORTH_OF_NON_SEA 3
-#define DRAC_HALF_HEALTH GAME_START_BLOOD_POINTS/2
+#define HALF_START_HEALTH GAME_START_BLOOD_POINTS/2
+
+struct closestHunter {
+	int hunterDist;
+	Player hunter;
+	PlaceId hunterLoc;
+};
+typedef struct closestHunter *ClosestHunter;
 
 // Helper function declarations:
-bool locationInArray(PlaceId location, PlaceId *array, int numArray)
+bool locationInArray(PlaceId location, PlaceId *array, int numArray);
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
-void lowHealthMove(DraculaView dv);
+void lowHealthMove(DraculaView dv, PlaceId furthestLoc);
 void handleRoundZero(DraculaView dv);
 int distFromHunters(DraculaView dv, PlaceId loc);
 int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest);
 char *placeIdToAbbrevNonConst(PlaceId pid);
-
+ClosestHunter initClosestHunter(void);
+void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo, 
+						PlaceId dracLoc);
+PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray, 
+							int locArrayLen, Player hunter);
 
 void decideDraculaMove(DraculaView dv)
 {
@@ -67,18 +79,15 @@ void decideDraculaMove(DraculaView dv)
 	}
 	// Register best play, in order of precedence.
 	// Handle case when there is no choice but to go to sea.
-	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(placeIdToAbbrevNonConst(furthestLoc), "...");
+	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(placeIdToAbbrevNonConst(furthestLoc), "..."); 
 	// Give precedence to avoiding suiciding at sea when he has 2 blood points (or less) left...
 	else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(placeIdToAbbrevNonConst(furthestNonSeaLoc), "...");
 	// ... then to avoiding the closest hunter, if dangerously close, health is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter.
 	// b. This could mean maximising your distance from the hunter
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= HALF_START_HEALTH) lowHealthMove(dv, furthestLoc);
 	// else if (health <= 12 && distClosestHunter <= 1 && DvGetHealth(dv, closestHunter) > highestDamageIfEncounteredAtCity) registerBestPlay(placeIdToAbbrevNonConst(furthestLoc), "...");
 	// ... then to placing the immature vampire...
-	else if (DvGetHealth(dv, PLAYER_DRACULA) <= DRAC_HALF_HEALTH) {
-		lowHealthMove(dv);
-		return;
-	}
 	else if (round % 13 == 0) registerBestPlay(placeIdToAbbrevNonConst(furthestNonSeaLoc), "...");
 	// ... then to making his way to Castle Dracula, if health is low...
 	// else if (health < LOW_HEALTH) find shortest way to castle dracula - could be either by self-restriction or travelling
@@ -87,12 +96,13 @@ void decideDraculaMove(DraculaView dv)
 		// If heading to sea means that one less encounter can be made with a hunter before death, then
 		// head to the best city location instead.
 		if ((DvGetHealth(dv, PLAYER_DRACULA) - LIFE_LOSS_SEA) % LIFE_LOSS_HUNTER_ENCOUNTER == 0) {
-			registerBestPlay(placeIdToAbbrevNonConst(furthestNonSeaLoc), "...");
+			registerBestPlay(placeIdToAbbrevNonConst(furthestNonSeaLoc), "..."); // TODO: use function dracLocToMoveAbbrev bc this doesnt give moves like D1, HI etc
 		} else {
 			registerBestPlay(placeIdToAbbrevNonConst(furthestLoc), "...");
 		}
 	}
 }
+
 void handleRoundZero(DraculaView dv) {
 	PlaceId bestLoc = MIN_REAL_PLACE;
 	int currBestTotal = 0;
@@ -187,6 +197,7 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 	return pathLength;
 }
 
+// TODO: don't need this bc starter files changed in hunt spec
 char *placeIdToAbbrevNonConst(PlaceId pid) {
 	return strdup(placeIdToAbbrev(pid));
 }
@@ -200,8 +211,9 @@ bool locationInArray(PlaceId location, PlaceId *array, int numArray) {
 	return false;
 }
 
+// Avoiding the closest hunter if health is low
 // This func assumes that Dracula has valid moves other than TP
-void lowHealthMove(DraculaView dv) {
+void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 	// Finding moves which avoid potential encounters 
 	// with hunters in the next round
 
@@ -228,33 +240,75 @@ void lowHealthMove(DraculaView dv) {
 
 	// Choosing a location for Dracula's move
 	PlaceId locChosen = NOWHERE;
-	if (numAvoidsHunt == 0) {
-		// Next move cannot avoid hunters' reachable locations
-		// play random valid move? TODO: consider best total dist
-		locChosen = dracReachable[0];
+
+	ClosestHunter nearestHunter = initClosestHunter();
+	PlaceId dracLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	storeClosestHunter(dv, nearestHunter, dracLoc);
+
+	int numDracSea = 0;
+	PlaceId *dracSea = DvWhereCanIGoByType(dv, false, true, &numDracSea);
+
+	if ((nearestHunter->hunterDist <= 2) && (numDracSea != 0)) {
+		// Heading to sea if possible to avoid an encounter if 
+		// the closest hunter is <= 2 moves away
+		// TODO: currently chooses the first sea location in array
+		locChosen = dracSea[0];
 	} else {
-		// Play random valid move that avoids the sea
-		for (int i = 0; i < numAvoidsHunt; i++) {
-			if (placeIsLand(locAvoidsHunt[i])) {
-				// TODO: consider best total dist
-				locChosen = locAvoidsHunt[i];
-				break;
-			}
-		} 
-		if (locChosen == NOWHERE) {
-			// No move which avoids the sea
-			// Play random sea move which avoids hunters? 
-			// TODO: consider best total dist 
-			locChosen = locAvoidsHunt[0];
+		// Aim to have move not reachable by any hunters
+		// Also aim to stay on land and maximise distance from nearest hunter
+		if (numAvoidsHunt == 0) {
+			// Next move cannot avoid hunters' reachable locations
+			// Choose the move with furthest total distance from hunters
+			locChosen = furthestLoc;
+		} else {
+			// Play move which maximises distance from nearest hunter
+			// Try to stay on land but if not possible, go to sea
+			locChosen = maxLocFromHunter(dv, locAvoidsHunt, numAvoidsHunt, 
+										nearestHunter->hunter);
 		}
 	}
+
 	free(dracReachable);
-	registerBestPlay(dracLocToMoveAbbrev(dv, locChosen), "");
+	free(nearestHunter);
+	free(dracSea);
+	registerBestPlay(dracLocToMoveAbbrev(dv, locChosen), "...");
 	return;
 }
 
+// Finds a location in locArray that has the maximum distance from the hunter's
+// location.
+// Aim for a land location but if no land moves exist in locArray, return
+// a sea location.
+PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray, 
+							int locArrayLen, Player hunter) {
+
+	bool landMoveExists = false;
+	for (int i = 0; i < locArrayLen; i++) {
+		if (placeIsLand(locArray[i])) landMoveExists = true;
+	}
+
+	int maxDist = 0;
+	PlaceId maxLoc = locArray[0];
+	for (int i = 0; i < locArrayLen; i++) {
+		if (landMoveExists && (placeIsSea(locArray[i]))) continue;
+		int dist = shortestPathFrom(dv, hunter, locArray[i]);
+		if (dist > maxDist) {
+			maxLoc = locArray[i];
+			maxDist = dist;
+		} else if (dist == maxDist) {
+			// if 2 moves are both the max distance, 
+			// choose move w highest distFromHunters
+			if (distFromHunters(dv, locArray[i]) > distFromHunters(dv, maxLoc)) {
+				maxLoc = locArray[i];
+				maxDist = dist;
+			}
+		}
+	}
+	return maxLoc;
+}
+
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
-	// Assumes that the location given is reachable by Dracula
+	// Assumes that the location given is reachable by a valid Dracula move
 
 	char *abbrev = NULL;
 	int numValid = 0;
@@ -288,3 +342,35 @@ char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	free(validMoves);
 	if (histCanFree) free(dracLocHist);
 	return abbrev;
+}
+
+ClosestHunter initClosestHunter(void) {
+	ClosestHunter new = malloc(sizeof(*new));
+	if (new == NULL) {
+		printf("Could not allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
+	new->hunterDist = -1;
+	new->hunter = PLAYER_LORD_GODALMING;
+	new->hunterLoc = NOWHERE;
+	return new;
+}
+
+void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo, 
+						PlaceId dracLoc) {
+	int minDist = shortestPathFrom(dv, PLAYER_LORD_GODALMING, dracLoc);
+	int closestHunter = PLAYER_LORD_GODALMING;
+	int closestLoc = DvGetPlayerLocation(dv, PLAYER_LORD_GODALMING);
+	for (int hunter = PLAYER_DR_SEWARD; hunter <= PLAYER_MINA_HARKER; hunter++) {
+		int hunterDist = shortestPathFrom(dv, hunter, dracLoc);
+		if (hunterDist < minDist) {
+			minDist = hunterDist;
+			closestHunter = hunter;
+			closestLoc = DvGetPlayerLocation(dv, hunter);
+		}
+	}
+	closestHunterInfo->hunter = closestHunter;
+	closestHunterInfo->hunterDist = minDist;
+	closestHunterInfo->hunterLoc = closestLoc;
+	return;
+}

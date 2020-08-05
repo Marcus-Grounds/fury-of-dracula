@@ -404,6 +404,8 @@ PlaceId *DvGetLocationHistory(DraculaView dv, int *numReturnedLocs,
                              bool *canFree) {
 	return GvGetLocationHistory(dv->gv, PLAYER_DRACULA,
                              	numReturnedLocs, canFree);
+}
+
 PlaceId *DvWhereCanTheyGoByRound(DraculaView dv, Player player, Round round, 
 								 PlaceId from, int *numReturnedLocs) {
 	PlaceId location = DvGetPlayerLocation(dv, player);
