@@ -16,22 +16,12 @@
 #define DRAC_HALF_HEALTH GAME_START_BLOOD_POINTS/2
 
 // Helper function declarations:
+bool locationInArray(PlaceId location, PlaceId *array, int numArray)
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
 void lowHealthMove(DraculaView dv);
 
 void decideDraculaMove(DraculaView dv)
 {
-	
-
-	/* #6 If dracula's health falls below 20, 
-	he should try to avoid going within 1 path length 
-	of a hunter's shortest path to him + avoid the sea, 
-	and begin moving towards castle dracula 
-	(if he can't force a teleport?)
-
-	#7 Dracula should try to remain at castle 
-	dracula with hide and doubleback unless >1 
-	hunters are within 2 paths lengths to him (unsure)*/
 	
 	int numValid = 0;
 	PlaceId *validMoves = DvGetValidMoves(dv, &numValid);
@@ -88,20 +78,21 @@ void lowHealthMove(DraculaView dv) {
 	PlaceId locChosen = NOWHERE;
 	if (numAvoidsHunt == 0) {
 		// Next move cannot avoid hunters' reachable locations
-		// play random valid move? TODO:
+		// play random valid move? TODO: consider best total dist
 		locChosen = dracReachable[0];
 	} else {
 		// Play random valid move that avoids the sea
 		for (int i = 0; i < numAvoidsHunt; i++) {
 			if (placeIsLand(locAvoidsHunt[i])) {
-				// TODO: try to get to castle dracula?
+				// TODO: consider best total dist
 				locChosen = locAvoidsHunt[i];
 				break;
 			}
 		} 
 		if (locChosen == NOWHERE) {
 			// No move which avoids the sea
-			// Play random sea move which avoids hunters? TODO: 
+			// Play random sea move which avoids hunters? 
+			// TODO: consider best total dist 
 			locChosen = locAvoidsHunt[0];
 		}
 	}
