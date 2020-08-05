@@ -13,23 +13,22 @@
 #include "hunter.h"
 #include "HunterView.h"
 
-
-
 //REMOVE TIS:
 #include <stdio.h>
 #include <stdlib.h>
 
 //HELPER FUNCTIONS DECLARATION//
-PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int *pathLength);
-void patrol(HunterView hv, Player hunter);
-
-
+void patrol (HunterView hv, Player hunter);
+PlaceId *ifDracAtCD (HunterView hv, Player hunter, PlaceId dest, Round round, int *pathLength);
+//                            //
 
 void decideHunterMove(HunterView hv)
-{
-	// TODO: Replace this with something better!
-	Round round = HvGetRound(hv);
+{	
 	Player player = HvGetPlayer(hv);
+	
+	if (player == PLAYER_DRACULA) return;
+	
+	Round round = HvGetRound(hv);
 	Round *roundLastseen = malloc(sizeof(Round));
 	PlaceId lastSeenDrac = HvGetLastKnownDraculaLocation(hv, roundLastseen);
 
@@ -45,212 +44,161 @@ void decideHunterMove(HunterView hv)
                 registerBestPlay(placeIdToAbbrev(LISBON), "See you in HEL dracula");
                 return;
             case PLAYER_MINA_HARKER:
-               registerBestPlay(placeIdToAbbrev(AMSTERDAM), "Down to hunt!");
+                registerBestPlay(placeIdToAbbrev(AMSTERDAM), "Down to hunt!");
                 return;
 			case PLAYER_DRACULA:
 				return;
         }
 	}
-
-	if (player == PLAYER_DRACULA) return;
-
 	//If Dracula's last known position is unknown, 
 	//The hunters would rest to find the location 
-	if (lastSeenDrac == UNKNOWN && round % 6 == 0 ) {
-		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)),
-				"Rest y'all, we gotta find the blood sucking villain");
+	
+	if ((lastSeenDrac == CITY_UNKNOWN || lastSeenDrac == SEA_UNKNOWN) && round % 7 == 0 ) {
+		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
+						 "Rest y'all, we gotta find the blood sucking villain");
+		return;
 	}
 
 	//Rest a round if health is too low 
-	//TODO: Add conditions
 	if (HvGetHealth(hv, player) <= 2) {
-		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), "Health is too low, have to rest");
+		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
+						 "Health is too low, have to rest");
+		return;
 	}
-
-
 	//IF dracula was last seen at Castle Dracula, 
 	//The hunters will advance to CD
+	
 	if (lastSeenDrac == CASTLE_DRACULA) {
+		
 		PlaceId *shortestPath = malloc(sizeof(PlaceId)); 
 		int *pathLength = malloc(sizeof(int));
+		
 		shortestPath = ifDracAtCD(hv, player, CASTLE_DRACULA, round, pathLength);
-		PlaceId nextLoc = 0;
-
-		nextLoc = shortestPath[0];
+		
+		PlaceId nextLoc = shortestPath[0];
 		char *nextlocation = placeIdToAbbrev(nextLoc);
 
 		registerBestPlay(nextlocation, "Rush to the castle!");
+
+		free(shortestPath);
+		free(pathLength);
 		
+		return;
 	}
 
 	//If Dracula has not been seen yet
 	if ((lastSeenDrac == CITY_UNKNOWN || lastSeenDrac == SEA_UNKNOWN) &&  round % 6 != 0) {
-			patrol(hv, player);
-
+		patrol(hv, player);
+		return;
 	}
 }
 
+void patrol(HunterView hv, Player hunter)
+{
+	if (hunter == PLAYER_LORD_GODALMING) {
+		
+		PlaceId zonePathGod[13];
+
+		zonePathGod[0] = BUDAPEST;
+		zonePathGod[1] = VIENNA;
+		zonePathGod[2] = ZAGREB;
+		zonePathGod[3] = SARAJEVO;
+		zonePathGod[4] = VALONA;
+		zonePathGod[5] = SALONICA;
+		zonePathGod[6] = SOFIA;
+		zonePathGod[7] = VARNA;
+		zonePathGod[8] = CONSTANTA;
+		zonePathGod[9] = GALATZ;
+		zonePathGod[10] = BUCHAREST;
+		zonePathGod[11] = KLAUSENBURG;
+		zonePathGod[12] = BUDAPEST;  
+		
+		for (int i = 0; i < 12; i++) {
+			if (HvGetPlayerLocation(hv, hunter) == zonePathGod[i]) {
+				char *nextlocation = placeIdToAbbrev(zonePathGod[i + 1]);
+				registerBestPlay(nextlocation, "Looking for him");
+				break;
+			}	
+		}
+	}
+	if (hunter == PLAYER_DR_SEWARD) {
+
+		PlaceId zonePathSew[13];
+
+		zonePathSew[0] = MARSEILLES;
+		zonePathSew[1] = GENOA;
+		zonePathSew[2] = MILAN;
+		zonePathSew[3] = MUNICH;
+		zonePathSew[4] = VALONA;
+		zonePathSew[5] = NUREMBURG;
+		zonePathSew[6] = COLOGNE;
+		zonePathSew[7] = BRUSSELS;
+		zonePathSew[8] = LE_HAVRE;
+		zonePathSew[9] = NANTES;
+		zonePathSew[10] = BORDEAUX;
+		zonePathSew[11] = TOULOUSE;
+		zonePathSew[12] = MARSEILLES; 
+
+		for (int i = 0; i < 12; i++) {
+			if (HvGetPlayerLocation(hv, hunter) == zonePathSew[i]) {
+				char *nextlocation = placeIdToAbbrev(zonePathSew[i + 1]);
+				registerBestPlay(nextlocation, "Looking for him");
+				break;
+			}	
+		}
+	}
+	if (hunter == PLAYER_VAN_HELSING) {	
+
+		PlaceId zonePathVan[9];
+
+		zonePathVan[0] = LISBON;
+		zonePathVan[1] = CADIZ;
+		zonePathVan[2] = GRANADA;
+		zonePathVan[3] = ALICANTE;
+		zonePathVan[4] = BARCELONA;
+		zonePathVan[5] = TOULOUSE;
+		zonePathVan[6] = SARAGOSSA;
+		zonePathVan[7] = SANTANDER;
+		zonePathVan[8] = LISBON;	  
+
+		for (int i = 0; i < 8; i++) {
+			if (HvGetPlayerLocation(hv, hunter) == zonePathVan[i]) {
+				char *nextlocation = placeIdToAbbrev(zonePathVan[i + 1]);
+				registerBestPlay(nextlocation, "Looking for him");
+				break;
+			}
+		}
+	}
+	if (hunter == PLAYER_MINA_HARKER) {	
+		
+		PlaceId zonePathMin[11];
+
+		zonePathMin[0] = AMSTERDAM;
+		zonePathMin[1] = BRUSSELS;
+		zonePathMin[2] = PARIS;
+		zonePathMin[3] = GENEVA;
+		zonePathMin[4] = ZURICH;
+		zonePathMin[5] = MILAN;
+		zonePathMin[6] = NUREMBURG;
+		zonePathMin[7] = LEIPZIG;
+		zonePathMin[8] = BERLIN;
+		zonePathMin[9] = HAMBURG;
+		zonePathMin[10] = AMSTERDAM;	  
+
+		for (int i = 0; i < 10; i++) {
+			if (HvGetPlayerLocation(hv, hunter) == zonePathMin[i]) {
+				char *nextlocation = placeIdToAbbrev(zonePathMin[i + 1]);
+				registerBestPlay(nextlocation, "Looking for him");
+				break;
+			}
+		}
+	}
+}
 
 //If Dracula moves to CD by a teleport move.
 //All Hunters will make their move to CD
-PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int *pathLength) {
-	
+PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int *pathLength)
+{	
 	PlaceId *shortestPath = HvGetShortestPathTo(hv, hunter, dest, pathLength);
 	return shortestPath;
-}
-
-void patrol(HunterView hv, Player hunter) {
-	//In case the hunter is Godalming
-	if (hunter == PLAYER_LORD_GODALMING) {
-
-		PlaceId *zonePath =  malloc(sizeof(PlaceId *));
-
-		zonePath[0] = BUDAPEST;
-		zonePath[1] = VIENNA;
-		zonePath[2] = ZAGREB;
-		zonePath[3] = SARAJEVO;
-		zonePath[4] = VALONA;
-		zonePath[5] = SALONICA;
-		zonePath[6] = SOFIA;
-		zonePath[7] = VARNA;
-		zonePath[8] = CONSTANTA;
-		zonePath[9] = GALATZ;
-		zonePath[10] = BUCHAREST;
-		zonePath[11] = KLAUSENBURG;
-		zonePath[12] = BUDAPEST;  
-
-		for (int i = 0; i < 13; i++) {
-			if (HvGetPlayerLocation(hv, hunter) == zonePath[i]) {
-				char *nextlocation = placeIdToAbbrev(zonePath[i]);
-				registerBestPlay(nextlocation, "Looking for him");
-				break;
-			}
-			
-		}
-
-	}
-
-	//In case the hunter is Dr.Seward
-	if (hunter == PLAYER_DR_SEWARD) {
-
-		PlaceId *zonePath =  malloc(sizeof(PlaceId *));
-
-		zonePath[0] = MARSEILLES;
-		zonePath[1] = GENOA;
-		zonePath[2] = MILAN;
-		zonePath[3] = MUNICH;
-		zonePath[4] = VALONA;
-		zonePath[5] = NUREMBURG;
-		zonePath[6] = COLOGNE;
-		zonePath[7] = BRUSSELS;
-		zonePath[8] = LE_HAVRE;
-		zonePath[9] = NANTES;
-		zonePath[10] = BORDEAUX;
-		zonePath[11] = TOULOUSE;
-		zonePath[12] = MARSEILLES;  
-
-		for (int i = 0; i < 13; i++) {
-			if (HvGetPlayerLocation(hv, hunter) == zonePath[i]) {
-				char *nextlocation = placeIdToAbbrev(zonePath[i]);
-				registerBestPlay(nextlocation, "Looking for him");
-				break;
-			}
-			
-		}
-
-		free(zonePath);
-
-	}
-
-	//In case the hunter is Dr.Seward
-	if (hunter == PLAYER_DR_SEWARD) {
-
-		PlaceId *zonePath =  malloc(sizeof(PlaceId *));
-
-		zonePath[0] = MARSEILLES;
-		zonePath[1] = GENOA;
-		zonePath[2] = MILAN;
-		zonePath[3] = MUNICH;
-		zonePath[4] = VALONA;
-		zonePath[5] = NUREMBURG;
-		zonePath[6] = COLOGNE;
-		zonePath[7] = BRUSSELS;
-		zonePath[8] = LE_HAVRE;
-		zonePath[9] = NANTES;
-		zonePath[10] = BORDEAUX;
-		zonePath[11] = TOULOUSE;
-		zonePath[12] = MARSEILLES;  
-
-		for (int i = 0; i < 13; i++) {
-			if (HvGetPlayerLocation(hv, hunter) == zonePath[i]) {
-				char *nextlocation = placeIdToAbbrev(zonePath[i]);
-				registerBestPlay(nextlocation, "Looking for him");
-				break;
-			}
-			
-		}
-
-		free(zonePath);
-
-	}
-
-
-	//In case the hunter is Van Helsing
-	if (hunter == PLAYER_VAN_HELSING) {
-
-		PlaceId *zonePath =  malloc(sizeof(PlaceId *));
-
-		zonePath[0] = LISBON;
-		zonePath[1] = CADIZ;
-		zonePath[2] = GRANADA;
-		zonePath[3] = ALICANTE;
-		zonePath[4] = BARCELONA;
-		zonePath[5] = TOULOUSE;
-		zonePath[6] = SARAGOSSA;
-		zonePath[7] = SANTANDER;
-		zonePath[8] = LISBON;
-		  
-		for (int i = 0; i < 13; i++) {
-			if (HvGetPlayerLocation(hv, hunter) == zonePath[i]) {
-				char *nextlocation = placeIdToAbbrev(zonePath[i]);
-				registerBestPlay(nextlocation, "Looking for him");
-				break;
-			}
-			
-		}
-
-		free(zonePath);
-
-	}
-
-	//In case the hunter is Mina Harker
-	if (hunter == PLAYER_MINA_HARKER) {
-
-		PlaceId *zonePath =  malloc(sizeof(PlaceId *));
-
-		zonePath[0] = AMSTERDAM;
-		zonePath[1] = BRUSSELS;
-		zonePath[2] = PARIS;
-		zonePath[3] = GENEVA;
-		zonePath[4] = ZURICH;
-		zonePath[5] = MILAN;
-		zonePath[6] = NUREMBURG;
-		zonePath[7] = LEIPZIG;
-		zonePath[8] = BERLIN;
-		zonePath[9] = HAMBURG;
-		zonePath[10] = AMSTERDAM;
-		  
-		for (int i = 0; i < 13; i++) {
-			if (HvGetPlayerLocation(hv, hunter) == zonePath[i]) {
-				char *nextlocation = placeIdToAbbrev(zonePath[i]);
-				registerBestPlay(nextlocation, "Looking for him");
-				break;
-			}
-			
-		}
-
-		free(zonePath);
-
-	}
-	
 }
