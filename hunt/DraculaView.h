@@ -179,6 +179,8 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 // Your own interface functions
 
 // TODO
+int numTrapsAtLoc(DraculaView dv, PlaceId loc);
 PlaceId *DvWhereCanTheyGoByRound(DraculaView dv, Player player, Round round, 
 								 PlaceId from, int *numReturnedLocs);
+PlaceId DvGetLocationFallingOffTrail(DraculaView dv);
 #endif // !defined(FOD__DRACULA_VIEW_H_)
