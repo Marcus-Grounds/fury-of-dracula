@@ -250,7 +250,7 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 	// Finding moves which avoid potential encounters 
 	// with hunters in the next round
 
-	PlaceId *locAvoidsHunt = NULL;
+	PlaceId locAvoidsHunt[NUM_REAL_PLACES];
 	int numAvoidsHunt = 0;
 
 	int numDracReachable = 0;
