@@ -24,6 +24,8 @@
 
 struct draculaView {
 	GameView gv;
+	Player closestHunter;
+	int distFromClosestHunter;
 };
 
 bool DvIsRepeat(PlaceId new, PlaceId *reachableLocations, 
@@ -404,6 +406,16 @@ PlaceId *DvGetLocationHistory(DraculaView dv, int *numReturnedLocs,
                              bool *canFree) {
 	return GvGetLocationHistory(dv->gv, PLAYER_DRACULA,
                              	numReturnedLocs, canFree);
+}							
+
+int numTrapsAtLoc(DraculaView dv, PlaceId loc) {
+	int numTrapsInTrail = 0;
+	int numTraps = 0;
+	PlaceId *allTraps = DvGetTrapLocations(dv, &numTrapsInTrail);
+	for (int i = 0; i < numTrapsInTrail; i++) {
+		if (allTraps[i] == loc) numTraps++;
+	}
+	return numTraps;
 }
 
 PlaceId *DvWhereCanTheyGoByRound(DraculaView dv, Player player, Round round, 
@@ -411,4 +423,17 @@ PlaceId *DvWhereCanTheyGoByRound(DraculaView dv, Player player, Round round,
 	PlaceId location = DvGetPlayerLocation(dv, player);
 	// Return the valid moves for the player in this round from current location.
 	return GvGetReachable(dv->gv, player, round, location, numReturnedLocs);
+}
+
+PlaceId DvGetLocationFallingOffTrail(DraculaView dv) {
+	int numReturnedLocs = 0;
+	bool canFree = false;
+	PlaceId *locHistory = GvGetLastLocations(dv->gv, PLAYER_DRACULA, TRAIL_SIZE,
+                            				 &numReturnedLocs, &canFree);
+	PlaceId locFallingOffTrail = NOWHERE;
+	if (numReturnedLocs == TRAIL_SIZE) {
+		locFallingOffTrail = locHistory[numReturnedLocs - 1];
+	}
+	if (canFree == true) free(locHistory);
+	return locFallingOffTrail;
 }
