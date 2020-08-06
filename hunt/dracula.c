@@ -300,7 +300,6 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 										nearestHunter->hunter);
 		}
 	}
-
 	free(dracReachable);
 	free(nearestHunter);
 	free(dracSea);
