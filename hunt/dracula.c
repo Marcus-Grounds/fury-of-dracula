@@ -17,7 +17,7 @@
 #include "queue.h"
 #include <stdio.h>
 #include <string.h>
-/*
+
 #define NUM_HUNTERS 4
 #define MIN_STARTING_DISTANCE 4
 #define WORTH_OF_NON_SEA 3
@@ -50,36 +50,24 @@ void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo,
 PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray, 
 							int locArrayLen, Player hunter);
 Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter);
-*/
 
-char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
 void decideDraculaMove(DraculaView dv)
 {
 	// TODO: Register a random move to ensure that a move is made.
 	////////////////////////////////////////////////////////////////////////
 	Round round = DvGetRound(dv);
 	// Decide on best location to spawn.
-	/*if (round == 0) {
+	if (round == 0) {
 		handleRoundZero(dv);
 		return;
-	}*/
-	// registerBestPlay("CD", "Mwahahahaha");
+	}
 
 	int numLocs = 0;
-	// PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
-	if (round == 0)  {
-	    registerBestPlay("AM", "...");
-	} else if (numLocs == 0 && round != 0) {
-		registerBestPlay("TP", "Mwahahahaha");
-	} else {
-		registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "Mwahahahaha");
-	}
-	return;
-}
-/*
+	
 	// Handle cases when no choice.
-	if (numLocs == 0 && round != 0) registerBestPlay("TP", "Mwahahahaha"); // TODO: CD or TP?
+	if (numLocs == 0 && round != 0) registerBestPlay("TP", "Mwahahahaha"); 
 	if (numLocs == 1) registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "...");
 	// TODO: Calculate shortest means to castle dracula, if health is low
 	//if (health <= 10) {
@@ -155,9 +143,9 @@ void decideDraculaMove(DraculaView dv)
 	else 
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
 
-}*/
+}
 
-/*
+
 void handleRoundZero(DraculaView dv) {
 	PlaceId bestLoc = MIN_REAL_PLACE;
 	int currBestTotal = 0;
@@ -242,16 +230,14 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 	for (PlaceId intermediate = dest; 
 		 intermediate != src; 
 		 intermediate = visited[intermediate]) {
-		printf("DEBUG: intermediate is %d\n", intermediate);
 		pathLength++;
-	    printf("DEBUG: visited[intermediate] is %d\n", visited[intermediate]);
 	}
 	return pathLength;
 }
-*/
+
 // Returns true if the location exists in the array, and false if
 // it doesn't
-/*bool locationInArray(PlaceId location, PlaceId *array, int numArray) {
+bool locationInArray(PlaceId location, PlaceId *array, int numArray) {
 	for (int i = 0; i < numArray; i++) {
 		if (array[i] == location) return true;
 	}
@@ -352,7 +338,7 @@ PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray,
 		}
 	}
 	return maxLoc;
-}*/
+}
 
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	// Assumes that the location given is reachable by a valid Dracula move
@@ -390,7 +376,7 @@ char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	if (histCanFree) free(dracLocHist);
 	return abbrev;
 }
-/*
+
 ClosestHunter initClosestHunter(void) {
 	ClosestHunter new = malloc(sizeof(*new));
 	if (new == NULL) {
@@ -431,4 +417,4 @@ Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter) {
 	}
 	return hunterReturned;
 }
-*/
+
