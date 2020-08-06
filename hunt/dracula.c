@@ -186,7 +186,6 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 {
 
 	PlaceId src = DvGetPlayerLocation(dv, hunter);
-	if (src == NOWHERE) return -1; //TODO: needed?
 	Round round = DvGetRound(dv) + 1;
 
 	// Initialise visited array to NOWHERE;
@@ -227,7 +226,6 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 	printf("DEBUG: Reached 1\n");
     
 	// Find shortest path in reverse order.
-	
 	int pathLength = 0;
 	for (PlaceId intermediate = dest; 
 		 intermediate != src; 
