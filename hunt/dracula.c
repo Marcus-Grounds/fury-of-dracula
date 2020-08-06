@@ -172,7 +172,7 @@ void handleRoundZero(DraculaView dv) {
 		totalScatter = 0;
 	}
 	
-	if (bestLoc != MIN_REAL_PLACE) registerBestPlay(dracLocToMoveAbbrev(dv, bestLoc), "Mwahahahaha");
+	if (bestLoc != MIN_REAL_PLACE) registerBestPlay(placeIdToAbbrev(bestLoc), "Mwahahahaha");
 }
 
 int distFromHunters(DraculaView dv, PlaceId loc) {
