@@ -401,6 +401,13 @@ PlaceId *DvAddRealPlaces(PlaceId *reachableLocations, PlaceId *validMoves,
 	return reachableLocations;
 }
 
+// Returns the location history of dracula (to be used for AI) 
+PlaceId *DvGetLocationHistory(DraculaView dv, int *numReturnedLocs, 
+                             bool *canFree) {
+	return GvGetLocationHistory(dv->gv, PLAYER_DRACULA,
+                             	numReturnedLocs, canFree);
+}							
+
 int numTrapsAtLoc(DraculaView dv, PlaceId loc) {
 	int numTrapsInTrail = 0;
 	int numTraps = 0;
