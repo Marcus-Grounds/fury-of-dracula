@@ -130,7 +130,6 @@ void handleRoundZero(DraculaView dv) {
 	int distSetFromHunter[NUM_HUNTERS];
 	int totalScatter = 0;
 	int totalDist = 0;
-	for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) printf("Hunter: %d, at %s\n", hunter, placeIdToName(DvGetPlayerLocation(dv, hunter)));
 	for (PlaceId loc = MIN_REAL_PLACE; loc < MAX_REAL_PLACE; loc++) {
 		if (loc == HOSPITAL_PLACE || loc == CASTLE_DRACULA || placeIsSea(loc)) continue;
 		for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
