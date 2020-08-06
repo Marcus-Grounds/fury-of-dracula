@@ -50,6 +50,9 @@ void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo,
 PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray, 
 							int locArrayLen, Player hunter);
 Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter);
+// Taken from testUtils.h to make dracLocToMoveAbbrev return HIDE before DOUBLE_BACK_1.
+static void dracSortPlaces(PlaceId *places, int numPlaces);
+static int dracPlaceIdCmp(const void *ptr1, const void *ptr2);
 
 void decideDraculaMove(DraculaView dv)
 {
@@ -67,8 +70,8 @@ void decideDraculaMove(DraculaView dv)
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
 	
 	// Handle cases when no choice.
-	if (numLocs == 0 && round != 0) registerBestPlay("TP", "Mwahahahaha"); 
-	if (numLocs == 1) registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "...");
+	if (numLocs == 0 && round != 0) registerBestPlay("TP", "teleport"); 
+	if (numLocs == 1) registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "only 1 valid move");
 	// TODO: Calculate shortest means to castle dracula, if health is low
 	//if (health <= 10) {
 		// Get safest path to castle dracula
@@ -117,9 +120,9 @@ void decideDraculaMove(DraculaView dv)
 
 	// Register best play, in order of precedence.
 	// Handle case when there is nso choice but to travel by sea.
-	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
+	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "only sea travel possible");
 	// Give precedece to avoiding suiciding at sea when he has 2 blood points (or less) left...
-	else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "...");
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding suicide at sea");
 	// ... then to avoiding the closest hunter, if dangerously close, health is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter.
 	// b. This could mean maximising your distance from the hunter
@@ -130,16 +133,16 @@ void decideDraculaMove(DraculaView dv)
 			 (numHunterSameSea > 1 
 			 || (numHunterSameSea == 1 
 			 	&& guaranteeHunterKillIfSameLoc(round, healthHunterSameSea, locFallingOffTrail, furthestNonSeaLoc, numTrapsAtNonSeaLoc))))
-		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
+		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "avoiding land");
 	// ... then to placing the immature vampire...
-	else if (round % 13 == 0) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "...");
+	else if (round % 13 == 0) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "placing immature vamp");
 	// ... then to making his way to Castle Dracula, if health is low...
 	// else if (health < LOW_HEALTH) find shortest way to castle dracula - could be either by self-restriction or travelling
 	// ... then to separating himself from the hunters, avoiding the sea...
 		// If heading to sea means that one less encounter can be made with a hunter before death, then
 		// head to the best city location instead.	
 	else if ((DvGetHealth(dv, PLAYER_DRACULA) - LIFE_LOSS_SEA) % LIFE_LOSS_HUNTER_ENCOUNTER == 0)
-		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "...");
+		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "head to city");
 	else 
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
 
@@ -172,7 +175,7 @@ void handleRoundZero(DraculaView dv) {
 		totalScatter = 0;
 	}
 	
-	if (bestLoc != MIN_REAL_PLACE) registerBestPlay(placeIdToAbbrev(bestLoc), "Mwahahahaha");
+	if (bestLoc != MIN_REAL_PLACE) registerBestPlay(placeIdToAbbrev(bestLoc), "first round");
 }
 
 int distFromHunters(DraculaView dv, PlaceId loc) {
@@ -270,7 +273,6 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 		}
 		free(huntReachable);
 	}
-
 	// Choosing a location for Dracula's move
 	PlaceId locChosen = NOWHERE;
 
@@ -280,11 +282,14 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 
 	int numDracSea = 0;
 	PlaceId *dracSea = DvWhereCanIGoByType(dv, false, true, &numDracSea);
-
-	if ((nearestHunter->hunterDist <= 2) && (numDracSea != 0)) {
+	// printf("DEBUG: numDracSea is %d\n", numDracSea);
+	// printf("DEBUG: dracSea[0] is %d\n", dracSea[0]);
+	// TODO: debug DvWhereCanIGoByType returns a location not at sea
+	if (((nearestHunter->hunterDist <= 2) && (numDracSea > 0)) && placeIsSea(dracSea[0])) {
 		// Heading to sea if possible to avoid an encounter if 
 		// the closest hunter is <= 2 moves away
 		// TODO: currently chooses the first sea location in array
+		// printf("DEBUG: here\n");
 		locChosen = dracSea[0];
 	} else {
 		// Aim to have move not reachable by any hunters
@@ -303,7 +308,7 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 	free(dracReachable);
 	free(nearestHunter);
 	free(dracSea);
-	registerBestPlay(dracLocToMoveAbbrev(dv, locChosen), "...");
+	registerBestPlay(dracLocToMoveAbbrev(dv, locChosen), "low health move");
 	return;
 }
 
@@ -343,8 +348,9 @@ char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	// Assumes that the location given is reachable by a valid Dracula move
 
 	char *abbrev = NULL;
-	int numValid = 0;
+	int numValid = -1;
 	PlaceId *validMoves = DvGetValidMoves(dv, &numValid);
+	dracSortPlaces(validMoves, numValid);
 
 	int numDracHist = 0; 
 	bool histCanFree = false;
@@ -415,5 +421,17 @@ Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter) {
 		(*numHunter)++;
 	}
 	return hunterReturned;
+}
+
+// Functions used to sort places in numeric (and alphabetic) order.
+// Taken from testUtils.c to make dracLocToMoveAbbrev return HIDE before DOUBLE_BACK_1.
+static int dracPlaceIdCmp(const void *ptr1, const void *ptr2) {
+	PlaceId p1 = *(PlaceId *)ptr1;
+	PlaceId p2 = *(PlaceId *)ptr2;
+	return p1 - p2;
+}
+
+static void dracSortPlaces(PlaceId *places, int numPlaces) {
+	qsort(places, (size_t)numPlaces, sizeof(PlaceId), dracPlaceIdCmp);
 }
 
