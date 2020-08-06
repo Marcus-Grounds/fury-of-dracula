@@ -16,6 +16,7 @@
 #include "Game.h"
 #include "queue.h"
 #include <string.h>
+/*
 #define NUM_HUNTERS 4
 #define MIN_STARTING_DISTANCE 4
 #define WORTH_OF_NON_SEA 3
@@ -48,22 +49,32 @@ void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo,
 PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray, 
 							int locArrayLen, Player hunter);
 Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter);
+*/
 
+char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
 void decideDraculaMove(DraculaView dv)
 {
 	// TODO: Register a random move to ensure that a move is made.
 	////////////////////////////////////////////////////////////////////////
 	Round round = DvGetRound(dv);
-	int numLocs = 0;
 	// Decide on best location to spawn.
-	if (round == 0) {
+	/*if (round == 0) {
 		handleRoundZero(dv);
 		return;
-	}
+	}*/
 
-	PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	int numLocs = 0;
+	// PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
-
+	if (round == 0)  registerBestPlay("AM", "...");
+	if (numLocs == 0 && round != 0) {
+		registerBestPlay("TP", "Mwahahahaha");
+	} else {
+		registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "Mwahahahaha");
+	}
+	return;
+}
+/*
 	// Handle cases when no choice.
 	if (numLocs == 0 && round != 0) registerBestPlay("TP", "Mwahahahaha"); // TODO: CD or TP?
 	if (numLocs == 1) registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "...");
@@ -140,8 +151,10 @@ void decideDraculaMove(DraculaView dv)
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "...");
 	else 
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
-}
 
+}*/
+
+/*
 void handleRoundZero(DraculaView dv) {
 	PlaceId bestLoc = MIN_REAL_PLACE;
 	int currBestTotal = 0;
@@ -343,6 +356,7 @@ PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray,
 	}
 	return maxLoc;
 }
+*/
 
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	// Assumes that the location given is reachable by a valid Dracula move
@@ -380,7 +394,7 @@ char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	if (histCanFree) free(dracLocHist);
 	return abbrev;
 }
-
+/*
 ClosestHunter initClosestHunter(void) {
 	ClosestHunter new = malloc(sizeof(*new));
 	if (new == NULL) {
@@ -421,3 +435,4 @@ Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter) {
 	}
 	return hunterReturned;
 }
+*/
