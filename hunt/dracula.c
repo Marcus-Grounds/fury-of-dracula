@@ -62,12 +62,14 @@ void decideDraculaMove(DraculaView dv)
 		handleRoundZero(dv);
 		return;
 	}*/
+	// registerBestPlay("CD", "Mwahahahaha");
 
 	int numLocs = 0;
 	// PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
-	if (round == 0)  registerBestPlay("AM", "...");
-	if (numLocs == 0 && round != 0) {
+	if (round == 0)  {
+	    registerBestPlay("AM", "...");
+	} else if (numLocs == 0 && round != 0) {
 		registerBestPlay("TP", "Mwahahahaha");
 	} else {
 		registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "Mwahahahaha");
