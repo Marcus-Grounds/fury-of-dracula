@@ -413,9 +413,8 @@ int numTrapsAtLoc(DraculaView dv, PlaceId loc) {
 
 PlaceId *DvWhereCanTheyGoByRound(DraculaView dv, Player player, Round round, 
 								 PlaceId from, int *numReturnedLocs) {
-	PlaceId location = DvGetPlayerLocation(dv, player);
 	// Return the valid moves for the player in this round from current location.
-	return GvGetReachable(dv->gv, player, round, location, numReturnedLocs);
+	return GvGetReachable(dv->gv, player, round, from, numReturnedLocs);
 }
 
 PlaceId DvGetLocationFallingOffTrail(DraculaView dv) {

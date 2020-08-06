@@ -14,6 +14,7 @@
 #include "GameView.h"
 #include "Game.h"
 #include "queue.h"
+#include <stdio.h>
 #include <string.h>
 #define NUM_HUNTERS 4
 #define MIN_STARTING_DISTANCE 4
@@ -129,7 +130,7 @@ void handleRoundZero(DraculaView dv) {
 	int distSetFromHunter[NUM_HUNTERS];
 	int totalScatter = 0;
 	int totalDist = 0;
-
+	for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) printf("Hunter: %d, at %s\n", hunter, placeIdToName(DvGetPlayerLocation(dv, hunter)));
 	for (PlaceId loc = MIN_REAL_PLACE; loc < MAX_REAL_PLACE; loc++) {
 		if (loc == HOSPITAL_PLACE || loc == CASTLE_DRACULA || placeIsSea(loc)) continue;
 		for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
@@ -167,11 +168,9 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 
 	PlaceId src = DvGetPlayerLocation(dv, hunter);
 	Round round = DvGetRound(dv) + 1;
-
 	// Initialise visited array to NOWHERE;
 	PlaceId visited[NUM_REAL_PLACES];
 	for (int i = 0; i < NUM_REAL_PLACES; i++) visited[i] = NOWHERE;
-
 	// Conduct breadth first search from source.
 	visited[src] = src;
 	Queue q = createQueue();
@@ -187,13 +186,13 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 				 inBetween = visited[inBetween]) {
 				roundsFromSrc++;
 			}
-
 			// Get reachable locations from current location.
 			int numLocs = -1;
 			PlaceId *intermediateConns = DvWhereCanTheyGoByRound(dv, hunter, 
 														  		 round + roundsFromSrc, 
 														 		 intermediate, 
 														  		 &numLocs);
+			
 			// Enqueue reachable locations from current location.
 			for (int i = 0; i < numLocs; i++) {
 				if (visited[intermediateConns[i]] == NOWHERE) {
@@ -201,9 +200,9 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 					visited[intermediateConns[i]] = intermediate;
 				}
 			}
+			free(intermediateConns);
 		}
 	}
-
 	// Find shortest path in reverse order.
 	int pathLength = 0;
 	for (PlaceId intermediate = dest; 
@@ -211,7 +210,6 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 		 intermediate = visited[intermediate]) {
 		pathLength++;
 	}
-
 	return pathLength;
 }
 
