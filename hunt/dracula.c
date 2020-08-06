@@ -23,10 +23,10 @@
 
 #define guaranteeHunterKillIfSameLoc(round, healthHunter, locFallingOffTrail, desiredLoc, numTrapsDesiredLoc)\
 									((round % 13 == 0 && locFallingOffTrail != desiredLoc && healthHunter <= numTrapsDesiredLoc * LIFE_LOSS_TRAP_ENCOUNTER)\
-									|| (round % 13 == 0 && locFallingOffTrail == desiredLoc && healthHunter <=  (numTrapsDesiredLoc - 1) * LIFE_LOSS_TRAP_ENCOUNTER)\
-									|| (round % 13 != 0 && (round - TRAIL_SIZE) % 13 != 0) && locFallingOffTrail == desiredLoc && healthHunter <= numTrapsDesiredLoc * LIFE_LOSS_TRAP_ENCOUNTER\
-									|| (round % 13 != 0 && (round - TRAIL_SIZE) % 13 != 0) && locFallingOffTrail != desiredLoc && healthHunter <= (numTrapsDesiredLoc + 1) * LIFE_LOSS_TRAP_ENCOUNTER\
-									|| (round % 13 != 0 && (round - TRAIL_SIZE) % 13 == 0) && healthHunter <= (numTrapsDesiredLoc + 1) * LIFE_LOSS_TRAP_ENCOUNTER)
+									|| ((round % 13 == 0 && locFallingOffTrail == desiredLoc && healthHunter <=  (numTrapsDesiredLoc - 1) * LIFE_LOSS_TRAP_ENCOUNTER))\
+									|| ((round % 13 != 0 && (round - TRAIL_SIZE) % 13 != 0) && locFallingOffTrail == desiredLoc && healthHunter <= numTrapsDesiredLoc * LIFE_LOSS_TRAP_ENCOUNTER)\
+									|| ((round % 13 != 0 && (round - TRAIL_SIZE) % 13 != 0) && locFallingOffTrail != desiredLoc && healthHunter <= (numTrapsDesiredLoc + 1) * LIFE_LOSS_TRAP_ENCOUNTER)\
+									|| ((round % 13 != 0 && (round - TRAIL_SIZE) % 13 == 0) && healthHunter <= (numTrapsDesiredLoc + 1) * LIFE_LOSS_TRAP_ENCOUNTER))
 
 struct closestHunter {
 	int hunterDist;
@@ -83,7 +83,7 @@ void decideDraculaMove(DraculaView dv)
 	int furthestNonSeaDist = 0;
 	PlaceId furthestNonSeaLoc = CITY_UNKNOWN;
 	int furthestSeaDist = 0;
-	PlaceId furthestSeaLoc = SEA_UNKNOWN;
+	// PlaceId furthestSeaLoc = SEA_UNKNOWN; //TODO: error as variable wasn't used
 	for (int i = 0; i < numLocs; i++) {
 		int totalDist = distFromHunters(dv, reachableLocations[i]);
 		if (totalDist > furthestTotalDist) {
@@ -98,7 +98,7 @@ void decideDraculaMove(DraculaView dv)
 
 		if (placeIsSea(reachableLocations[i] && totalDist > furthestSeaDist)) {
 			furthestSeaDist = totalDist;
-			furthestSeaLoc = reachableLocations[i];
+			// furthestSeaLoc = reachableLocations[i];
 		}
 	}
 
@@ -186,6 +186,7 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 {
 
 	PlaceId src = DvGetPlayerLocation(dv, hunter);
+	if (src == NOWHERE) return -1; //TODO: needed?
 	Round round = DvGetRound(dv) + 1;
 
 	// Initialise visited array to NOWHERE;
@@ -223,15 +224,20 @@ int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
 			}
 		}
 	}
-
+	printf("DEBUG: Reached 1\n");
+    
 	// Find shortest path in reverse order.
+	
 	int pathLength = 0;
 	for (PlaceId intermediate = dest; 
 		 intermediate != src; 
 		 intermediate = visited[intermediate]) {
+		printf("DEBUG: intermediate is %d\n", intermediate);
 		pathLength++;
+	    printf("DEBUG: visited[intermediate] is %d\n", visited[intermediate]);
 	}
-
+	
+    printf("DEBUG: Reached 2\n");
 	return pathLength;
 }
 
