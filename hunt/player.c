@@ -60,7 +60,7 @@ typedef DraculaView View;
 # define decideMove decideDraculaMove
 # define ViewFree DvFree
 
-# define xPastPlays "GCD.... SGA.... HFR.... MSR.... DLV.V.. GGA.... SCD.... HBR.... MBA.... DSWT... GCD.... SGA.... HPR.... MSR.... DHIT... GGA.... SGA.... HVI.... MBA.... DD1T... GGA.... SGA.... HZA.... MLS.... DLOT... GGA.... SCD.... HMU.... MMA.... DMNT... GGA.... SCD.... HMU.... MMA.... DEDT.V. GBD.... SKL.... HMI.... MAL.... DNS..M. GVI.... SBC.... HRO.... MAL.... DAMT.M. GMU.... SBD.... HRO.... MMS.... DHIT.M. GMU.... SBD.... HRO.... MMS.... DD1T.M. GZA.... SZA.... HFL.... MMR.... DBUT.M. GZA.... SZA.... HMI.... MMI.... DLET.M. GZA.... SZA.... HMU.... MMU.... DNA.V.. GZA.... SZA.... HMU.... MMU.... DBB..M. GMU.... SSJ.... HVE.... MLI.... DSNT.M. GST.... SZA.... HFL.... MBUT... DHIT.M. GBU.... SVI.... HGE.... MAM.... DD1T... GBO.... SHA.... HCF.... MBU.... DSRT.M. GLS.... SNS.... HBO.... MBO.... DTOT.V. GLS.... SAO.... HBA.... MLS.... DCFT... GLS.... SAO.... HBA.... MLS.... DGET.M. GSRT... SBB.... HMS.... MMA.... DZUT.M. GAL.... SAO.... HTS.... MAL.... DMUT.M. GMA.... SLS.... HMS.... MLS.... DZAT... GLS.... SLS.... HAO.... MLS.... DSJT.M. GLS.... SLS.... HLS.... MLS.... DBE.VM. GLS.... SLS.... HLS.... MAO.... DKLT.M. GAO.... SAO.... HAO.... MIR.... DCDT.M. GMS.... SMS.... HMS.... MAO.... DHIT.M. GTS.... SMR.... HTS.... MMS.... DD1T.M. GIO.... SGO.... HIO.... MTS.... DGAT.M. GBS.... SVE.... HSA.... MGO.... DBCT.V. GCN.... SBD.... HBE.... MVE.... DSOT.M. GBCT... SBE.... HBE.... MVI.... DVAT.M. GBE.... SBE.... HBE.... MBD.... DATT.M. GSJ.... SSJ.... HSA.... MSOT... DHIT.M. GZA.... SZA.... HIO.... MSJ.... DD1T.M. GMU.... SMU.... HAS.... MZA.... DIO.... GFR.... SVE.... HBI.... MVI.... DSA.V.. GNU.... SMU.... HAS.... MLI.... DSOT.M. GNU.... SNU.... HVE.... MNU.... DVRT.M. GNU.... SNU.... HMU.... MNU.... DBS..M. GCO.... SLI.... HVE.... MNU.... DCNT.M. GCO.... SLI.... HVE.... MHA.... DD3T... GAM.... SHA.... HBR.... MNS.... DHIT.V. GNS.... SNS.... HHA.... MAO...."
+# define xPastPlays "GKL.... SMR... HLS... MAM.... DLS.V.. GBU.... SCA... HSN.... "
 # define xMsgs { "", "", "", "" }
 
 #else
@@ -71,7 +71,7 @@ typedef HunterView View;
 # define decideMove decideHunterMove
 # define ViewFree HvFree
 
-# define xPastPlays "GZA.... SED.... HZU...."
+# define xPastPlays "GKL.... SMR... HLS... MAM.... DC?.... GBD.... SGO...."
 # define xMsgs { "", "", "" }
 
 #endif
