@@ -18,17 +18,17 @@
 #include <stdlib.h>
 
 //HELPER FUNCTIONS DECLARATION//
-PlaceId *godPatrol ();
-PlaceId *sewPatrol ();
-PlaceId *vanPatrol ();
-PlaceId *minPatrol ();
+PlaceId *redPatrol ();
+PlaceId *greenPatrol ();
+PlaceId *pinkPatrol ();
+PlaceId *bluePatrol ();
 
 void patrol (HunterView hv, Player hunter);
-void followPath (HunterView hv, Player hunter);
+//void preSixPositioning (HunterView hv, Player hunter);
 PlaceId *ifDracAtCD (HunterView hv, Player hunter, PlaceId dest, Round round, int *pathLength);
 
 //STORE PATROL ZONES
-PlaceId *godPatrol () {
+PlaceId *redPatrol () {
 
 	PlaceId *patrol = malloc(sizeof (PlaceId) * 13);
 	
@@ -49,7 +49,7 @@ PlaceId *godPatrol () {
 	return patrol;
 }
 
-PlaceId *sewPatrol () {
+PlaceId *greenPatrol () {
 
 	PlaceId *patrol = malloc(sizeof (PlaceId) * 13);
 	
@@ -70,7 +70,7 @@ PlaceId *sewPatrol () {
 	return patrol;
 }
 
-PlaceId *vanPatrol () {
+PlaceId *pinkPatrol () {
 
 	PlaceId *patrol = malloc(sizeof (PlaceId) * 7);
 	
@@ -85,7 +85,7 @@ PlaceId *vanPatrol () {
 	return patrol;
 }
 
-PlaceId *minPatrol () {
+PlaceId *bluePatrol () {
 
 	PlaceId *patrol = malloc(sizeof (PlaceId) * 14);
 	
@@ -150,6 +150,14 @@ void decideHunterMove(HunterView hv)
 						 "Health is too low, have to rest");
 		return;
 	}
+	//If Dracula has not been seen yet
+	if ((lastSeenDrac == CITY_UNKNOWN || lastSeenDrac == SEA_UNKNOWN) &&
+		 round % 6 != 0) {
+		
+		patrol(hv, player);
+		return;
+	}
+	
 	//IF dracula was last seen at Castle Dracula, 
 	//The hunters will advance to CD
 	
@@ -170,21 +178,13 @@ void decideHunterMove(HunterView hv)
 		
 		return;
 	}
-
-	//If Dracula has not been seen yet
-	if ((lastSeenDrac == CITY_UNKNOWN || lastSeenDrac == SEA_UNKNOWN) &&
-		 round % 6 != 0) {
-		
-		patrol(hv, player);
-		return;
-	}
 }
 
 void patrol(HunterView hv, Player hunter)
 {
 	if (hunter == PLAYER_LORD_GODALMING) {
 
-		PlaceId *patrol = godPatrol();
+		PlaceId *patrol = redPatrol();
 		for (int i = 0; i < 12; i++) {
 			if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
 				char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
@@ -196,7 +196,7 @@ void patrol(HunterView hv, Player hunter)
 	}
 	if (hunter == PLAYER_DR_SEWARD) {
 
-		PlaceId *patrol = sewPatrol();
+		PlaceId *patrol = greenPatrol();
 		for (int i = 0; i < 12; i++) {
 			if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
 				char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
@@ -208,8 +208,8 @@ void patrol(HunterView hv, Player hunter)
 	}
 	if (hunter == PLAYER_VAN_HELSING) {	
   
-		PlaceId *patrol = vanPatrol();
-		for (int i = 0; i < 8; i++) {
+		PlaceId *patrol = pinkPatrol();
+		for (int i = 0; i < 6; i++) {
 			if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
 				char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
 				registerBestPlay(nextlocation, "Looking for him");
@@ -220,8 +220,8 @@ void patrol(HunterView hv, Player hunter)
 	}
 	if (hunter == PLAYER_MINA_HARKER) {	
 
-		PlaceId *patrol = minPatrol();
-		for (int i = 0; i < 10; i++) {
+		PlaceId *patrol = bluePatrol();
+		for (int i = 0; i < 13; i++) {
 			if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
 				char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
 				registerBestPlay(nextlocation, "Looking for him");
@@ -242,10 +242,15 @@ PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int
 
 /*
 //STRATEGY FOR IF HUNTERS FALL IN TRAIL DURING PATROL
-void followPath (HunterView hv, Player hunter)
+void preSixPositioning (HunterView hv, Player hunter)
 {
 	//NEED TO SEE IN WHICH PATROL ZONE WAS LOCATED
-	//MAY NEED TO STORE PAST DRAC LOCATION
+	//FOUND IN RED 
+		//LEFT HALF
+		//pinkpatrol rotates to red right half
+		//RIGHT HALF
+		//
+
 	//IF FOUND IN PATROL OF HUNTER (1), HUNTER (1) GOES FURTHEST AWAY FROM OTHER HUNTERS
 	//COULD SPLIT THE PATROLS INTO TWO HALVES
 
@@ -256,24 +261,27 @@ void followPath (HunterView hv, Player hunter)
 	PlaceId hunterLoc  = (HvGetPlayerLocation(hv, hunter));
 
 	if (draculaLoc == NOWHERE) return;
-	if (draculaLoc != hunterLoc) return;
 
-	if (hunter == PLAYER_LORD_GODALMING) {
+	if (searchPatrol(redPatrol, draculaLoc) != FALSE)
+	if (searchPatrol(bluePatrol, draculaLoc) != FALSE)
+	if (searchPatrol(greenPatrol, draculaLoc) != FALSE)
+	if (searchPatrol(pinkPatrol, draculaLoc) != FALSE)
+
+	
+	int check = 0;
+
+	PlaceId *patrol = redPatrol();
+	
+	if (check <= 5) {
+
 		
-		int check = 0;
-		PlaceId *patrol = godPatrol();
-		
-		for (int i = 0; i < 13; i++) {
-			if (hunterLoc == patrol[i]) {
-				check = i;
-				break;
-			}
-	 	}
-		
-		if (check <= 5) {
-			
-		}
 	}
+}
+
+//
+bool searchPatrol (PlaceId *patrol, PlaceId location) {
+	//use the fact that the last thing in the array is equal to the first thing
+	while
 }
 */
 
