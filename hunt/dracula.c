@@ -43,7 +43,7 @@ char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
 void lowHealthMove(DraculaView dv, PlaceId furthestLoc);
 void handleRoundZero(DraculaView dv);
 int distFromHunters(DraculaView dv, PlaceId loc);
-int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest);
+int shortestDistFrom(DraculaView dv, Player hunter, PlaceId dest);
 ClosestHunter initClosestHunter(void);
 void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo, 
 						PlaceId dracLoc);
@@ -56,7 +56,9 @@ void decideDraculaMove(DraculaView dv)
 	// TODO: Register a random move to ensure that a move is made.
 	////////////////////////////////////////////////////////////////////////
 	Round round = DvGetRound(dv);
+	printf("Round is %d\n", round);
 	// Decide on best location to spawn.
+	for (int i = 0; i < 4; i++) printf("Hunter %d at %s\n", i, placeIdToName(DvGetPlayerLocation(dv, i)));
 	if (round == 0) {
 		handleRoundZero(dv);
 		return;
@@ -67,8 +69,14 @@ void decideDraculaMove(DraculaView dv)
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
 	
 	// Handle cases when no choice.
-	if (numLocs == 0 && round != 0) registerBestPlay("TP", "Mwahahahaha"); 
-	if (numLocs == 1) registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "...");
+	if (numLocs == 0 && round != 0) {
+		registerBestPlay("TP", "Mwahahahaha"); 
+		return;
+	}
+	if (numLocs == 1) {
+		registerBestPlay(dracLocToMoveAbbrev(dv, reachableLocations[0]), "...");
+		return;
+	}
 	// TODO: Calculate shortest means to castle dracula, if health is low
 	//if (health <= 10) {
 		// Get safest path to castle dracula
@@ -107,7 +115,7 @@ void decideDraculaMove(DraculaView dv)
 	int numHunterSameSea = 0;
 	int numTrapsAtNonSeaLoc = 0;
 	int healthHunterSameSea = 0;
-	PlaceId locFallingOffTrail = DvGetLocationFallingOffTrail(dv);
+	PlaceId locFallingOffTrail = DvGetMoveFallingOffTrail(dv);
 	Player hunterSameSea = PLAYER_DRACULA;
 	if (placeIsSea(currLoc))  {
 		hunterSameSea = hunterAtSameSea(dv, currLoc, &numHunterSameSea);
@@ -149,14 +157,15 @@ void decideDraculaMove(DraculaView dv)
 void handleRoundZero(DraculaView dv) {
 	PlaceId bestLoc = MIN_REAL_PLACE;
 	int currBestTotal = 0;
-
+	printf("bestLoc is: %s\n", placeIdToName(bestLoc));
 	int distSetFromHunter[NUM_HUNTERS];
 	int totalScatter = 0;
 	int totalDist = 0;
 	for (PlaceId loc = MIN_REAL_PLACE; loc < MAX_REAL_PLACE; loc++) {
+		Player hunter;
 		if (loc == HOSPITAL_PLACE || loc == CASTLE_DRACULA || placeIsSea(loc)) continue;
-		for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
-			distSetFromHunter[hunter] = shortestPathFrom(dv, hunter, loc);
+		for (hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
+			distSetFromHunter[hunter] = shortestDistFrom(dv, hunter, loc);
 			if (distSetFromHunter[hunter] < MIN_STARTING_DISTANCE) break;
 			totalDist += distSetFromHunter[hunter];
 			for (int i = 0; i < hunter; i++) {
@@ -164,6 +173,7 @@ void handleRoundZero(DraculaView dv) {
 							    (distSetFromHunter[hunter] < distSetFromHunter[i]) * distSetFromHunter[i];
 			}
 		}
+		if (distSetFromHunter[hunter] < MIN_STARTING_DISTANCE) continue;
 		if (totalDist + totalScatter > currBestTotal) {
 			currBestTotal = totalDist + totalScatter;
 			bestLoc = loc;
@@ -171,21 +181,21 @@ void handleRoundZero(DraculaView dv) {
 		totalDist = 0;
 		totalScatter = 0;
 	}
-	
-	if (bestLoc != MIN_REAL_PLACE) registerBestPlay(placeIdToAbbrev(bestLoc), "Mwahahahaha");
+	printf("bestLoc is: %s\n", placeIdToName(bestLoc));
+	registerBestPlay(placeIdToAbbrev(bestLoc), "Mwahahahaha");
 }
 
 int distFromHunters(DraculaView dv, PlaceId loc) {
 	int distSetFromHunter[NUM_HUNTERS];
 	int totalDist = 0;
 	for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
-		distSetFromHunter[hunter] = shortestPathFrom(dv, hunter, loc);
+		distSetFromHunter[hunter] = shortestDistFrom(dv, hunter, loc);
 		totalDist += distSetFromHunter[hunter];
 	}
 	return totalDist;
 }
 
-int shortestPathFrom(DraculaView dv, Player hunter, PlaceId dest)
+int shortestDistFrom(DraculaView dv, Player hunter, PlaceId dest)
 {
 
 	PlaceId src = DvGetPlayerLocation(dv, hunter);
@@ -323,7 +333,7 @@ PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray,
 	PlaceId maxLoc = locArray[0];
 	for (int i = 0; i < locArrayLen; i++) {
 		if (landMoveExists && (placeIsSea(locArray[i]))) continue;
-		int dist = shortestPathFrom(dv, hunter, locArray[i]);
+		int dist = shortestDistFrom(dv, hunter, locArray[i]);
 		if (dist > maxDist) {
 			maxLoc = locArray[i];
 			maxDist = dist;
@@ -390,11 +400,11 @@ ClosestHunter initClosestHunter(void) {
 
 void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo, 
 						PlaceId dracLoc) {
-	int minDist = shortestPathFrom(dv, PLAYER_LORD_GODALMING, dracLoc);
+	int minDist = shortestDistFrom(dv, PLAYER_LORD_GODALMING, dracLoc);
 	int closestHunter = PLAYER_LORD_GODALMING;
 	int closestLoc = DvGetPlayerLocation(dv, PLAYER_LORD_GODALMING);
 	for (int hunter = PLAYER_DR_SEWARD; hunter <= PLAYER_MINA_HARKER; hunter++) {
-		int hunterDist = shortestPathFrom(dv, hunter, dracLoc);
+		int hunterDist = shortestDistFrom(dv, hunter, dracLoc);
 		if (hunterDist < minDist) {
 			minDist = hunterDist;
 			closestHunter = hunter;
@@ -417,3 +427,83 @@ Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter) {
 	return hunterReturned;
 }
 
+// Consider: number of rounds (shortestDistance)
+// Consider: how many seas
+// Consider: likelihood of hunters intercepting the path and catching on your trail - consider all the moves they could make(double?)
+// Consider: self trap
+/*PlaceId *safestPathToCastleDracula(DraculaView dv) {
+	// Direct path to castle dracula
+
+}*/
+
+PlaceId *shortestPathToCastleDracula(DraculaView dv, int *pathLength, int *numSeas) {
+	// Direct path to Castle Dracula. Must consider the moves that are
+	// currently in his trail, and the ones that will fall off by the time
+	// he reaches a certain location. No backtracking into the locations in his trail
+	// to minimise chance of contact with hunters.
+	*numSeas = 0;
+	int numLocsInTrail = -1;
+	bool canFree = false;
+	PlaceId *trail = DvGetLocationHistory(dv, &numLocsInTrail, &canFree);
+
+	if (numLocsInTrail > 6) numLocsInTrail = 6;
+	PlaceId src = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	Round round = DvGetRound(dv);
+
+	// Initialise visited array to NOWHERE;
+	PlaceId visited[NUM_REAL_PLACES];
+	for (int i = 0; i < NUM_REAL_PLACES; i++) visited[i] = NOWHERE;
+	// Conduct breadth first search from source.
+	visited[src] = src;
+	Queue q = createQueue();
+	enqueue(q, src);
+	while (!queueIsEmpty(q)) {
+		PlaceId intermediate = dequeue(q);
+		if (intermediate != CASTLE_DRACULA) {
+			// Calculate the number of rounds from source location required to
+			// reach intermediate location.
+			PlaceId roundsFromSrc = 0;
+			for (PlaceId inBetween = intermediate; 
+				 inBetween != src; 
+				 inBetween = visited[inBetween]) {
+				roundsFromSrc++;
+			}
+			// Get reachable locations from current location.
+			int numLocs = -1;
+			PlaceId *intermediateConns = DvWhereCanTheyGoByRound(dv, PLAYER_DRACULA, 
+														  		 round + roundsFromSrc, 
+														 		 intermediate, 
+														  		 &numLocs);
+			
+			// Enqueue reachable locations from current location.
+			for (int i = 0; i < numLocs; i++) {
+				if (visited[intermediateConns[i]] == NOWHERE 
+					&& (roundsFromSrc > numLocsInTrail 
+					|| (roundsFromSrc <= numLocsInTrail && !DvIsRepeat(i, trail, numLocs - roundsFromSrc)))) {
+					enqueue(q, intermediateConns[i]);
+					visited[intermediateConns[i]] = intermediate;
+				}
+			}
+			free(intermediateConns);
+		}
+	}
+	// Find shortest path in reverse order.
+	int reversePathLength = 0;
+	PlaceId *reversePath = NULL;
+	for (PlaceId intermediate = CASTLE_DRACULA; 
+		 intermediate != src; 
+		 intermediate = visited[intermediate]) {
+		if (placeIsSea(intermediate)) (*numSeas)++;
+		reversePath = DvAddPlaceId(intermediate, reversePath, pathLength);
+	}
+
+	*pathLength = 0;
+	PlaceId *path = NULL;
+	for (int i = reversePathLength - 1; i < 1; i++) {
+		path = DvAddPlaceId(reversePath[i], path, pathLength);
+	}
+	free(reversePath);
+	if (canFree) free(trail);
+	return path;
+
+}
