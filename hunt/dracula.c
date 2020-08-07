@@ -59,16 +59,16 @@ void decideDraculaMove(DraculaView dv)
 	// TODO: Register a random move to ensure that a move is made.
 	////////////////////////////////////////////////////////////////////////
 	Round round = DvGetRound(dv);
-	printf("Round is %d\n", round);
+	//printf("Round is %d\n", round);
 	// Decide on best location to spawn.
-	for (int i = 0; i < 4; i++) printf("Hunter %d at %s\n", i, placeIdToName(DvGetPlayerLocation(dv, i)));
+	// for (int i = 0; i < 4; i++) printf("Hunter %d at %s\n", i, placeIdToName(DvGetPlayerLocation(dv, i)));
 	if (round == 0) {
 		handleRoundZero(dv);
 		return;
 	}
 
 	int numLocs = 0;
-	// PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
+	//PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
 	
 	// Handle cases when no choice.
@@ -186,7 +186,11 @@ void handleRoundZero(DraculaView dv) {
 		totalScatter = 0;
 	}
 	
-	if (bestLoc != MIN_REAL_PLACE) registerBestPlay(placeIdToAbbrev(bestLoc), "first round");
+	if (bestLoc != MIN_REAL_PLACE) {
+		registerBestPlay(placeIdToAbbrev(bestLoc), "first round");
+	} else {
+		registerBestPlay("AM", "debug later");
+	}
 }
 
 int distFromHunters(DraculaView dv, PlaceId loc) {
