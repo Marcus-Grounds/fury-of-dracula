@@ -103,7 +103,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 	*numReturnedMoves = 0;
 	int numTrail = 0; 
 	bool trailCanFree = false;
-	PlaceId *trail = GvGetLastMoves(dv->gv, PLAYER_DRACULA, TRAIL_SIZE, 
+	PlaceId *trail = GvGetLastMoves(dv->gv, PLAYER_DRACULA, TRAIL_SIZE - 1, 
 	                                &numTrail, &trailCanFree);
 	if (numTrail == 0) return NULL;
 	
