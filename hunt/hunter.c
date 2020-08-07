@@ -12,6 +12,8 @@
 #include "Game.h"
 #include "hunter.h"
 #include "HunterView.h"
+#include "Map.h"
+
 
 //REMOVE TIS:
 #include <stdio.h>
@@ -24,10 +26,15 @@ PlaceId *ifDracAtCD (HunterView hv, Player hunter, PlaceId dest, Round round, in
 
 void decideHunterMove(HunterView hv)
 {	
+
+
 	Player player = HvGetPlayer(hv);
 	
 	if (player == PLAYER_DRACULA) return;
-	
+
+	//To keep track of drack encounters?
+	//int *dracEncounterCount = malloc(sizeof(int *));
+
 	Round round = HvGetRound(hv);
 	Round *roundLastseen = malloc(sizeof(Round));
 	PlaceId lastSeenDrac = HvGetLastKnownDraculaLocation(hv, roundLastseen);
@@ -91,8 +98,17 @@ void decideHunterMove(HunterView hv)
 		patrol(hv, player);
 		return;
 	}
+
+	//If hunter comes into a location into Dracula's position
+	//The rest of the hunters should try to reach Dracula.
+	if (lastSeenDrac != CITY_UNKNOWN && lastSeenDrac != SEA_UNKNOWN) {
+
+	}
+	
+	
 }
 
+//Setting up a patrol zonme for the hunters to start their round with
 void patrol(HunterView hv, Player hunter)
 {
 	if (hunter == PLAYER_LORD_GODALMING) {
@@ -202,3 +218,38 @@ PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int
 	PlaceId *shortestPath = HvGetShortestPathTo(hv, hunter, dest, pathLength);
 	return shortestPath;
 }
+
+
+//If Dracula lands in the same location as a hunter
+//Each of the hunter should Converge into Dracula's position
+
+//Should each hunter take n steps away?
+//Try to go to the reachable locations from Drac's known location?
+void ReachDrac(HunterView hv, PlaceId dest, PlaceId lastSeenDrac) {
+
+	Player hunter = HvGetPlayer(hv);
+	PlaceId location = HvGetPlayerLocation(hv, hunter);
+	
+
+	//If dracula's last known position is the same as that of the
+	//current hunter, The hunter should try to get to one of the connected locations
+	//Connected by road and sea only)
+
+	//The current hunter 
+	//If the Drac's last known position is the same as the hunter's
+	if (lastSeenDrac == location) {
+		PlaceId *numRetLocs = malloc(sizeof(PlaceId));
+
+		//Add in a condition to check Dracula's health.
+		//If his health is too low, he might avoid the sea
+		//Necessary?
+
+		PlaceId *possiblelocations = HvWhereCanTheyGoByType(hv, hunter, true, false,true, numRetLocs);
+		PlaceId location = possiblelocations[0];
+		registerBestPlay(placeIdToAbbrev(location), "Found Drac, moving to another position to track");
+		return;
+	}
+	
+	
+}
+
