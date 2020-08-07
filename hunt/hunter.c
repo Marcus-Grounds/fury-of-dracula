@@ -147,7 +147,6 @@ void decideHunterMove(HunterView hv)
 	//The hunters would rest to find the location 
 	
 	if ((lastSeenDrac == CITY_UNKNOWN || lastSeenDrac == SEA_UNKNOWN) && round > 6 ) {
-		printf("IN DRAC'S \n\n");
 		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
 						 "Rest y'all, we gotta find the blood sucking villain");
 		return;
@@ -161,8 +160,6 @@ void decideHunterMove(HunterView hv)
 	}
 	//If Dracula has not been seen yet
 	if (lastSeenDrac == CITY_UNKNOWN || lastSeenDrac == SEA_UNKNOWN || lastSeenDrac == NOWHERE) {
-		//registerBestPlay(placeIdToAbbrev(BUDAPEST), "MOVE 2");
-		printf("ON PATROL\n\n"); 
 		patrol(hv, player);
 		return;
 	}
@@ -171,9 +168,7 @@ void decideHunterMove(HunterView hv)
 	//The hunters will advance to CD
 	
 	if (lastSeenDrac == CASTLE_DRACULA) {
-
-		printf("AT CD\n\n");
-		
+	
 		PlaceId *shortestPath = malloc(sizeof(PlaceId)); //does this malloc need to be bigger
 		int *pathLength = malloc(sizeof(int));
 		
@@ -202,7 +197,6 @@ void decideHunterMove(HunterView hv)
 
 	int *numRetLocs = malloc(sizeof(int *));
 	if (lastSeenDrac == HvGetPlayerLocation(hv, HvGetPlayer(hv))) {
-		printf("IN DRAC'S SPOT\n\n");
 		LookForDrac(hv, lastSeenDrac, numRetLocs, player );
 		return;
 	}
