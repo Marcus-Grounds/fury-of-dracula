@@ -292,14 +292,10 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 
 	int numDracSea = 0;
 	PlaceId *dracSea = DvWhereCanIGoByType(dv, false, true, &numDracSea);
-	// printf("DEBUG: numDracSea is %d\n", numDracSea);
-	// printf("DEBUG: dracSea[0] is %d\n", dracSea[0]);
-	// TODO: debug DvWhereCanIGoByType returns a location not at sea
+
 	if (((nearestHunter->hunterDist <= 2) && (numDracSea > 0)) && placeIsSea(dracSea[0])) {
 		// Heading to sea if possible to avoid an encounter if 
 		// the closest hunter is <= 2 moves away
-		// TODO: currently chooses the first sea location in array
-		// printf("DEBUG: here\n");
 		locChosen = dracSea[0];
 	} else {
 		// Aim to have move not reachable by any hunters
