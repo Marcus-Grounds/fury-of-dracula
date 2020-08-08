@@ -135,7 +135,7 @@ void decideDraculaMove(DraculaView dv)
 	// ... then to avoiding the closest hunter, if dangerously close, health is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter.
 	// b. This could mean maximising your distance from the hunter
-	else if (DvGetHealth(dv, PLAYER_DRACULA) <= 20) lowHealthMove(dv, furthestLoc, furthestSeaLoc);
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= 25) lowHealthMove(dv, furthestLoc, furthestSeaLoc);
 	/*
 	// else if (health <= 12 && distClosestHunter <= 1 && DvGetHealth(dv, closestHunter) > highestDamageIfEncounteredAtCity) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
 	// ... then to avoiding land if hunter is at the same sea location of Dracula, and a hunter kill is not guaranteed...
