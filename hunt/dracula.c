@@ -19,8 +19,7 @@
 #include <string.h>
 
 #define NUM_HUNTERS 4
-#define MIN_STARTING_DISTANCE 4
-#define WORTH_OF_NON_SEA 3
+#define MIN_STARTING_DISTANCE 3
 #define HALF_START_HEALTH GAME_START_BLOOD_POINTS/2
 
 #define guaranteeHunterKillIfSameLoc(round, healthHunter, locFallingOffTrail, desiredLoc, numTrapsDesiredLoc)\
@@ -127,7 +126,7 @@ void decideDraculaMove(DraculaView dv)
 	}*/
 
 	// Register best play, in order of precedence.
-	// Handle case when there is nso choice but to travel by sea.
+	// Handle case when there is no choice but to travel by sea.
 	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "only sea travel possible");
 	// Give precedece to avoiding suiciding at sea when he has 2 blood points (or less) left...
 	/*else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding suicide at sea");
