@@ -60,7 +60,7 @@ typedef DraculaView View;
 # define decideMove decideDraculaMove
 # define ViewFree DvFree
 
-# define xPastPlays "GKL.... SMR... HLS... MAM.... DLS.V.. GBU.... SCA... HSN.... "
+# define xPastPlays "GKL.... SMR.... HLS.... MAM.... DLS.V.. GSZ.... STO.... HLSVD.. MBU.... DCAT... GBE.... SSR.... HMA.... MPA.... DAO.... GBE.... STO.... HSR.... MSR.... DIR.... GSZ.... SSR.... HMA.... MPA.... DDUT... GBD.... SMA.... HLS.... MST.... DHIT... GVI.... SLS.... HMA.... MZU.... DD1T... GVI.... SLS.... HMA.... MZU...."
 # define xMsgs { "", "", "", "" }
 
 #else
@@ -71,7 +71,7 @@ typedef HunterView View;
 # define decideMove decideHunterMove
 # define ViewFree HvFree
 
-# define xPastPlays "GKL.... SMR... HLS... MAM.... DC?.... GBD.... SGO...."
+# define xPastPlays "GKL.... SMR.... HLS.... MAM.... DLS.V.. GSZ.... STO.... HLSVD.. MBU.... DCAT... GBE.... SSR.... HMA.... MPA.... DAO.... GBE.... STO.... HSR.... MSR.... DS?.... GSZ.... SSR.... HMA.... MPA.... DC?T... GBD.... SMA.... HLS.... MST.... DC?T... GBD.... SMA.... HLS.... MST.... DD1T... GBD.... SMA.... HLS.... MST.... DC?T.M. GBD.... SMA.... HLS.... MST.... DS?....";
 # define xMsgs { "", "", "" }
 
 #endif
@@ -84,7 +84,7 @@ int main(void)
 	View state = ViewNew(pastPlays, msgs);
 	decideMove(state);
 	ViewFree(state);
-
+	
 	printf("Move: %s, Message: %s\n", latestPlay, latestMessage);
 	return EXIT_SUCCESS;
 }
