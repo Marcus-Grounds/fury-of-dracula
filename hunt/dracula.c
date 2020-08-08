@@ -101,19 +101,6 @@ void decideDraculaMove(DraculaView dv)
 		}
 	}
 
-
-	PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
-	int numHunterSameSea = 0;
-	int numTrapsAtNonSeaLoc = 0;
-	int healthHunterSameSea = 0;
-	PlaceId locFallingOffTrail = DvGetMoveFallingOffTrail(dv);
-	Player hunterSameSea = PLAYER_DRACULA;
-	if (placeIsSea(currLoc))  {
-		hunterSameSea = hunterAtSameSea(dv, currLoc, &numHunterSameSea);
-		healthHunterSameSea = DvGetHealth(dv, hunterSameSea);
-		numTrapsAtNonSeaLoc = numTrapsAtLoc(dv, furthestNonSeaLoc);
-	}*/
-
 	// Register best play, in order of precedence.
 	// Handle case when there is no choice but to travel by sea.
 	if (furthestNonSeaLoc == CITY_UNKNOWN)
@@ -126,7 +113,7 @@ void decideDraculaMove(DraculaView dv)
 	// is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter or
 	// b. simply maximising your distance from the closest hunter.
-	else if (DvGetHealth(dv, PLAYER_DRACULA) <= 20) 
+	else if (DvGetHealth(dv, PLAYER_DRACULA) < 25) 
 		lowHealthMove(dv, furthestLoc, furthestSeaLoc);
 	// ... then to placing the immature vampire...
 	else if (round % 13 == 0) 
