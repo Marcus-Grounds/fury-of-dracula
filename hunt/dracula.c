@@ -114,7 +114,7 @@ void decideDraculaMove(DraculaView dv)
 		}*/
 	}
 
-	/*int numHunterSameSea = 0;
+	int numHunterSameSea = 0;
 	int numTrapsAtNonSeaLoc = 0;
 	int healthHunterSameSea = 0;
 	PlaceId locFallingOffTrail = DvGetMoveFallingOffTrail(dv);
@@ -123,13 +123,13 @@ void decideDraculaMove(DraculaView dv)
 		hunterSameSea = hunterAtSameSea(dv, currLoc, &numHunterSameSea);
 		healthHunterSameSea = DvGetHealth(dv, hunterSameSea);
 		numTrapsAtNonSeaLoc = numTrapsAtLoc(dv, furthestNonSeaLoc);
-	}*/
+	}
 
 	// Register best play, in order of precedence.
 	// Handle case when there is no choice but to travel by sea.
 	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "only sea travel possible");
 	// Give precedece to avoiding suiciding at sea when he has 2 blood points (or less) left...
-	/*else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding suicide at sea");
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding suicide at sea");
 	// ... then to avoiding the closest hunter, if dangerously close, health is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter.
 	// b. This could mean maximising your distance from the hunter
@@ -148,7 +148,6 @@ void decideDraculaMove(DraculaView dv)
 	// ... then to separating himself from the hunters, avoiding the sea...
 		// If heading to sea means that one less encounter can be made with a hunter before death, then
 		// head to the best city location instead.
-	*/
 	else if ((DvGetHealth(dv, PLAYER_DRACULA) - LIFE_LOSS_SEA) % LIFE_LOSS_HUNTER_ENCOUNTER == 0)
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "head to city");
 	else 
