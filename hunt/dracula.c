@@ -130,11 +130,12 @@ void decideDraculaMove(DraculaView dv)
 	// Handle case when there is nso choice but to travel by sea.
 	if (furthestNonSeaLoc == CITY_UNKNOWN) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "only sea travel possible");
 	// Give precedece to avoiding suiciding at sea when he has 2 blood points (or less) left...
-	/*else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding suicide at sea");
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= LIFE_LOSS_SEA) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding suicide at sea");
 	// ... then to avoiding the closest hunter, if dangerously close, health is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter.
 	// b. This could mean maximising your distance from the hunter
-	else if (DvGetHealth(dv, PLAYER_DRACULA) <= HALF_START_HEALTH) lowHealthMove(dv, furthestLoc);
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= 20) lowHealthMove(dv, furthestLoc);
+	/*
 	// else if (health <= 12 && distClosestHunter <= 1 && DvGetHealth(dv, closestHunter) > highestDamageIfEncounteredAtCity) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
 	// ... then to avoiding land if hunter is at the same sea location of Dracula, and a hunter kill is not guaranteed...
 	else if (placeIsSea(currLoc) && 
@@ -142,8 +143,9 @@ void decideDraculaMove(DraculaView dv)
 			 || (numHunterSameSea == 1 
 			 	&& guaranteeHunterKillIfSameLoc(round, healthHunterSameSea, locFallingOffTrail, furthestNonSeaLoc, numTrapsAtNonSeaLoc))))
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "avoiding land");
-	// ... then to placing the immature vampire...
+	// ... then to placing the immature vampire...*/
 	else if (round % 13 == 0) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "placing immature vamp");
+	/*
 	// ... then to making his way to Castle Dracula, if health is low...
 	// else if (health < LOW_HEALTH) find shortest way to castle dracula - could be either by self-restriction or travelling
 	// ... then to separating himself from the hunters, avoiding the sea...
@@ -153,7 +155,7 @@ void decideDraculaMove(DraculaView dv)
 	else if ((DvGetHealth(dv, PLAYER_DRACULA) - LIFE_LOSS_SEA) % LIFE_LOSS_HUNTER_ENCOUNTER == 0)
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "head to city");
 	else 
-		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
+		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "..."); //todo: drac will often go to sea even if hunter stays still?
 
 }
 
