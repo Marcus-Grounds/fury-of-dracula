@@ -19,7 +19,7 @@
 #include <string.h>
 
 #define NUM_HUNTERS 4
-#define MIN_STARTING_DISTANCE 3
+#define MIN_STARTING_DISTANCE 4
 #define HALF_START_HEALTH GAME_START_BLOOD_POINTS/2
 
 #define guaranteeHunterKillIfSameLoc(round, healthHunter, locFallingOffTrail, desiredLoc, numTrapsDesiredLoc)\
@@ -62,7 +62,8 @@ void decideDraculaMove(DraculaView dv)
 	// Decide on best location to spawn.
 	// for (int i = 0; i < 4; i++) printf("Hunter %d at %s\n", i, placeIdToName(DvGetPlayerLocation(dv, i)));
 	if (round == 0) {
-		handleRoundZero(dv);
+		registerBestPlay("AM", "debug later");
+		handleRoundZero(dv, MIN_STARTING_DISTANCE);
 		return;
 	}
 
@@ -144,21 +145,19 @@ void decideDraculaMove(DraculaView dv)
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "avoiding land");
 	// ... then to placing the immature vampire...*/
 	else if (round % 13 == 0) registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "placing immature vamp");
-	/*
 	// ... then to making his way to Castle Dracula, if health is low...
 	// else if (health < LOW_HEALTH) find shortest way to castle dracula - could be either by self-restriction or travelling
 	// ... then to separating himself from the hunters, avoiding the sea...
 		// If heading to sea means that one less encounter can be made with a hunter before death, then
 		// head to the best city location instead.
-	else if ((DvGetHealth(dv, PLAYER_DRACULA) - LIFE_LOSS_SEA) % LIFE_LOSS_HUNTER_ENCOUNTER == 0)
+	else
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "head to city");
-	else 
-		registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "..."); //todo: drac will often go to sea even if hunter stays still?
+	//todo: drac will often go to sea even if hunter stays still?
 
 }
 
 
-void handleRoundZero(DraculaView dv) {
+void handleRoundZero(DraculaView dv, int min_distance) {
 	PlaceId bestLoc = MIN_REAL_PLACE;
 	int currBestTotal = 0;
 	
@@ -170,14 +169,14 @@ void handleRoundZero(DraculaView dv) {
 		if (loc == HOSPITAL_PLACE || loc == CASTLE_DRACULA || placeIsSea(loc)) continue;
 		for (hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
 			distSetFromHunter[hunter] = shortestDistFrom(dv, hunter, loc);
-			if (distSetFromHunter[hunter] < MIN_STARTING_DISTANCE) break;
+			if (distSetFromHunter[hunter] < min_distance) break;
 			totalDist += distSetFromHunter[hunter];
 			for (int i = 0; i < hunter; i++) {
 				totalScatter += (distSetFromHunter[hunter] > distSetFromHunter[i]) * distSetFromHunter[hunter] + 
 							    (distSetFromHunter[hunter] < distSetFromHunter[i]) * distSetFromHunter[i];
 			}
 		}
-		if (distSetFromHunter[hunter] < MIN_STARTING_DISTANCE) continue;
+		if (distSetFromHunter[hunter] < min_distance) continue;
 		if (totalDist + totalScatter > currBestTotal) {
 			currBestTotal = totalDist + totalScatter;
 			bestLoc = loc;
@@ -188,8 +187,9 @@ void handleRoundZero(DraculaView dv) {
 	
 	if (bestLoc != MIN_REAL_PLACE) {
 		registerBestPlay(placeIdToAbbrev(bestLoc), "first round");
+		return;
 	} else {
-		registerBestPlay("AM", "debug later");
+		handleRoundZero(dv, min_distance - 1); 
 	}
 }
 
