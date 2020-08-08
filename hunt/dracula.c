@@ -40,7 +40,7 @@ typedef struct closestHunter *ClosestHunter;
 bool locationInArray(PlaceId location, PlaceId *array, int numArray);
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
 void lowHealthMove(DraculaView dv, PlaceId furthestLoc);
-void handleRoundZero(DraculaView dv);
+void handleRoundZero(DraculaView dv, int min_distance);
 int distFromHunters(DraculaView dv, PlaceId loc);
 int shortestDistFrom(DraculaView dv, Player hunter, PlaceId dest);
 ClosestHunter initClosestHunter(void);
@@ -68,7 +68,6 @@ void decideDraculaMove(DraculaView dv)
 	}
 
 	int numLocs = 0;
-	//PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 	PlaceId *reachableLocations = DvWhereCanIGo(dv, &numLocs);
 	
 	// Handle cases when no choice.
@@ -115,6 +114,8 @@ void decideDraculaMove(DraculaView dv)
 		}*/
 	}
 
+
+	/*PlaceId currLoc = DvGetPlayerLocation(dv, PLAYER_DRACULA);
 	int numHunterSameSea = 0;
 	int numTrapsAtNonSeaLoc = 0;
 	int healthHunterSameSea = 0;
@@ -124,7 +125,7 @@ void decideDraculaMove(DraculaView dv)
 		hunterSameSea = hunterAtSameSea(dv, currLoc, &numHunterSameSea);
 		healthHunterSameSea = DvGetHealth(dv, hunterSameSea);
 		numTrapsAtNonSeaLoc = numTrapsAtLoc(dv, furthestNonSeaLoc);
-	}
+	}*/
 
 	// Register best play, in order of precedence.
 	// Handle case when there is no choice but to travel by sea.
