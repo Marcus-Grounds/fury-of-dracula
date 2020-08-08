@@ -191,7 +191,7 @@ void handleRoundZero(DraculaView dv) {
 	if (bestLoc != MIN_REAL_PLACE) {
 		registerBestPlay(placeIdToAbbrev(bestLoc), "first round");
 	} else {
-		registerBestPlay("AM", "debug later");
+		registerBestPlay("LS", "debug later");
 	}
 }
 
