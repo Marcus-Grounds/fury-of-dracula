@@ -39,7 +39,7 @@ typedef struct closestHunter *ClosestHunter;
 // Helper function declarations:
 bool locationInArray(PlaceId location, PlaceId *array, int numArray);
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc);
-void lowHealthMove(DraculaView dv, PlaceId furthestLoc);
+void lowHealthMove(DraculaView dv, PlaceId furthestLoc, PlaceId furthestSeaLoc);
 void handleRoundZero(DraculaView dv, int min_distance);
 int distFromHunters(DraculaView dv, PlaceId loc);
 int shortestDistFrom(DraculaView dv, Player hunter, PlaceId dest);
@@ -94,8 +94,8 @@ void decideDraculaMove(DraculaView dv)
 	PlaceId furthestLoc = reachableLocations[0];
 	int furthestNonSeaDist = 0;
 	PlaceId furthestNonSeaLoc = CITY_UNKNOWN;
-	// int furthestSeaDist = 0;
-	// PlaceId furthestSeaLoc = SEA_UNKNOWN; //TODO: error as variable wasn't used
+	int furthestSeaDist = 0;
+	PlaceId furthestSeaLoc = SEA_UNKNOWN; 
 	for (int i = 0; i < numLocs; i++) {
 		int totalDist = distFromHunters(dv, reachableLocations[i]);
 		if (totalDist > furthestTotalDist) {
@@ -108,10 +108,10 @@ void decideDraculaMove(DraculaView dv)
 			furthestNonSeaLoc = reachableLocations[i];
 		}
 
-		/*if (placeIsSea(reachableLocations[i] && totalDist > furthestSeaDist)) {
+		if (placeIsSea(reachableLocations[i] && totalDist > furthestSeaDist)) {
 			furthestSeaDist = totalDist;
 			furthestSeaLoc = reachableLocations[i];
-		}*/
+		}
 	}
 
 
@@ -135,7 +135,7 @@ void decideDraculaMove(DraculaView dv)
 	// ... then to avoiding the closest hunter, if dangerously close, health is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter.
 	// b. This could mean maximising your distance from the hunter
-	else if (DvGetHealth(dv, PLAYER_DRACULA) <= 20) lowHealthMove(dv, furthestLoc);
+	else if (DvGetHealth(dv, PLAYER_DRACULA) <= 20) lowHealthMove(dv, furthestLoc, furthestSeaLoc);
 	/*
 	// else if (health <= 12 && distClosestHunter <= 1 && DvGetHealth(dv, closestHunter) > highestDamageIfEncounteredAtCity) registerBestPlay(dracLocToMoveAbbrev(dv, furthestLoc), "...");
 	// ... then to avoiding land if hunter is at the same sea location of Dracula, and a hunter kill is not guaranteed...
@@ -265,7 +265,7 @@ bool locationInArray(PlaceId location, PlaceId *array, int numArray) {
 
 // Avoiding the closest hunter if health is low
 // This func assumes that Dracula has valid moves other than TP
-void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
+void lowHealthMove(DraculaView dv, PlaceId furthestLoc, PlaceId furthestSeaLoc) {
 	// Finding moves which avoid potential encounters 
 	// with hunters in the next round
 
@@ -299,10 +299,10 @@ void lowHealthMove(DraculaView dv, PlaceId furthestLoc) {
 	int numDracSea = 0;
 	PlaceId *dracSea = DvWhereCanIGoByType(dv, false, true, &numDracSea);
 
-	if (((nearestHunter->hunterDist <= 2) && (numDracSea > 0)) && placeIsSea(dracSea[0])) {
+	if (((nearestHunter->hunterDist <= 2) && (numDracSea > 0)) && (furthestSeaLoc != SEA_UNKNOWN)) {
 		// Heading to sea if possible to avoid an encounter if 
 		// the closest hunter is <= 2 moves away
-		locChosen = dracSea[0];
+		locChosen = furthestSeaLoc;
 	} else {
 		// Aim to have move not reachable by any hunters
 		// Also aim to stay on land and maximise distance from nearest hunter
