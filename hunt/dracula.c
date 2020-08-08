@@ -194,7 +194,7 @@ void handleRoundZero(DraculaView dv) {
 int distFromHunters(DraculaView dv, PlaceId loc) {
 	int distSetFromHunter[NUM_HUNTERS];
 	int totalDist = 0;
-	for (int hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
+	for (Player hunter = PLAYER_LORD_GODALMING; hunter <= PLAYER_MINA_HARKER; hunter++) {
 		distSetFromHunter[hunter] = shortestDistFrom(dv, hunter, loc);
 		totalDist += distSetFromHunter[hunter];
 	}
