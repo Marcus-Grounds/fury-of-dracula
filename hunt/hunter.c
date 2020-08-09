@@ -13,6 +13,7 @@
 #include "hunter.h"
 #include "HunterView.h"
 #include "Map.h"
+#include "GameView.h"
 
 
 //REMOVE TIS:
@@ -122,15 +123,16 @@ void decideHunterMove(HunterView hv)
 {	
 
 	Player player = HvGetPlayer(hv);
+	Round round = HvGetRound(hv);
 
-	/*printf("LOCATION of %d  THEIR HEALTH IS %d is %s\n", PLAYER_LORD_GODALMING,  HvGetHealth(hv, player), placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING)));
-	printf("LOCATION of %d is %s\n", PLAYER_DR_SEWARD,  placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_DR_SEWARD)));
+	printf(" ROUND: %d LOCATION of %d is %s  and health is %d\n", round,  PLAYER_LORD_GODALMING, placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING)), HvGetHealth(hv, PLAYER_LORD_GODALMING));
+	/*printf("LOCATION of %d is %s\n", PLAYER_DR_SEWARD,  placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_DR_SEWARD)));
 	printf("LOCATION of %d is %s\n", PLAYER_VAN_HELSING, placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_VAN_HELSING)));
 	printf("LOCATION of %d is %s\n", PLAYER_MINA_HARKER, placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_MINA_HARKER)));
 	*/
 	
 	if (HvGetPlayerLocation(hv, player) == ST_JOSEPH_AND_ST_MARY) {
-		MoveToConnection(hv, player);
+		registerBestPlay("SJ", "OopS");
 		return;
 	}
 	
@@ -139,7 +141,6 @@ void decideHunterMove(HunterView hv)
 
 	//To keep track of drack encounters?
 
-	Round round = HvGetRound(hv);
 	Round *roundLastseen = malloc(sizeof(Round));
 	PlaceId lastSeenDrac = HvGetLastKnownDraculaLocation(hv, roundLastseen);
 	PlaceId currDracLocation = HvGetPlayerLocation(hv, PLAYER_DRACULA);
@@ -166,8 +167,18 @@ void decideHunterMove(HunterView hv)
 	}
 	
 
+	//If hunter is in the same location as dracula and does not have  enough health
+	//To survive a trap and dracula himself
+	//He must go to an adjacent city
+	if (HvGetPlayerLocation(hv, player) == lastSeenDrac && HvGetHealth(hv, player) < 7) {
+		MoveToConnection(hv, player);
+		return;
+	}
+
+
 	//Rest a round if health is too low 
 	if (HvGetHealth(hv, player) <= 4) {
+		
 		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
 						 "Health is too low, have to rest");
 		return;
@@ -175,7 +186,7 @@ void decideHunterMove(HunterView hv)
 
 	//If Dracula's last known position is unknown, 
 	//The hunters would rest to find the location 
-	if ((currDracLocation == CITY_UNKNOWN || currDracLocation == SEA_UNKNOWN) && round % 6 == 0 ) {
+	if ((currDracLocation == CITY_UNKNOWN || currDracLocation == SEA_UNKNOWN) && round % 7 == 0 ) {
 		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
 						 "Rest y'all, we gotta find the blood sucking villain");
 		return;
@@ -346,6 +357,6 @@ void MoveToConnection(HunterView hv, Player hunter) {
 	PlaceId *whereto = HvWhereCanIGo(hv, moves);
 
 	int i = rand()% *moves;	
-	registerBestPlay(placeIdToAbbrev(whereto[i]), "Moving randomly");
+	registerBestPlay(placeIdToAbbrev(whereto[i]), "Gotta move Gotta move Gotta MOVE");
 
 }
