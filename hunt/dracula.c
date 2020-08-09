@@ -321,8 +321,10 @@ PlaceId maxLocFromHunter(DraculaView dv, PlaceId *locArray,
 	return maxLoc;
 }
 
+// Converts Dracula's location to an abbreviated move
 char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	// Assumes that the location given is reachable by a valid Dracula move
+	// This function does not return "TP".
 
 	char *abbrev = NULL;
 	int numValid = -1;
@@ -359,6 +361,7 @@ char *dracLocToMoveAbbrev(DraculaView dv, PlaceId loc) {
 	return abbrev;
 }
 
+// Initialises a new 'ClosestHunter'.
 ClosestHunter initClosestHunter(void) {
 	ClosestHunter new = malloc(sizeof(*new));
 	if (new == NULL) {
@@ -371,6 +374,7 @@ ClosestHunter initClosestHunter(void) {
 	return new;
 }
 
+// Stores information about the closest hunter into 'closestHunterInfo'.
 void storeClosestHunter(DraculaView dv, ClosestHunter closestHunterInfo, 
 						PlaceId dracLoc) {
 	int minDist = shortestDistFrom(dv, PLAYER_LORD_GODALMING, dracLoc);
@@ -399,6 +403,7 @@ Player hunterAtSameSea(DraculaView dv, PlaceId currSeaLoc, int *numHunter) {
 	}
 	return hunterReturned;
 }
+
 // Functions used to sort places in numeric (and alphabetic) order.
 // Taken from testUtils.c to make dracLocToMoveAbbrev return HIDE before DOUBLE_BACK_1.
 static int dracPlaceIdCmp(const void *ptr1, const void *ptr2) {
