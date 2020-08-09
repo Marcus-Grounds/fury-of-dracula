@@ -20,7 +20,7 @@
 
 #define NUM_HUNTERS 4
 #define MIN_STARTING_DISTANCE 4
-#define HALF_START_HEALTH GAME_START_BLOOD_POINTS / 2
+#define HALF_START_HEALTH 20
 
 #define guaranteeHunterKillIfSameLoc(round, healthHunter, locFallingOffTrail, desiredLoc, numTrapsDesiredLoc)\
 									((round % 13 == 0 && locFallingOffTrail != desiredLoc && healthHunter <= numTrapsDesiredLoc * LIFE_LOSS_TRAP_ENCOUNTER)\
@@ -107,7 +107,7 @@ void decideDraculaMove(DraculaView dv)
 	// is low, and can't guarantee a hunter kill...
 	// a. This could mean heading to sea to avoid an encounter or
 	// b. simply maximising your distance from the closest hunter.
-	else if (DvGetHealth(dv, PLAYER_DRACULA) < 25) 
+	else if (DvGetHealth(dv, PLAYER_DRACULA) < HALF_START_HEALTH) 
 		lowHealthMove(dv, furthestLoc);
 	// ... then to placing the immature vampire...
 	else if (round % 13 == 0) 
