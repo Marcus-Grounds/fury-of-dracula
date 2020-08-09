@@ -23,13 +23,13 @@ PlaceId *storeBluePatrol ();
 PlaceId *storeGreenPatrol ();
 PlaceId *storePinkPatrol ();
 
-void patrolRed (HunterView hv, Player hunter);
-void patrolBlue (HunterView hv, Player hunter);
-void patrolGreen (HunterView hv, Player hunter);
-void patrolPink (HunterView hv, Player hunter);
-
+void patrolInitialise (HunterView hv, Player hunter);
 int searchStorePatrol (PlaceId *patrol, PlaceId location);
-void preSixPositioning (HunterView hv, Player hunter);
+void goToandPatrol (HunterView hv, Player hunter, PlaceId *storePatrol);
+
+void playerPositioningStage1 (HunterView hv, Player hunter);
+void playerPositioningStage2 (HunterView hv, Player hunter);
+
 PlaceId *ifDracAtCD (HunterView hv, Player hunter, PlaceId dest, Round round, int *pathLength);
 
 //STORE PATROL ZONES
@@ -131,54 +131,53 @@ int searchStorePatrol (PlaceId *patrol, PlaceId location) {
 	return check;
 }
 
-void patrolRed (HunterView hv, Player hunter)
-{
-	PlaceId *patrol = storeRedPatrol();
-	for (int i = 0; i < 12; i++) {
-		if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
-			char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
-			registerBestPlay(nextlocation, "Looking for him");
-			free(patrol);
-			break;
-		}	
+void patrolInitialise (HunterView hv, Player hunter) {
+	
+	if (hunter == PLAYER_LORD_GODALMING) {
+		goToandPatrol (hv, hunter, storeRedPatrol());
+	}
+	if (hunter == PLAYER_DR_SEWARD) {
+		goToandPatrol  (hv, hunter, storeBluePatrol());
+	}
+	if (hunter == PLAYER_VAN_HELSING) {
+		goToandPatrol (hv, hunter, storeGreenPatrol());
+	}
+	if (hunter == PLAYER_MINA_HARKER) {
+		goToandPatrol  (hv, hunter, storePinkPatrol());
 	}
 }
-void patrolBlue (HunterView hv, Player hunter)
-{
-	PlaceId *patrol = storeBluePatrol();
-	for (int i = 0; i < 13; i++) {
-		if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
-			char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
-			registerBestPlay(nextlocation, "Looking for him");
-			free(patrol);
-			break;
-		}
-	}
-}
-void patrolGreen (HunterView hv, Player hunter)
-{
-	PlaceId *patrol = storeGreenPatrol();
-	for (int i = 0; i < 12; i++) {
-		if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
-			char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
-			registerBestPlay(nextlocation, "Looking for him");
-			free(patrol);
-			break;
-		}	
-	}
-}
-void patrolPink (HunterView hv, Player hunter)
+
+void goToandPatrol (HunterView hv, Player hunter, PlaceId *storePatrol)
 {	
-	PlaceId *patrol = storePinkPatrol();
-	for (int i = 0; i < 6; i++) {
+	int i = 0;
+	int check = 1;
+	PlaceId first = NOWHERE;
+
+	PlaceId *patrol = storePatrol;
+	int *pathLength = malloc(sizeof(int));
+	PlaceId *shortestPath = malloc(sizeof(PlaceId));
+	
+	while (patrol[i] != first) {
 		if (HvGetPlayerLocation(hv, hunter) == patrol[i]) {
 			char *nextlocation = placeIdToAbbrev(patrol[i + 1]);
 			registerBestPlay(nextlocation, "Looking for him");
-			free(patrol);				
+			free(patrol);
+			check = 0;
 			break;
 		}
+		first = patrol[0];	
+		i ++;
 	}
+
+	if (check != 0) {
+		shortestPath = HvGetShortestPathTo(hv, hunter, patrol[0], pathLength);
+		PlaceId nextLoc = shortestPath[0];
+		registerBestPlay(placeIdToAbbrev(nextLoc), "Rush to the castle!");	
+	}
+	free(pathLength);
+	free(shortestPath);
 }
+
 
 void decideHunterMove(HunterView hv)
 {	
@@ -208,15 +207,6 @@ void decideHunterMove(HunterView hv)
 				return;
         }
 	}
-	//If Dracula's last known position is unknown, 
-	//The hunters would rest to find the location 
-	
-	if ((lastSeenDrac == NOWHERE) && round % 7 == 0 ) {
-		
-		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
-						 "Rest y'all, we gotta find the blood sucking villain");
-		return;
-	}
 
 	//Rest a round if health is too low 
 	if (HvGetHealth(hv, player) <= 2) {
@@ -224,27 +214,38 @@ void decideHunterMove(HunterView hv)
 						 "Health is too low, have to rest");
 		return;
 	}
-	//If Dracula has not been seen yet
-	if ((lastSeenDrac == NOWHERE) && (round % 7 != 0)) {
+
+	if ((lastSeenDrac == NOWHERE) && round % 7 == 0 ) {
 		
-		if (player == PLAYER_LORD_GODALMING) {
-			patrolRed (hv, player);
-		}
-		if (player == PLAYER_DR_SEWARD) {
-			patrolBlue  (hv, player);
-		}
-		if (player == PLAYER_VAN_HELSING) {
-			patrolGreen (hv, player);
-		}
-		if (player == PLAYER_MINA_HARKER) {
-			patrolPink  (hv, player);
-		}
-		
+		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
+						 "Rest y'all, we gotta find the blood sucking villain");
 		return;
 	}
+	
+	//If Dracula has not been seen yet
+	if (lastSeenDrac == NOWHERE) {
+		
+		patrolInitialise (hv, player);
+		return;
+	}
+
+	//If Dracula has been see, except his last known location is too far behind his current loc
+	if (lastSeenDrac != NOWHERE) {
+		
+		if ((round - *roundLastseen) > 4) {
+			patrolInitialise (hv, player); 
+		
+		} else if (((round - *roundLastseen) < 5) && ((round - *roundLastseen) > 2)) {
+			playerPositioningStage1(hv, player);
+			
+		} else if ((round - *roundLastseen) < 3) {
+			playerPositioningStage2(hv, player); //randomise moves in this
+		}
+	}
+
 	//IF dracula was last seen at Castle Dracula, 
 	//The hunters will advance to CD
-	
+	//ADD THIS CONDITION IN PINK ROTATE
 	if (lastSeenDrac == CASTLE_DRACULA) {
 		
 		PlaceId *shortestPath = malloc(sizeof(PlaceId)); //does this malloc need to be bigger
@@ -273,7 +274,7 @@ PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int
 }
 
 //STRATEGY FOR IF HUNTERS FALL IN TRAIL DURING PATROL
-void preSixPositioning (HunterView hv, Player hunter)
+void playerPositioningStage1 (HunterView hv, Player hunter)
 {
 	//NEED TO SEE IN WHICH PATROL ZONE WAS LOCATED
 	//FOUND IN RED - PINK MOVES TO RED
@@ -291,12 +292,12 @@ void preSixPositioning (HunterView hv, Player hunter)
 
 	if (searchStorePatrol(storeRedPatrol(), draculaLoc) != -1) {
 				
-		if (hunter == PLAYER_VAN_HELSING) {
+		if (hunter == PLAYER_MINA_HARKER) {
 			
 			if ((hunterLoc == VARNA) || 
 				(searchStorePatrol(storeRedPatrol(), hunterLoc) != -1)) {
 				
-				patrolRed (hv, hunter);
+				goToandPatrol (hv, hunter, storeRedPatrol());
 			
 			} else {
 
@@ -315,7 +316,7 @@ void preSixPositioning (HunterView hv, Player hunter)
 			if ((hunterLoc == ALICANTE) || 
 				(searchStorePatrol(storePinkPatrol(), hunterLoc) != -1)) {
 				
-				patrolPink (hv, hunter);
+				goToandPatrol (hv, hunter, storePinkPatrol());
 			
 			} else {
 			
@@ -335,7 +336,7 @@ void preSixPositioning (HunterView hv, Player hunter)
 			if ((hunterLoc == VIENNA) || 
 				(searchStorePatrol(storeBluePatrol(), hunterLoc) != -1)) {
 				
-				patrolBlue (hv, hunter);
+				goToandPatrol (hv, hunter, storeBluePatrol());
 			
 			} else {
 
@@ -347,12 +348,107 @@ void preSixPositioning (HunterView hv, Player hunter)
 			return;	
 		}
 
-		if (hunter == PLAYER_VAN_HELSING) {
+		if (hunter == PLAYER_MINA_HARKER) {
 
 			if ((hunterLoc == TOULOUSE) || 
 				(searchStorePatrol(storeGreenPatrol(), hunterLoc) != -1)) {
 				
-				patrolGreen (hv, hunter);
+				goToandPatrol (hv, hunter, storeGreenPatrol()); //random moves 
+			
+			} else {
+
+				shortestPath = HvGetShortestPathTo(hv, hunter, TOULOUSE, pathLength);
+				PlaceId nextLoc = shortestPath[0];
+				registerBestPlay(placeIdToAbbrev(nextLoc), "Rush to the castle!");
+			}
+
+			return;	
+		}	
+	}
+	
+	free(round);
+	free(shortestPath);
+	free(pathLength);
+}
+
+void playerPositioningStage2 (HunterView hv, Player hunter)
+{
+	//ALL PLAYERS MOVE TO A SINGLE PATROL ZONE
+
+	Round *round = malloc(sizeof(int));
+	int *pathLength = malloc(sizeof(int));
+	PlaceId *shortestPath = malloc(sizeof(PlaceId)); //does this malloc need to be bigger
+	PlaceId draculaLoc = (HvGetLastKnownDraculaLocation(hv, round));
+	PlaceId hunterLoc  = (HvGetPlayerLocation(hv, hunter));
+
+	if (draculaLoc == NOWHERE) return;
+
+	if (searchStorePatrol(storeRedPatrol(), draculaLoc) != -1) {
+				
+		if (hunter != PLAYER_LORD_GODALMING) {
+			
+			if ((hunterLoc == VARNA) || 
+				(searchStorePatrol(storeRedPatrol(), hunterLoc) != -1)) {
+				
+				goToandPatrol (hv, hunter, storeRedPatrol());
+			
+			} else {
+
+				shortestPath = HvGetShortestPathTo(hv, hunter, VARNA, pathLength);
+				PlaceId nextLoc = shortestPath[0];
+				registerBestPlay(placeIdToAbbrev(nextLoc), "Rush to red!");
+			}
+			return;	
+		}
+	}
+	
+	if (searchStorePatrol(storePinkPatrol(), draculaLoc) != -1) {
+		
+		if (hunter != PLAYER_MINA_HARKER) {
+
+			if ((hunterLoc == ALICANTE) || 
+				(searchStorePatrol(storePinkPatrol(), hunterLoc) != -1)) {
+				
+				goToandPatrol (hv, hunter, storePinkPatrol());
+			
+			} else {
+			
+				shortestPath = HvGetShortestPathTo(hv, hunter, ALICANTE, pathLength);
+				PlaceId nextLoc = shortestPath[0];
+				registerBestPlay(placeIdToAbbrev(nextLoc), "Rush to the castle!");
+			}
+			return;	
+		}
+	}
+
+	if (searchStorePatrol(storeBluePatrol(), draculaLoc) != -1) {
+		
+		if (hunter != PLAYER_DR_SEWARD) {
+			
+			if ((hunterLoc == VIENNA) || 
+				(searchStorePatrol(storeBluePatrol(), hunterLoc) != -1)) {
+				
+				goToandPatrol (hv, hunter, storeBluePatrol());
+			
+			} else {
+
+				shortestPath = HvGetShortestPathTo(hv, hunter, VIENNA, pathLength);
+				PlaceId nextLoc = shortestPath[0];
+				registerBestPlay(placeIdToAbbrev(nextLoc), "Rush to the castle!");
+			}
+			
+			return;	
+		}
+	}
+
+	if (searchStorePatrol(storeGreenPatrol(), draculaLoc) != -1)  {
+		
+		if (hunter != PLAYER_VAN_HELSING) {
+
+			if ((hunterLoc == TOULOUSE) || 
+				(searchStorePatrol(storeGreenPatrol(), hunterLoc) != -1)) {
+				
+				goToandPatrol (hv, hunter, storeGreenPatrol());
 			
 			} else {
 

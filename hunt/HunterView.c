@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 // COMP2521 20T2 ... the Fury of Dracula
 // HunterView.c: the HunterView ADT implementation
 //
@@ -97,7 +97,7 @@ PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 	
 	PlaceId *locationHistory = GvGetLocationHistory(hv->gv,  PLAYER_DRACULA, 
 	         										 &numLocs, &canFree);
-
+													  
 	for (int i = numLocs - 1; i >= 0; i--) {
 		if (placeIsReal(locationHistory[i])) {
 			*round = i;
