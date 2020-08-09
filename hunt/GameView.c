@@ -607,9 +607,8 @@ static void updatePlayerHealth(GameView gv, char *pastPlays, char *play,
 			}
 		}
 
-		if (playerHistory[histCount - 1] == playerHistory[histCount - 2]) {
+		if (!health <= 0 && playerHistory[histCount - 1] == playerHistory[histCount - 2]) {
 			health = health + LIFE_GAIN_REST; 
-				
 			if (health > GAME_START_HUNTER_LIFE_POINTS) {
 				health = GAME_START_HUNTER_LIFE_POINTS;
 			}
@@ -628,7 +627,8 @@ static void updatePlayerHealth(GameView gv, char *pastPlays, char *play,
 		} else if (currLoc == CASTLE_DRACULA) {
 			health = health + LIFE_GAIN_CASTLE_DRACULA;
 		}
-	}	
+	}
+	
 	if (health < 0) health = 0;
 	(gv->players[player]).health = health;
 }
