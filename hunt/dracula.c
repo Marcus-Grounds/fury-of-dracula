@@ -127,7 +127,6 @@ void decideDraculaMove(DraculaView dv)
 		registerBestPlay(dracLocToMoveAbbrev(dv, furthestNonSeaLoc), "avoiding sea");
 }
 
-
 void handleRoundZero(DraculaView dv, int min_distance) {
 	PlaceId bestLoc = MIN_REAL_PLACE;
 	int currBestTotal = 0;

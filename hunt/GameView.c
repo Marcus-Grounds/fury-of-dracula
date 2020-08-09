@@ -412,7 +412,7 @@ static Player initialToPlayer(char initial) {
 static PlaceId locationOfHide(PlaceId *moveHistory, int index, 
                               PlaceId currMove) {
 
-	if (currMove != HIDE) return currMove;
+	if (currMove != HIDE) return currMove == TELEPORT? CASTLE_DRACULA: currMove;
 	// Check if the resolved location of hide is a doubleback move
 	return locationOfDoubleBack(moveHistory, index - 1, moveHistory[index - 1]);
 }
@@ -440,7 +440,7 @@ static PlaceId locationOfDoubleBack(PlaceId *moveHistory, int index,
 			                      moveHistory[index - 5]);
 		default: 
 			// Move given is not a double back move
-			return currMove;
+			return currMove == TELEPORT? CASTLE_DRACULA: currMove;
 	}
 }
 
