@@ -186,7 +186,7 @@ void decideHunterMove(HunterView hv)
 
 	//If Dracula's last known position is unknown, 
 	//The hunters would rest to find the location 
-	if ((currDracLocation == CITY_UNKNOWN || currDracLocation == SEA_UNKNOWN) && round % 6 == 0 ) {
+	if ((currDracLocation == CITY_UNKNOWN || currDracLocation == SEA_UNKNOWN) && round % 7 == 0 ) {
 		registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
 						 "Rest y'all, we gotta find the blood sucking villain");
 		return;
