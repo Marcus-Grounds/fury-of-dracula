@@ -173,6 +173,8 @@ void decideHunterMove(HunterView hv)
 		return;
 	}
 
+
+
 	//If Dracula's last known position is unknown, 
 	//The hunters would rest to find the location 
 	if ((currDracLocation == CITY_UNKNOWN || currDracLocation == SEA_UNKNOWN) && round % 7 == 0 ) {
@@ -180,6 +182,42 @@ void decideHunterMove(HunterView hv)
 						 "Rest y'all, we gotta find the blood sucking villain");
 		return;
 	}
+
+	if (round - *roundLastseen > 1) {
+
+		PlaceId *shortestPath = malloc(sizeof(PlaceId)); 
+		int *pathLength = malloc(sizeof(int));
+
+		if(HvGetPlayerLocation(hv, player) == CASTLE_DRACULA) {
+			if(HvGetHealth(hv, player) < 4) {
+			MoveToConnection(hv, player);
+			return;
+			}
+
+			registerBestPlay(placeIdToAbbrev(CASTLE_DRACULA), "Staying at castle!");
+			return;
+		}
+		
+		shortestPath = HvGetShortestPathTo(hv, player, lastSeenDrac, pathLength);
+
+		if (shortestPath == NULL) {
+			MoveToConnection(hv, player);
+		} else {
+
+			PlaceId nextLoc = shortestPath[0];
+			char *nextlocation = placeIdToAbbrev(nextLoc);
+
+
+			registerBestPlay(nextlocation, "Research chase");
+
+		}
+		
+		free(shortestPath);
+		free(pathLength);
+		
+		return;
+	}
+	
 
 	//If Dracula has not been seen yet
 	if ((currDracLocation == CITY_UNKNOWN || currDracLocation == SEA_UNKNOWN) && lastSeenDrac == NOWHERE) {
