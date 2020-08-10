@@ -26,6 +26,7 @@ PlaceId *storeGreenPatrol ();
 PlaceId *storePinkPatrol  ();
 
 int  inZone            (HunterView hv, Player player);
+void resetZone          (HunterView hv, Player player);
 int  searchStorePatrol (PlaceId *patrol, PlaceId location);
 void patrolCurrent     (HunterView hv, Player hunter);
 
@@ -139,6 +140,50 @@ int inZone (HunterView hv, Player player) {
     free(round);            
     return check;
 }
+
+void resetZone (HunterView hv, Player player) 
+{
+	
+	int search = 0;
+	PlaceId hunterStart;
+	
+	if (player == PLAYER_LORD_GODALMING) {
+		hunterStart = KLAUSENBURG;
+		search = 1;
+	}
+	if (player == PLAYER_DR_SEWARD) {
+		hunterStart = MARSEILLES;
+		search = 3;
+	}
+	if (player == PLAYER_VAN_HELSING) {
+		hunterStart = LISBON;
+		search = 4;
+	}
+	if (player == PLAYER_MINA_HARKER) {
+		hunterStart = AMSTERDAM;
+		search = 2;
+	}
+
+	if (inZone(hv, player) == search) {
+		patrolCurrent (hv, player);
+		return;
+	}
+	
+	Round *round = malloc (sizeof(round));
+	int *pathlength = malloc(sizeof (pathlength));
+
+    PlaceId *shortestPath = malloc(sizeof(PlaceId));
+    
+    shortestPath = HvGetShortestPathTo(hv, player, hunterStart, pathlength);
+    PlaceId nextLoc = shortestPath[0];
+    
+    registerBestPlay(placeIdToAbbrev(nextLoc), "Rush to the castle!");  
+
+	free(pathlength);
+    free(shortestPath);
+
+
+}
 int searchStorePatrol (PlaceId *patrol, PlaceId location) {
     //use the fact that the last thing in the array is equal to the first thing
     int i = 0;
@@ -217,6 +262,7 @@ void patrolCurrent (HunterView hv, Player hunter)
 		return;
 	}
 }
+
 void goToDrac (HunterView hv, Player hunter)
 {
 	Round *round = malloc(sizeof (int));
@@ -249,7 +295,6 @@ void goToDrac (HunterView hv, Player hunter)
     free(pathLength);
     free(shortestPath);
 }
-
 
 void decideHunterMove(HunterView hv)
 {   
@@ -303,7 +348,7 @@ void decideHunterMove(HunterView hv)
         return;
     }
 	
-    if ((round - *roundLastseen > 8) && (lastSeenDrac != NOWHERE)) {
+    if (round % 6 == 0 || (round - *roundLastseen) > 7) {
         
         registerBestPlay(placeIdToAbbrev(HvGetPlayerLocation(hv, player)), 
                          "Rest y'all, we gotta find the blood sucking villain");
@@ -322,7 +367,8 @@ void decideHunterMove(HunterView hv)
 			goToDrac (hv, player);
 			return;
 		} else {
-			
+			resetZone (hv, player);
+			return;
 		}
     }
 
@@ -371,7 +417,7 @@ void decideHunterMove(HunterView hv)
     }
 
     ////////............................////////
-    MoveToConnection(hv, player);
+    //MoveToConnection(hv, player);
 }
 
 //If Dracula moves to CD by a teleport move.
