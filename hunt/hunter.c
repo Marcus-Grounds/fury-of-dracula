@@ -124,28 +124,18 @@ void decideHunterMove(HunterView hv)
 
 	Player player = HvGetPlayer(hv);
 	Round round = HvGetRound(hv);
-
-	printf(" ROUND: %d LOCATION of %d is %s  and health is %d\n", round,  PLAYER_LORD_GODALMING, placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_LORD_GODALMING)), HvGetHealth(hv, PLAYER_LORD_GODALMING));
-	/*printf("LOCATION of %d is %s\n", PLAYER_DR_SEWARD,  placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_DR_SEWARD)));
-	printf("LOCATION of %d is %s\n", PLAYER_VAN_HELSING, placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_VAN_HELSING)));
-	printf("LOCATION of %d is %s\n", PLAYER_MINA_HARKER, placeIdToAbbrev(HvGetPlayerLocation(hv, PLAYER_MINA_HARKER)));
-	*/
 	
 	if (HvGetPlayerLocation(hv, player) == ST_JOSEPH_AND_ST_MARY) {
-		registerBestPlay("SJ", "OopS");
+		registerBestPlay("SJ", "Back up and ready to hunt!");
 		return;
 	}
 	
-
 	if (player == PLAYER_DRACULA) return;
-
-	//To keep track of drack encounters?
 
 	Round *roundLastseen = malloc(sizeof(Round));
 	PlaceId lastSeenDrac = HvGetLastKnownDraculaLocation(hv, roundLastseen);
 	PlaceId currDracLocation = HvGetPlayerLocation(hv, PLAYER_DRACULA);
-	printf("lastSeenDrac is: %s\n\n", placeIdToAbbrev(lastSeenDrac));
-	printf("currSeenDrac is: %s\n\n", placeIdToAbbrev(currDracLocation));
+
 
 	if (round == 0) {
 		switch (player) {
@@ -175,7 +165,6 @@ void decideHunterMove(HunterView hv)
 		return;
 	}
 
-
 	//Rest a round if health is too low 
 	if (HvGetHealth(hv, player) <= 4) {
 		
@@ -198,13 +187,11 @@ void decideHunterMove(HunterView hv)
 		return;
 	}
 	
-
-
 	//If dracula was last seen at Castle Dracula, 
 	//The hunters will advance to CD
 	if (lastSeenDrac == CASTLE_DRACULA) {
 	
-		PlaceId *shortestPath = malloc(sizeof(PlaceId)); //does this malloc need to be bigger
+		PlaceId *shortestPath = malloc(sizeof(PlaceId)); 
 		int *pathLength = malloc(sizeof(int));
 
 
@@ -231,20 +218,16 @@ void decideHunterMove(HunterView hv)
 		
 		return;
 	}
-    ////CHECK THE IMPLEMENTATION BEHIND THIS..////
 
 	//If the hunter and dracula have the same location
 	//The hunter will move to an adjacent location of it.
-	
-	//PossiblePlaces is an array that consists of the adjacent locations
-	//Which are possible places
 	int *numRetLocs = malloc(sizeof(int *));
 	if (currDracLocation == HvGetPlayerLocation(hv, HvGetPlayer(hv))) {
 		LookForDrac(hv, lastSeenDrac, numRetLocs, player );
 		return;
 	}
 
-	////////............................////////
+	//A back up measure to play if a case is not satisfied.
 	MoveToConnection(hv, player);
 }
 
@@ -312,24 +295,15 @@ PlaceId *ifDracAtCD(HunterView hv, Player hunter, PlaceId dest, Round round, int
 
 
 //If Dracula lands in the same location as a hunter
-//Each of the hunter should Converge into Dracula's position
-//Should each hunter take n steps away?
 //Try to go to the reachable locations from Drac's known location
-//Return an array of possible locations.
 void LookForDrac(HunterView hv, PlaceId lastSeenDrac, int *pathLength, Player hunter) {
 
-	
 	//If dracula's last known position is the same as that of the
 	//current hunter, The hunter should try to get to one of the connected locations
 	//Connected by road and sea only)
-	//The current hunter 
-	//If the Drac's last known position is the same as the hunter's
 
-	//Add in a condition to check Dracula's health.
-	//If his health is too low, he might avoid the sea
-		//Necessary?
 
-		PlaceId *possibleLocations = HvWhereCanIGoByType(hv, true, false,true, pathLength);
+	PlaceId *possibleLocations = HvWhereCanIGoByType(hv, true, false,true, pathLength);
 
 	if (HvGetPlayerLocation(hv, hunter) == lastSeenDrac) {
 		PlaceId newlocation = possibleLocations[0];
@@ -350,7 +324,7 @@ void LookForDrac(HunterView hv, PlaceId lastSeenDrac, int *pathLength, Player hu
 }
 
 
-//Back up case in case no condition is satisfied.
+//Makes a randomized move to a nearby location
 void MoveToConnection(HunterView hv, Player hunter) {
 
 	int *moves = malloc(sizeof(int *));
